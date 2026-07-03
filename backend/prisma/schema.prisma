@@ -1,0 +1,74 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model users {
+  id         Int      @id @default(autoincrement())
+  name       String
+  email      String   @unique
+  password   String
+   role       String   @default("User")
+  created_at DateTime @default(now())
+
+  logs  logs[]
+  files files[]
+}
+
+model categories {
+  id         Int      @id @default(autoincrement())
+  name       String
+  created_at DateTime @default(now())
+}
+
+    model files {
+      id          Int      @id @default(autoincrement())
+      title       String
+      category    String
+      file_name String?
+      file_path String?
+      uploaded_by Int?
+      inventory_id Int?
+      access_code   String?
+      subject       String?
+      document_type String?
+      dynamic_data Json?
+      ocr_text String?
+      document_id String?
+      memo_date     DateTime?
+      received_date DateTime?
+      created_at  DateTime @default(now())
+      status String? @default("Active")
+      is_deleted Boolean @default(false)
+
+      user users? @relation(fields: [uploaded_by], references: [id])
+
+      inventory inventory? @relation("InventoryFiles", fields: [inventory_id], references: [id])
+    }
+
+model logs {
+  id          Int      @id @default(autoincrement())
+  action      String
+  description String
+  user_id     Int?
+  created_at  DateTime @default(now())
+
+  user users? @relation(fields: [user_id], references: [id])
+}
+
+model inventory {
+  id            Int      @id @default(autoincrement())
+  cabinet_name  String
+  shelf         String
+  folder_count  Int
+  used_space Int @default(0)
+  status        String
+
+  files files[] @relation("InventoryFiles")
+
+  created_at    DateTime @default(now())
+}

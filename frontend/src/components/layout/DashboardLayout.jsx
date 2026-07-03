@@ -1,239 +1,183 @@
-import {
-  Link,
-  useLocation,
-  useNavigate,
-} from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { 
+  LayoutDashboard, 
+  FolderSearch, 
+  Archive, 
+  Tags, 
+  Box, 
+  Users, 
+  Activity, 
+  FileText, 
+  LogOut,
+  Menu,
+  ChevronLeft,
+  ChevronRight
+} from "lucide-react";
+import logo from "../../assets/logo.jpg";
+import { useState } from "react";
 
 function DashboardLayout({ children }) {
-
   const location = useLocation();
-
   const navigate = useNavigate();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
-  const user = JSON.parse(
-  localStorage.getItem("user")
-);
+  const user = JSON.parse(localStorage.getItem("user"));
+  const role = user?.role;  
 
-const role = user?.role;  
-
-  // LOGOUT FUNCTION
   const handleLogout = () => {
-
-    // REMOVE SAVED DATA
     localStorage.removeItem("token");
-
     localStorage.removeItem("user");
-
-
-    // REDIRECT TO LANDING PAGE
     navigate("/");
-
   };
 
-  return (
+  const navItems = [
+    { name: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
+    { name: "Files", path: "/files", icon: FolderSearch },
+    { name: "Document Center", path: "/document-center", icon: Archive },
+    ...(role === "Admin" ? [{ name: "Categories", path: "/categories", icon: Tags }] : []),
+    { name: "Inventory", path: "/inventory", icon: Box },
+    ...(role === "Admin" ? [
+      { name: "Users", path: "/users", icon: Users },
+      { name: "Activity Logs", path: "/logs", icon: Activity },
+      { name: "Accomplishment Report", path: "/accomplishment-report", icon: FileText }
+    ] : []),
+  ];
 
-    <div className="flex min-h-screen bg-gray-100 transition-all duration-300">
+  return (
+    <div className="flex min-h-screen bg-[#FDFBF7] transition-all duration-300 font-sans selection:bg-[#FFD700] selection:text-[#800000]">
+      
+      {/* MOBILE OVERLAY */}
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
 
       {/* SIDEBAR */}
-     <div
-  className="
-    fixed
-    top-0
-    left-0
-    h-screen
-    w-[220px]
-    bg-[#8B0000]
-    text-white
-    flex
-    flex-col
-    justify-between
-  "
->
-
-        <div>
-
+      <aside
+        className={`
+          fixed top-0 left-0 h-screen bg-[#800000] text-white flex flex-col justify-between z-50 transition-all duration-300 shadow-2xl lg:shadow-none
+          ${isCollapsed ? "w-[80px]" : "w-[260px]"}
+          ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
+        `}
+      >
+        <button
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          className="hidden lg:flex absolute -right-4 top-8 z-50 w-8 h-8 bg-[#FFD700] border-2 border-[#800000] rounded-full items-center justify-center text-[#800000] hover:bg-yellow-400 shadow-md cursor-pointer transition-transform hover:scale-110"
+        >
+          {isCollapsed ? <ChevronRight className="w-5 h-5 ml-0.5" /> : <ChevronLeft className="w-5 h-5 mr-0.5" />}
+        </button>
+        <div className="absolute inset-0 bg-[radial-gradient(#ffffff22_1px,transparent_1px)] [background-size:24px_24px] opacity-10 pointer-events-none"></div>
+        <div className="absolute top-0 left-0 w-64 h-64 bg-gradient-to-br from-[#FFD700]/10 to-transparent rounded-full blur-3xl -translate-y-1/2 -translate-x-1/2 pointer-events-none"></div>
+        
+        <div className="relative z-10 flex-1 overflow-y-auto overflow-x-hidden">
           {/* LOGO */}
-          <div className="p-6 text-3xl font-bold">
-
-            ZPPSU
-
+          <div className={`p-6 flex items-center border-b border-white/10 relative ${isCollapsed ? "justify-center px-0" : "gap-3"}`}>
+            <div className="w-10 h-10 rounded-full overflow-hidden border border-white/20 bg-white shrink-0">
+              <img src={logo} alt="ZPPSU Logo" className="w-full h-full object-cover" />
+            </div>
+            {!isCollapsed && (
+              <div className="whitespace-nowrap transition-opacity duration-300">
+                <h2 className="text-xl font-extrabold tracking-tight">ZPPSU</h2>
+                <p className="text-[10px] text-white/70 uppercase tracking-widest font-bold">Guidance Office</p>
+              </div>
+            )}
           </div>
 
           {/* NAVIGATION */}
-          <nav className="mt-6 flex flex-col gap-2 px-4">
-
-            <Link
-              to="/dashboard"
-              className={`text-lg py-2 px-4 rounded-xl transition ${
-                location.pathname === "/dashboard"
-                  ? "bg-white text-[#8B0000]"
-                  : "hover:bg-red-900"
-              }`}
-            >
-
-              Dashboard
-
-            </Link>
-
-            <Link
-              to="/files"
-              className={`text-lg py-2 px-4 rounded-xl transition ${
-                location.pathname === "/files"
-                  ? "bg-white text-[#8B0000]"
-                  : "hover:bg-red-900"
-              }`}
-            >
-
-              Files
-
-            </Link>
-
-            <Link
-              to="/document-center"
-              className={`text-lg py-2 px-4 rounded-xl transition ${
-                location.pathname ===
-                "/document-center"
-
-                  ? "bg-white text-[#8B0000]"
-
-                  : "hover:bg-red-900"
-              }`}
-            >
-
-              Document Center
-
-            </Link>
-
-            {role === "Admin" && (
-
-              <Link
-                to="/categories"
-                className={`text-lg py-2 px-4 rounded-xl transition ${
-                  location.pathname === "/categories"
-                    ? "bg-white text-[#8B0000]"
-                    : "hover:bg-red-900"
-                }`}
-              >
-
-                Categories
-
-              </Link>
-
+          <nav className="mt-6 flex flex-col gap-1.5 px-3">
+            {!isCollapsed && (
+              <p className="px-4 text-xs font-bold uppercase tracking-wider text-white/50 mb-2 whitespace-nowrap">Main Menu</p>
             )}
-
-            { <Link
-              to="/inventory"
-              className={`text-lg py-2 px-4 rounded-xl transition ${
-                location.pathname === "/inventory"
-                  ? "bg-white text-[#8B0000]"
-                  : "hover:bg-red-900"
-              }`}
-            >
-
-              Inventory
-
-            </Link>}
-
-            {role === "Admin" && (
-
-              <Link
-                to="/users"
-                className={`text-lg py-2 px-4 rounded-xl transition ${
-                  location.pathname === "/users"
-                    ? "bg-white text-[#8B0000]"
-                    : "hover:bg-red-900"
-                }`}
-              >
-
-                Users
-
-              </Link>
-
-            )}
-            {role === "Admin" && (
-
-            <Link
-              to="/logs"
-              className={`text-lg py-2 px-4 rounded-xl transition ${
-                location.pathname === "/logs"
-                  ? "bg-white text-[#8B0000]"
-                  : "hover:bg-red-900"
-              }`}
-            >
-
-              Activity Logs
-
-            </Link>
-          )}
-
-          {role === "Admin" && (
-
-        <Link
-          to="/accomplishment-report"
-          className={`text-lg py-2 px-4 rounded-xl transition ${
-            location.pathname === "/accomplishment-report"
-              ? "bg-white text-[#8B0000]"
-              : "hover:bg-red-900"
-          }`}
-        >
-
-          Accomplishment Report
-
-        </Link>
-
-)}
+            {navItems.map((item) => {
+              const isActive = location.pathname === item.path;
+              const Icon = item.icon;
+              return (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  title={isCollapsed ? item.name : ""}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className={`flex items-center gap-3 text-sm py-3 px-3 rounded-xl font-medium transition-all duration-200 ${
+                    isCollapsed ? "justify-center" : ""
+                  } ${
+                    isActive
+                      ? "bg-white text-[#800000] shadow-md shadow-black/10 scale-[1.02]"
+                      : "text-white/80 hover:bg-white/10 hover:text-white"
+                  }`}
+                >
+                  <Icon className={`w-5 h-5 shrink-0 ${isActive ? "text-[#800000]" : "text-white/70"}`} />
+                  {!isCollapsed && <span className="whitespace-nowrap">{item.name}</span>}
+                </Link>
+              );
+            })}
           </nav>
-
         </div>
 
-        {/* LOGOUT */}
-        <div className="p-4">
-
+        {/* USER PROFILE & LOGOUT */}
+        <div className="relative z-10 p-4 border-t border-white/10">
+          {!isCollapsed ? (
+            <div className="flex items-center gap-3 mb-4 px-2">
+              <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center font-bold text-sm shrink-0">
+                {user?.name?.charAt(0).toUpperCase() || "U"}
+              </div>
+              <div className="flex flex-col overflow-hidden">
+                <span className="text-sm font-bold truncate">{user?.name}</span>
+                <span className="text-xs text-white/70">{role}</span>
+              </div>
+            </div>
+          ) : (
+            <div className="flex justify-center mb-4">
+              <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center font-bold text-sm shrink-0" title={user?.name}>
+                {user?.name?.charAt(0).toUpperCase() || "U"}
+              </div>
+            </div>
+          )}
           <button
             onClick={handleLogout}
-            className="w-full bg-white text-[#8B0000] text-lg font-bold py-3 rounded-2xl hover:bg-gray-200 transition"
+            title={isCollapsed ? "Logout" : ""}
+            className={`w-full flex items-center justify-center gap-2 bg-white/10 text-white text-sm font-semibold py-2.5 rounded-xl hover:bg-[#660000] transition-colors border border-white/20 ${isCollapsed ? "px-0" : ""}`}
           >
-
-            Logout
-
+            <LogOut className="w-4 h-4 shrink-0" />
+            {!isCollapsed && <span>Logout</span>}
           </button>
-
         </div>
+      </aside>
 
-      </div>
-
-      {/* MAIN CONTENT */}
-      <div className="flex-1 ml-[220px]">
-
+      {/* MAIN CONTENT AREA */}
+      <main className={`flex-1 flex flex-col min-w-0 min-h-screen transition-all duration-300 ${isCollapsed ? "lg:ml-[80px]" : "lg:ml-[260px]"}`}>
         {/* TOPBAR */}
-        <div className="flex items-center justify-between bg-white shadow-md px-6 py-4">
-
-          <h1 className="text-3xl font-bold text-black">
-
-            
-
-          </h1>
-
+        <header className="sticky top-0 z-30 flex items-center justify-between bg-white/80 backdrop-blur-md border-b border-gray-100 px-6 py-4 shadow-sm">
           <div className="flex items-center gap-4">
-
-            <h2 className="text-xl font-semibold text-black">
-
-            Welcome {user?.name}
-
-          </h2>
+            <button 
+              className="lg:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+              onClick={() => setIsMobileMenuOpen(true)}
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+            <h1 className="text-xl font-bold text-gray-800 tracking-tight hidden sm:block">
+              {navItems.find(item => item.path === location.pathname)?.name || "Dashboard"}
+            </h1>
           </div>
-
-        </div>
+          
+          <div className="flex items-center gap-4">
+            <div className="hidden md:flex flex-col items-end mr-2">
+              <span className="text-sm font-bold text-gray-900 leading-none">Welcome back,</span>
+              <span className="text-xs text-gray-500">{user?.name}</span>
+            </div>
+            <div className="w-10 h-10 rounded-full border-2 border-gray-200 bg-gray-50 flex items-center justify-center font-bold text-[#800000] shadow-sm">
+              {user?.name?.charAt(0).toUpperCase() || "U"}
+            </div>
+          </div>
+        </header>
 
         {/* PAGE CONTENT */}
-        <div className="p-6">
-
+        <div className="p-4 sm:p-6 lg:p-8 flex-1 w-full max-w-[1600px] mx-auto">
           {children}
-
         </div>
-
-      </div>
-
+      </main>
     </div>
   );
 }

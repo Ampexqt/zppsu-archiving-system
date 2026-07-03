@@ -3,7 +3,12 @@
     useEffect
   } from "react";
 
-  import axios
+  import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+
+import axios
     from "axios";
 
     const documentCategories = {
@@ -1751,103 +1756,103 @@ await axios.post(
               overflow-x-auto
             ">
 
-              <table className="
+              <Table className="
                 w-full
                 border-collapse
               ">
 
-                <thead>
+                <TableHeader>
 
-                  <tr className="
+                  <TableRow className="
                     bg-[#8B0000]
                     text-white
                   ">
 
-                    <th className="
+                    <TableHead className="
                       p-4
                     ">
                       Document Type
-                    </th>
+                    </TableHead>
 
-                    <th className="
+                    <TableHead className="
                       p-4
                     ">
                       Access Code
-                    </th>
+                    </TableHead>
 
-                    <th className="
+                    <TableHead className="
                       p-4
                     ">
                       Subject
-                    </th>
+                    </TableHead>
 
-                    <th className="
+                    <TableHead className="
                       p-4
                     ">
                       Status
-                    </th>
+                    </TableHead>
 
-                    <th className="p-4">
+                    <TableHead className="p-4">
                       Cabinet
-                    </th>
+                    </TableHead>
 
-                    <th className="p-4">
+                    <TableHead className="p-4">
                       Action
-                    </th>
+                    </TableHead>
 
                     
 
-                  </tr>
+                  </TableRow>
 
-                </thead>
+                </TableHeader>
 
-                <tbody>
+                <TableBody>
 
                   {
 
                     generatedRecords.map(
                       (record) => (
 
-                        <tr
+                        <TableRow
                           key={record.id}
                           className="
                             border-b
                           "
                         >
 
-                          <td className="
+                          <TableCell className="
                             p-4
                           ">
                             {
                               record.document_type
                             }
-                          </td>
+                          </TableCell>
 
-                          <td className="
+                          <TableCell className="
                             p-4
                           ">
                             {
                               record.access_code
                             }
-                          </td>
+                          </TableCell>
 
-                          <td className="
+                          <TableCell className="
                             p-4
                           ">
                             {
                               record.subject
                             }
-                          </td>
+                          </TableCell>
 
-                          <td className="
+                          <TableCell className="
                             p-4
                           ">
                             {
                               record.status
                             }
-                          </td>
+                          </TableCell>
 
-                          <td className="p-4">
+                          <TableCell className="p-4">
 
                           <select
 
@@ -1906,9 +1911,9 @@ await axios.post(
 
                           </select>
 
-                        </td>
+                        </TableCell>
 
-                        <td className="p-4">
+                        <TableCell className="p-4">
 
                           <button
 
@@ -1954,17 +1959,17 @@ await axios.post(
 
                           </button>
 
-                        </td>
-                      </tr>
+                        </TableCell>
+                      </TableRow>
 
                       )
                     )
 
                   }
 
-                </tbody>
+                </TableBody>
 
-              </table>
+              </Table>
 
             </div>
 

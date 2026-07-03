@@ -1,6 +1,11 @@
 import { useEffect, useState }
 from "react";
 
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+
 import axios from "axios";
 
 import DashboardLayout
@@ -264,92 +269,92 @@ const handleViewFiles =
       {/* INVENTORY TABLE */}
       <div className="bg-white rounded-2xl shadow-md overflow-hidden">
 
-        <table className="w-full">
+        <Table className="w-full">
 
           {/* HEADER */}
-          <thead className="bg-[#8B0000] text-white">
+          <TableHeader className="bg-[#8B0000] text-white">
 
-            <tr>
+            <TableRow>
 
-              <th className="text-left p-5">
+              <TableHead className="text-left p-5">
                 Cabinet
-              </th>
+              </TableHead>
 
-              <th className="text-left p-5">
+              <TableHead className="text-left p-5">
                 Shelf
-              </th>
+              </TableHead>
 
-              <th className="text-left p-5">
+              <TableHead className="text-left p-5">
                 Folder Capacity
-              </th>
+              </TableHead>
 
 
-            <th className="text-left p-5">
+            <TableHead className="text-left p-5">
                 Used Space
-                </th>
+                </TableHead>
 
-            <th className="text-left p-5">
+            <TableHead className="text-left p-5">
                 Storage
-                </th>
+                </TableHead>
 
-              <th className="text-left p-5">
+              <TableHead className="text-left p-5">
                 Status
-              </th>
+              </TableHead>
 
-            <th className="p-5">
+            <TableHead className="p-5">
                   Files
-                </th>
+                </TableHead>
 
-                <th className="p-5">
+                <TableHead className="p-5">
                   Action
-                </th>
-              </tr>
+                </TableHead>
+              </TableRow>
 
-          </thead>
+          </TableHeader>
 
           {/* BODY */}
-          <tbody>
+          <TableBody>
 
             {inventories.map(
               (inventory) => (
 
-                <tr
+                <TableRow
                   key={inventory.id}
                   className="border-b"
                 >
 
-                  <td className="p-5">
+                  <TableCell className="p-5">
 
                     {
                       inventory.cabinet_name
                     }
 
-                  </td>
+                  </TableCell>
 
-                  <td className="p-5">
+                  <TableCell className="p-5">
 
                     {inventory.shelf}
 
-                  </td>
+                  </TableCell>
 
-                  <td className="p-5">
+                  <TableCell className="p-5">
 
                     {
                       inventory.folder_count
                     }
 
-                  </td>
+                  </TableCell>
 
-                 <td className="p-5">
+                 <TableCell className="p-5">
 
                     {
                         inventory.used_space
                     }
 
-                    </td>
+                    </TableCell>
 
 
-                    <td className="p-5">
+                    <TableCell className="p-5">
 
                     <div className="w-40 bg-gray-200 rounded-full h-4 overflow-hidden">
 
@@ -391,11 +396,11 @@ const handleViewFiles =
 
                     </p>
 
-                    </td>
+                    </TableCell>
 
 
 
-                  <td className="p-5">
+                  <TableCell className="p-5">
 
                     <span className="bg-green-500 text-white px-4 py-2 rounded-full text-sm">
 
@@ -403,9 +408,9 @@ const handleViewFiles =
 
                     </span>
 
-                  </td>
+                  </TableCell>
                 
-                <td className="p-5">
+                <TableCell className="p-5">
 
                     <button
                       onClick={() =>
@@ -420,9 +425,9 @@ const handleViewFiles =
 
                     </button>
 
-                  </td>
+                  </TableCell>
 
-                  <td className="p-5">
+                  <TableCell className="p-5">
 
                     <button
                       onClick={() =>
@@ -437,14 +442,14 @@ const handleViewFiles =
 
                     </button>
 
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               )
             )}
 
-          </tbody>
+          </TableBody>
 
-        </table>
+        </Table>
 
       </div>
 

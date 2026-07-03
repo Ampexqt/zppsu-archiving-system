@@ -1,1262 +1,376 @@
-import { useEffect, useState }
-from "react";
-
+import { useEffect, useState } from "react";
 import axios from "axios";
-
-import {
-
-  ResponsiveContainer,
-
-  BarChart,
-
-  Bar,
-
-  XAxis,
-
-  YAxis,
-
-  Tooltip,
-
-  PieChart,
-
-  Pie,
-
-  Cell,
-
-} from "recharts";
-
-import DashboardLayout from
-"../components/layout/DashboardLayout";
-
-import { useNavigate }
-from "react-router-dom";
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, PieChart, Pie, Cell } from "recharts";
+import DashboardLayout from "../components/layout/DashboardLayout";
+import { useNavigate } from "react-router-dom";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { FileText, Archive, Clock, Files, TrendingUp, Users, FolderTree, Activity, Box } from "lucide-react";
 
 function Dashboard() {
+  const navigate = useNavigate();
+  const user = JSON.parse(localStorage.getItem("user"));
+  
+  const [files, setFiles] = useState([]);
+  const [categoryChartData, setCategoryChartData] = useState([]);
+  const [maxCapacity, setMaxCapacity] = useState(500);
+  const [storagePercentage, setStoragePercentage] = useState(0);
+  const [cabinetUsage, setCabinetUsage] = useState([]);
+  const [topUsers, setTopUsers] = useState([]);
+  const [analytics, setAnalytics] = useState({});
 
-  const navigate =
-  useNavigate();
-
-  const user = JSON.parse(
-  localStorage.getItem("user")
-);
-
-  const [
-    files,
-    setFiles
-  ] = useState([]);
-
-  const [
-  categoryChartData,
-  setCategoryChartData
-] = useState([]);
-
-const [
-  maxCapacity,
-  setMaxCapacity
-] = useState(500);
-
-const [
-  storagePercentage,
-  setStoragePercentage
-] = useState(0);
-
-const [
-  cabinetUsage,
-  setCabinetUsage
-] = useState([]);
-
-const [
-  topUsers,
-  setTopUsers
-] = useState([]);
-
-const [analytics, setAnalytics] =
-  useState({});
-
-  // FETCH FILES
-  const fetchFiles =
-  async () => {
-
+  const fetchFiles = async () => {
     try {
-
-      const token =
-        localStorage.getItem(
-          "token"
-        );
-
-      const response =
-        await axios.get(
-          "http://localhost:5000/api/files",
-          {
-            headers: {
-              Authorization:
-                `Bearer ${token}`,
-            },
-          }
-        );
-
-      console.log(
-        "FILES:",
-        response.data
-      );
-
-      setFiles(
-        response.data
-      );
-
+      const token = localStorage.getItem("token");
+      const response = await axios.get("http://localhost:5000/api/files", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setFiles(response.data);
     } catch (error) {
-
-      console.error(
-        "FETCH FILES ERROR:",
-        error.response?.data ||
-        error.message
-      );
-
+      console.error("FETCH FILES ERROR:", error.response?.data || error.message);
     }
-
   };
-  useEffect(() => {
 
-  fetchFiles();
-
-  fetchAnalytics();
-
-}, []);
-
-  const fetchAnalytics =
-  async () => {
-
+  const fetchAnalytics = async () => {
     try {
-
-      const token =
-  localStorage.getItem("token");
-
-const response =
-  await axios.get(
-    "http://localhost:5000/api/dashboard/analytics",
-    {
-      headers: {
-        Authorization:
-          `Bearer ${token}`,
-      },
-    }
-  );
-  setAnalytics(
-  response.data
-);
-      const chartData =
-
-        response.data.documentsPerCategory.map(
-          (item) => ({
-
-            category:
-              item.document_type,
-
-            count:
-              item._count.id,
-
-          })
-        );
-
-      setCategoryChartData(
-        chartData
-      );
-
-      setMaxCapacity(
-  response.data.maxCapacity
-);
-
-setStoragePercentage(
-  response.data.storagePercentage
-);
-
-setCabinetUsage(
-  response.data.cabinetUsage || []
-);
-
-setTopUsers(
-  response.data.topUsers || []
-);  
-
-      console.log(
-  "CATEGORY CHART:",
-  chartData
-);
-
+      const token = localStorage.getItem("token");
+      const response = await axios.get("http://localhost:5000/api/dashboard/analytics", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setAnalytics(response.data);
+      const chartData = response.data.documentsPerCategory.map((item) => ({
+        category: item.document_type,
+        count: item._count.id,
+      }));
+      setCategoryChartData(chartData);
+      setMaxCapacity(response.data.maxCapacity);
+      setStoragePercentage(response.data.storagePercentage);
+      setCabinetUsage(response.data.cabinetUsage || []);
+      setTopUsers(response.data.topUsers || []);
     } catch (error) {
-
       console.error(error);
-
     }
-
   };
 
-  // ANALYTICS
-  const totalDocuments =
-    files.length;
+  useEffect(() => {
+    fetchFiles();
+    fetchAnalytics();
+  }, []);
 
-  const activeDocuments =
-    files.filter(
-      (file) =>
-        file.status ===
-        "Active"
-    ).length;
+  const totalDocuments = files.length;
+  const activeDocuments = files.filter((file) => file.status === "Active").length;
+  const archivedDocuments = files.filter((file) => file.status === "Archived").length;
+  const pendingDocuments = files.filter((file) => file.status === "Pending").length;
 
-  const archivedDocuments =
-    files.filter(
-      (file) =>
-        file.status ===
-        "Archived"
-    ).length;
-
-  const pendingDocuments =
-    files.filter(
-      (file) =>
-        file.status ===
-        "Pending"
-    ).length;
-
-    // MOST USED DOCUMENT TYPE
-const documentTypeCounts = {};
-
-files.forEach((file) => {
-
-  if (
-    file.document_type
-  ) {
-
-    documentTypeCounts[
-      file.document_type
-    ] =
-
-      (
-        documentTypeCounts[
-          file.document_type
-        ] || 0
-      ) + 1;
-
-  }
-
-});
-
-const mostUsedDocument =
-
-  Object.entries(
-    documentTypeCounts
-  ).sort(
-
-    (a, b) =>
-      b[1] - a[1]
-
-  )[0];
-
-  const recentUploads =
-    files.slice(0, 5);
-
-  // STATUS CHART DATA
-  const statusData = [
-
-    {
-      name: "Active",
-      value: activeDocuments,
-    },
-
-    {
-      name: "Archived",
-      value: archivedDocuments,
-    },
-
-    {
-      name: "Pending",
-      value: pendingDocuments,
-    },
-
-  ];
-
-  // MONTHLY DOCUMENTS
-  const monthlyData = [
-
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec",
-
-  ].map((month, index) => {
-
-    const count =
-      files.filter((file) => {
-
-        if (!file.created_at)
-          return false;
-
-        return (
-          new Date(
-            file.created_at
-          ).getMonth() ===
-          index
-        );
-
-      }).length;
-
-    return {
-      month,
-      documents: count,
-    };
-
+  const documentTypeCounts = {};
+  files.forEach((file) => {
+    if (file.document_type) {
+      documentTypeCounts[file.document_type] = (documentTypeCounts[file.document_type] || 0) + 1;
+    }
   });
 
-  const COLORS = [
-    "#22c55e",
-    "#6b7280",
-    "#eab308",
+  const mostUsedDocument = Object.entries(documentTypeCounts).sort((a, b) => b[1] - a[1])[0];
+  const recentUploads = files.slice(0, 5);
+
+  const statusData = [
+    { name: "Active", value: activeDocuments },
+    { name: "Archived", value: archivedDocuments },
+    { name: "Pending", value: pendingDocuments },
   ];
 
+  const monthlyData = [
+    "Jan", "Feb", "Mar", "Apr", "May", "Jun", 
+    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+  ].map((month, index) => {
+    const count = files.filter((file) => {
+      if (!file.created_at) return false;
+      return new Date(file.created_at).getMonth() === index;
+    }).length;
+    return { month, documents: count };
+  });
+
+  const COLORS = ["#800000", "#FFD700", "#B22222"]; // Maroon, Gold, Dark Red
+
   return (
-
     <DashboardLayout>
-
-      {/* HEADER */}
-      <div className="mb-8">
-
-        <h1 className="
-          text-4xl
-          font-bold
-        ">
-
-          Dashboard
-
-        </h1>
-
-        <p className="
-          text-gray-500
-          mt-2
-        ">
-
-          Smart Records and
-          Archiving Analytics
-
-        </p>
-
+      <div className="mb-8 bg-gradient-to-r from-[#800000] to-[#B22222] rounded-2xl p-8 text-white shadow-lg relative overflow-hidden">
+        <div className="relative z-10">
+          <h1 className="text-3xl font-extrabold tracking-tight mb-2">Welcome to your Dashboard</h1>
+          <p className="text-white/80 font-medium max-w-xl">
+            Get an instant overview of your smart records, track storage limits, and analyze recent archiving activities.
+          </p>
+        </div>
+        <div className="absolute right-0 top-0 w-64 h-full bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-[#FFD700]/20 to-transparent pointer-events-none"></div>
       </div>
 
-      {/* STATS */}
-      <div className="
-        grid
-        grid-cols-1
-        md:grid-cols-2
-        xl:grid-cols-5
-        gap-6
-        mb-10
-      ">
-
-        {/* TOTAL */}
-       <div
-        onClick={() =>
-          navigate("/document-center")
-        }
-        className="
-          bg-white
-          rounded-2xl
-          shadow-md
-          p-6
-          cursor-pointer
-          hover:shadow-xl
-          hover:-translate-y-1
-          transition
-        "
->
-
-          <p className="
-            text-gray-500
-            text-sm
-          ">
-
-            Total Documents
-
-          </p>
-
-          <h2 className="
-            text-4xl
-            font-bold
-            mt-3
-            text-[#8B0000]
-          ">
-
-            {
-              totalDocuments
-            }
-
-          </h2>
-
-        </div>
-
-        {/* ACTIVE */}
-        <div
-            onClick={() =>
-              navigate("/document-center")
-            }
-            className="
-              bg-white
-              rounded-2xl
-              shadow-md
-              p-6
-              cursor-pointer
-              hover:shadow-xl
-              hover:-translate-y-1
-              transition
-            "
-          >
-
-          <p className="
-            text-gray-500
-            text-sm
-          ">
-
-            Active Documents
-
-          </p>
-
-          <h2 className="
-            text-4xl
-            font-bold
-            mt-3
-            text-green-500
-          ">
-
-            {
-              activeDocuments
-            }
-
-          </h2>
-
-        </div>
-
-        {/* ARCHIVED */}
-        <div
-          onClick={() =>
-            navigate("/document-center")
-          }
-          className="
-            bg-white
-            rounded-2xl
-            shadow-md
-            p-6
-            cursor-pointer
-            hover:shadow-xl
-            hover:-translate-y-1
-            transition
-          "
-        >
-          <p className="
-            text-gray-500
-            text-sm
-          ">
-
-            Archived Documents
-
-          </p>
-
-          <h2 className="
-            text-4xl
-            font-bold
-            mt-3
-            text-gray-500
-          ">
-
-            {
-              archivedDocuments
-            }
-
-          </h2>
-
-        </div>
-
-        {/* MOST USED */}
-        <div
-            onClick={() =>
-              navigate("/document-center")
-            }
-            className="
-              bg-white
-              rounded-2xl
-              shadow-md
-              p-6
-              cursor-pointer
-              hover:shadow-xl
-              hover:-translate-y-1
-              transition
-            "
-          >
-
-          <p className="
-            text-gray-500
-            text-sm
-          ">
-
-            Most Used Document Type
-
-          </p>
-
-          <h2 className="
-            text-2xl
-            font-bold
-            mt-3
-            text-red-500
-          ">
-
-            {
-
-              mostUsedDocument
-
-              ?
-
-              mostUsedDocument[0]
-
-              :
-
-              "No Data"
-
-            }
-
-          </h2>
-
-          <p className="
-            text-gray-500
-            mt-2
-          ">
-
-            {
-
-              mostUsedDocument
-
-              ?
-
-              `${mostUsedDocument[1]} Documents`
-
-              :
-
-              ""
-
-            }
-
-          </p>
-
-        </div>
-{/* TOP ACTIVE USERS */}
-<div
-  className="
-    bg-white
-    rounded-2xl
-    shadow-md
-    p-6
-  "
->
-
-  <p className="
-    text-gray-500
-    text-sm
-    mb-3
-  ">
-    Top Active Users
-  </p>
-
-  {
-
-    analytics.topUsers?.length > 0
-
-    ?
-
-    analytics.topUsers
-      .slice(0, 2)
-      .map((user, index) => (
-
-        <div
-          key={index}
-          className="
-            flex
-            justify-between
-            mb-2
-          "
-        >
-
-       <span
-  className="
-    font-medium
-    text-sm
-    truncate
-    max-w-[120px]
-  "
->
-
-  #{index + 1} {user.name}
-
-</span>
-
-         <div className="
-          bg-[#8B0000]
-          text-white
-          px-2
-          py-1
-          rounded-lg
-          text-sm
-          font-bold
-        ">
-          {user.activities}
-        </div>
-
-        </div>
-
-      ))
-
-    :
-
-    <p>No Data</p>
-
-  }
-
-</div>
-
-      </div>
-
-      
-
-      <div className="
-  bg-white
-  rounded-2xl
-  shadow-md
-  p-6
-  mb-10
-">
-
-  <h2 className="
-    text-2xl
-    font-bold
-    mb-4
-  ">
-    Storage Capacity
-  </h2>
-
-  <p className="
-    text-lg
-    mb-3
-  ">
-    {totalDocuments}
-    {" / "}
-    {maxCapacity}
-    Documents
-  </p>
-
-  <div className="
-    w-full
-    h-6
-    bg-gray-200
-    rounded-full
-    overflow-hidden
-  ">
-
-    <div
-
-      className="
-        h-full
-        bg-[#8B0000]
-      "
-
-      style={{
-        width:
-          `${storagePercentage}%`
-      }}
-
-    />
-
-  </div>
-
-  <p className="
-    mt-3
-    font-bold
-    text-[#8B0000]
-  ">
-    {storagePercentage}%
-  </p>
-
-</div>
-
-<div className="
-  bg-white
-  rounded-2xl
-  shadow-md
-  p-6
-  mb-10
-">
-
-  <h2 className="
-    text-2xl
-    font-bold
-    mb-6
-  ">
-    Cabinet Usage Monitoring
-  </h2>
-
-  {
-
-    cabinetUsage.map(
-      (cabinet) => {
-
-        const percentage =
-
-          Math.round(
-
-            (
-              cabinet.files.length /
-
-              cabinet.folder_count
-
-            ) * 100
-
+      {/* STATS CARDS */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {[
+          { title: "Total Documents", value: totalDocuments, icon: Files },
+          { title: "Active", value: activeDocuments, icon: FileText },
+          { title: "Archived", value: archivedDocuments, icon: Archive },
+          { title: "Pending", value: pendingDocuments, icon: Clock }
+        ].map((stat, index) => {
+          const Icon = stat.icon;
+          return (
+            <Card key={index} className="cursor-pointer bg-white hover:-translate-y-1 hover:shadow-xl transition-all duration-300 border border-gray-100 shadow-sm relative overflow-hidden group" onClick={() => navigate("/document-center")}>
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#800000] to-[#FFD700] transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-bold text-gray-500 uppercase tracking-wider">{stat.title}</CardTitle>
+                <div className="p-2 rounded-xl bg-[#800000]/5 text-[#800000] group-hover:bg-[#800000] group-hover:text-white transition-colors duration-300">
+                  <Icon className="h-5 w-5" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-4xl font-extrabold text-gray-900 tracking-tight">{stat.value}</div>
+              </CardContent>
+            </Card>
           );
+        })}
+      </div>
 
-        return (
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        {/* MOST USED DOC TYPE */}
+        <Card className="border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-[#FFD700]/10 border border-[#FFD700]/20">
+                <TrendingUp className="w-5 h-5 text-[#800000]" /> 
+              </div>
+              Most Used Type
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col justify-center items-center h-32">
+            {mostUsedDocument ? (
+              <>
+                <div className="text-3xl font-extrabold text-gray-900 text-center tracking-tight mb-2">
+                  {mostUsedDocument[0]}
+                </div>
+                <div className="inline-flex items-center px-3 py-1 rounded-full bg-[#800000]/10 text-[#800000] text-sm font-bold">
+                  {mostUsedDocument[1]} Documents
+                </div>
+              </>
+            ) : (
+              <div className="flex flex-col items-center justify-center text-gray-400">
+                <FolderTree className="w-10 h-10 mb-2 opacity-20" />
+                <span className="font-medium text-sm">No documents found</span>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
-          <div
-            key={cabinet.id}
-            className="mb-6"
-          >
-
-            <div className="
-              flex
-              justify-between
-              mb-2
-            ">
-
-              <span className="font-semibold">
-
-                {
-                  cabinet.cabinet_name
-                }
-
-              </span>
-
-              <span>
-
-                {
-                  cabinet.files.length
-                }
-
-                /
-
-                {
-                  cabinet.folder_count
-                }
-
-              </span>
-
+        {/* TOP USERS */}
+        <Card className="border border-gray-100 shadow-sm hover:shadow-md transition-shadow lg:col-span-2">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-[#FFD700]/10 border border-[#FFD700]/20">
+                <Users className="w-5 h-5 text-[#800000]" />
+              </div>
+              Top Active Users
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col gap-3">
+              {analytics.topUsers?.length > 0 ? (
+                analytics.topUsers.slice(0, 3).map((user, index) => (
+                  <div key={index} className="flex items-center justify-between bg-white hover:bg-gray-50 p-4 rounded-xl border border-gray-100 transition-colors shadow-sm">
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#800000] to-[#B22222] text-white font-bold flex items-center justify-center shadow-md">
+                        {index + 1}
+                      </div>
+                      <span className="font-bold text-gray-900 text-lg">{user.name}</span>
+                    </div>
+                    <div className="bg-[#800000]/5 text-[#800000] border border-[#800000]/10 px-4 py-1.5 rounded-full text-sm font-bold tracking-wide">
+                      {user.activities} Actions
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="flex flex-col items-center justify-center py-6 text-gray-400">
+                  <Activity className="w-10 h-10 mb-2 opacity-20" />
+                  <span className="font-medium text-sm">No user activity recorded yet.</span>
+                </div>
+              )}
             </div>
+          </CardContent>
+        </Card>
+      </div>
 
-            <div className="
-              w-full
-              h-5
-              bg-gray-200
-              rounded-full
-              overflow-hidden
-            ">
-
-              <div
-
-                className="
-                  h-full
-                  bg-green-600
-                "
-
-                style={{
-                  width:
-                    `${percentage}%`
-                }}
-
-              />
-
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        {/* STORAGE CAPACITY */}
+        <Card className="border border-gray-100 shadow-sm hover:shadow-md transition-shadow flex flex-col">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-[#FFD700]/10 border border-[#FFD700]/20">
+                <Archive className="w-5 h-5 text-[#800000]" />
+              </div>
+              Storage Capacity
+            </CardTitle>
+            <CardDescription className="font-medium ml-11">System wide document limits</CardDescription>
+          </CardHeader>
+          <CardContent className="flex-1 flex flex-col justify-end">
+            <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100">
+              <div className="flex justify-between items-end mb-4">
+                <div className="text-4xl font-extrabold text-gray-900 tracking-tight">{totalDocuments} <span className="text-xl font-medium text-gray-400">/ {maxCapacity}</span></div>
+                <div className="px-3 py-1 rounded-full bg-[#800000] text-white text-sm font-bold shadow-sm">{storagePercentage}% Used</div>
+              </div>
+              <Progress value={storagePercentage} className="h-4 bg-gray-200 [&>div]:bg-gradient-to-r [&>div]:from-[#800000] [&>div]:to-[#B22222] shadow-inner" />
             </div>
+          </CardContent>
+        </Card>
 
-            <p className="
-              mt-2
-              text-sm
-              text-gray-500
-            ">
-
-              {percentage}% Used
-
-            </p>
-
-          </div>
-
-        );
-
-      }
-    )
-
-  }
-
-</div>
+        {/* CABINET USAGE */}
+        <Card className="border border-gray-100 shadow-sm hover:shadow-md transition-shadow flex flex-col">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-[#FFD700]/10 border border-[#FFD700]/20">
+                <FolderTree className="w-5 h-5 text-[#800000]" />
+              </div>
+              Cabinet Usage Monitoring
+            </CardTitle>
+            <CardDescription className="font-medium ml-11">Physical and digital space utilization</CardDescription>
+          </CardHeader>
+          <CardContent className="flex-1">
+            <div className="space-y-5 max-h-[180px] overflow-y-auto pr-4 custom-scrollbar">
+              {cabinetUsage.map((cabinet) => {
+                const percentage = Math.round((cabinet.files.length / cabinet.folder_count) * 100);
+                return (
+                  <div key={cabinet.id} className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="font-bold text-gray-700 flex items-center gap-2">
+                        <Box className="w-4 h-4 text-gray-400" />
+                        {cabinet.cabinet_name}
+                      </span>
+                      <span className="text-gray-500 font-bold">{cabinet.files.length} <span className="font-medium text-gray-400">/ {cabinet.folder_count}</span> <span className="text-[#800000] ml-1">({percentage}%)</span></span>
+                    </div>
+                    <Progress value={percentage} className="h-2.5 bg-gray-100 [&>div]:bg-[#FFD700]" />
+                  </div>
+                );
+              })}
+              {cabinetUsage.length === 0 && (
+                <div className="flex flex-col items-center justify-center py-6 text-gray-400 h-full">
+                  <Box className="w-10 h-10 mb-2 opacity-20" />
+                  <span className="font-medium text-sm">No cabinets configured.</span>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* CHARTS */}
-      <div className="
-        grid
-        grid-cols-1
-        xl:grid-cols-2
-        gap-6
-        mb-10
-      ">
-
-        {/* BAR CHART */}
-        <div className="
-          bg-white
-          rounded-2xl
-          shadow-md
-          p-6
-        ">
-
-          <h2 className="
-            text-2xl
-            font-bold
-            mb-6
-          ">
-
-            Documents Per Month
-
-          </h2>
-
-          <div className="
-            w-full
-            h-[350px]
-          ">
-
-            <ResponsiveContainer
-              width="100%"
-              height="100%"
-            >
-
-              <BarChart
-                data={monthlyData}
-              >
-
-                <XAxis
-                  dataKey="month"
-                />
-
-                <YAxis />
-
-                <Tooltip />
-
-                <Bar
-                dataKey="documents"
-                fill="#8B0000"
-                radius={[10,10,0,0]}
-                barSize={35}
-              />
-
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <Card className="border-none shadow-sm">
+          <CardHeader>
+            <CardTitle>Documents by Category</CardTitle>
+          </CardHeader>
+          <CardContent className="h-80">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={categoryChartData}>
+                <XAxis dataKey="category" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
+                <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
+                <Tooltip cursor={{fill: '#f3f4f6'}} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                <Bar dataKey="count" fill="#800000" radius={[4, 4, 0, 0]} />
               </BarChart>
-
             </ResponsiveContainer>
+          </CardContent>
+        </Card>
 
-          </div>
-
-        </div>
-
-        {/* PIE CHART */}
-        <div className="
-          bg-white
-          rounded-2xl
-          shadow-md
-          p-6
-        ">
-
-          <h2 className="
-            text-2xl
-            font-bold
-            mb-6
-          ">
-
-            Status Distribution
-
-          </h2>
-
-          <div className="
-            w-full
-            h-[350px]
-          ">
-
-            <ResponsiveContainer
-              width="100%"
-              height="100%"
-            >
-
+        <Card className="border-none shadow-sm">
+          <CardHeader>
+            <CardTitle>Document Status Overview</CardTitle>
+          </CardHeader>
+          <CardContent className="h-80">
+            <ResponsiveContainer width="100%" height="100%">
               <PieChart>
-
-                <Pie
-
-                  data={statusData}
-
-                  cx="50%"
-
-                  cy="50%"
-
-                  outerRadius={120}
-
-                  dataKey="value"
-
-                  label
-
-                >
-
-                  {
-                    statusData.map(
-                      (
-                        entry,
-                        index
-                      ) => (
-
-                        <Cell
-                          key={`cell-${index}`}
-                          fill={
-                            COLORS[
-                              index %
-                              COLORS.length
-                            ]
-                          }
-                        />
-
-                      )
-                    )
-                  }
-
+                <Pie data={statusData} cx="50%" cy="50%" innerRadius={80} outerRadius={110} paddingAngle={5} dataKey="value">
+                  {statusData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
                 </Pie>
-
-                <Tooltip />
-
+                <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
               </PieChart>
-
             </ResponsiveContainer>
-
-          </div>
-
-        </div>
-
+            <div className="flex justify-center gap-6 mt-4">
+              {statusData.map((entry, index) => (
+                <div key={entry.name} className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[index] }} />
+                  <span className="text-sm font-medium text-gray-600">{entry.name}</span>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       </div>
-
-      <div className="
-  bg-white
-  rounded-2xl
-  shadow-md
-  p-6
-  mb-10
-">
-
-  <h2 className="
-    text-2xl
-    font-bold
-    mb-6
-  ">
-    Documents Per Category
-  </h2>
-
-  <div
-  style={{
-    width: "100%",
-    height: "500px"
-  }}
->
-
-    <ResponsiveContainer
-      width="100%"
-      height="100%"
-    >
-
-      <BarChart
-        layout="vertical"
-        data={categoryChartData}
-      >
-
-        <XAxis
-          type="number"
-        />
-
-        <YAxis
-          dataKey="category"
-          type="category"
-          width={250}
-        />
-
-        <Tooltip />
-
-        <Bar
-          dataKey="count"
-          fill="#8B0000"
-          radius={[0,10,10,0]}
-        />
-
-      </BarChart>
-
-    </ResponsiveContainer>
-
-  </div>
-
-</div>
-
+      
+      {/* UPLOAD ACTIVITY */}
+      <Card className="border-none shadow-sm mb-10">
+        <CardHeader>
+          <CardTitle>Upload Activity (Monthly)</CardTitle>
+        </CardHeader>
+        <CardContent className="h-80">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={monthlyData}>
+              <XAxis dataKey="month" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
+              <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
+              <Tooltip cursor={{fill: '#f3f4f6'}} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+              <Bar dataKey="documents" fill="#800000" radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </CardContent>
+      </Card>
+      
       {/* RECENT UPLOADS */}
-      <div className="
-        bg-white
-        rounded-2xl
-        shadow-md
-        p-6
-      ">
-
-        <div className="
-          flex
-          items-center
-          justify-between
-          mb-6
-        ">
-
-          <h2 className="
-            text-2xl
-            font-bold
-          ">
-
-            Recent Uploads
-
-          </h2>
-
-        </div>
-
-        <div className="
-          overflow-x-auto
-        ">
-
-          <table className="
-            w-full
-            border-collapse
-          ">
-
-            <thead>
-
-              <tr className="
-                bg-[#8B0000]
-                text-white
-              ">
-
-                <th className="
-                  p-4
-                  text-left
-                ">
-                  Document ID
-                </th>
-
-                <th className="
-                  p-4
-                  text-left
-                ">
-                  Subject
-                </th>
-
-                <th className="p-4 text-left">
-                    Document Type
-                  </th>
-
-                  {
-                    user?.role === "Admin" && (
-                      <th className="p-4 text-left">
-                        Uploaded By
-                      </th>
-                    )
-                  }
-
-                  <th className="p-4 text-left">
-                    Status
-                  </th>
-
-                <th className="
-                  p-4
-                  text-left
-                ">
-                  Date Uploaded
-                </th>
-
-              </tr>
-
-            </thead>
-
-            <tbody>
-
-              {
-                recentUploads.length > 0
-
-                ?
-
-                recentUploads.map(
-                  (file) => (
-
-                    <tr
-                      key={file.id}
-                      className="
-                        border-b
-                        hover:bg-gray-50
-                      "
-                    >
-
-                      {/* DOC ID */}
-                      <td className="
-                        p-4
-                        font-semibold
-                        text-[#8B0000]
-                      ">
-
-                        {
-                          file.document_id
-                        }
-
-                      </td>
-
-                        {/* SUBJECT */}
-                        <td className="
-                          p-4
-                        ">
-
-                          {
-                            file.subject
-                          }
-
-                        </td>
-
-                        {/* TYPE */}
-                        <td className="p-4">
-                          {file.document_type}
-                        </td>
-
-                        {
-                          user?.role === "Admin" && (
-                            <td className="p-4">
-                              {file.user?.email || "Unknown"}
-                            </td>
-                          )
-                        }
-                        {/* STATUS */}
-                        <td className="
-                          p-4
-                        ">
-
-                        <span
-                          className={`
-                            px-4
-                            py-2
-                            rounded-full
-                            text-white
-                            text-sm
-
-                            ${
-
-                              file.status ===
-                              "Active"
-
-                              ?
-
-                              "bg-green-500"
-
-                              :
-
-                              file.status ===
-                              "Archived"
-
-                              ?
-
-                              "bg-gray-500"
-
-                              :
-
-                              file.status ===
-                              "Pending"
-
-                              ?
-
-                              "bg-yellow-500"
-
-                              :
-
-                              "bg-blue-500"
-
-                            }
-                          `}
-                        >
-
-                          {
-                            file.status ||
-                            "Active"
-                          }
-
-                        </span>
-
-                      </td>
-
-                      {/* DATE */}
-                      <td className="
-                        p-4
-                      ">
-
-                        {
-                          file.created_at
-
-                          ?
-
-                          new Date(
-                            file.created_at
-                          ).toLocaleDateString()
-
-                          :
-
-                          "No Date"
-                        }
-
-                      </td>
-
-                    </tr>
-
-                  )
-                )
-
-                :
-
+      <Card className="border-none shadow-sm">
+        <CardHeader>
+          <CardTitle>Recent Uploads</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm text-left">
+              <thead className="text-xs text-gray-500 uppercase bg-gray-50 border-b border-gray-100">
                 <tr>
-
-                  <td
-                    colSpan="5"
-                    className="
-                      text-center
-                      py-10
-                      text-gray-500
-                    "
-                  >
-
-                    No uploads yet
-
-                  </td>
-
+                  <th className="px-6 py-3 font-semibold">Document ID</th>
+                  <th className="px-6 py-3 font-semibold">Subject</th>
+                  <th className="px-6 py-3 font-semibold">Type</th>
+                  {user?.role === "Admin" && <th className="px-6 py-3 font-semibold">Uploaded By</th>}
+                  <th className="px-6 py-3 font-semibold">Status</th>
+                  <th className="px-6 py-3 font-semibold">Date</th>
                 </tr>
-
-              }
-
-            </tbody>
-
-          </table>
-
-        </div>
-
-      </div>
-
+              </thead>
+              <tbody>
+                {recentUploads.length > 0 ? (
+                  recentUploads.map((file) => (
+                    <tr key={file.id} className="bg-white border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+                      <td className="px-6 py-4 font-bold text-[#800000]">{file.document_id}</td>
+                      <td className="px-6 py-4 font-medium text-gray-900">{file.subject}</td>
+                      <td className="px-6 py-4 text-gray-500">{file.document_type}</td>
+                      {user?.role === "Admin" && <td className="px-6 py-4 text-gray-500">{file.user?.email || "Unknown"}</td>}
+                      <td className="px-6 py-4">
+                        <span className={`px-2.5 py-1 rounded-full text-xs font-semibold
+                          ${file.status === "Active" ? "bg-emerald-100 text-emerald-700" :
+                            file.status === "Archived" ? "bg-gray-100 text-gray-700" :
+                            file.status === "Pending" ? "bg-yellow-100 text-yellow-700" :
+                            "bg-blue-100 text-blue-700"}`}
+                        >
+                          {file.status || "Active"}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-gray-500">
+                        {file.created_at ? new Date(file.created_at).toLocaleDateString() : "No Date"}
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="6" className="px-6 py-8 text-center text-gray-500 italic">No uploads yet</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </CardContent>
+      </Card>
     </DashboardLayout>
   );
 }

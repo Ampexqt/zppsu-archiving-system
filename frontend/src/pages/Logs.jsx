@@ -1,5 +1,10 @@
 import { useEffect, useState } from "react";
 
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+
 import axios from "axios";
 
 import DashboardLayout from "../components/layout/DashboardLayout";
@@ -51,77 +56,77 @@ function Logs() {
       {/* LOGS TABLE */}
       <div className="bg-white rounded-2xl shadow-md overflow-hidden">
 
-        <table className="w-full">
+        <Table className="w-full">
 
           {/* HEADER */}
-          <thead>
+          <TableHeader>
 
-              <tr className="bg-[#8B0000] text-white">
+              <TableRow className="bg-[#8B0000] text-white">
 
-                <th className="p-5 text-left">
+                <TableHead className="p-5 text-left">
                   Email
-                </th>
+                </TableHead>
 
-                <th className="p-5 text-left">
+                <TableHead className="p-5 text-left">
                   Action
-                </th>
+                </TableHead>
 
-                <th className="p-5 text-left">
+                <TableHead className="p-5 text-left">
                   Description
-                </th>
+                </TableHead>
 
-                <th className="p-5 text-left">
+                <TableHead className="p-5 text-left">
                   Date
-                </th>
+                </TableHead>
 
-                <th className="p-5 text-left">
+                <TableHead className="p-5 text-left">
                   Time
-                </th>
+                </TableHead>
 
-              </tr>
+              </TableRow>
 
-            </thead>
+            </TableHeader>
 
           {/* BODY */}
-<tbody>
+<TableBody>
 
   {logs.map((log) => (
 
-    <tr
+    <TableRow
       key={log.id}
       className="border-b"
     >
 
       {/* EMAIL */}
-      <td className="p-5">
+      <TableCell className="p-5">
         {log.user?.email || "System"}
-      </td>
+      </TableCell>
 
       {/* ACTION */}
-      <td className="p-5">
+      <TableCell className="p-5">
 
         <span className="bg-[#8B0000] text-white px-3 py-1 rounded-full text-sm">
           {log.action}
         </span>
 
-      </td>
+      </TableCell>
 
       {/* DESCRIPTION */}
-      <td className="p-5">
+      <TableCell className="p-5">
         {log.description}
-      </td>
+      </TableCell>
 
       {/* DATE */}
-      <td className="p-5">
+      <TableCell className="p-5">
 
         {new Date(
           log.created_at
         ).toLocaleDateString()}
 
-      </td>
+      </TableCell>
 
       {/* TIME */}
-      <td className="p-5">
+      <TableCell className="p-5">
 
         {new Date(
           log.created_at
@@ -133,15 +138,15 @@ function Logs() {
 
         })}
 
-      </td>
+      </TableCell>
 
-    </tr>
+    </TableRow>
 
   ))}
 
-</tbody>
+</TableBody>
 
-        </table>
+        </Table>
 
       </div>
 

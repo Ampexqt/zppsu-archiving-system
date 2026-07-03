@@ -1,7 +1,12 @@
   import { useEffect, useState }
   from "react";
 
-  import axios from "axios";
+  import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+
+import axios from "axios";
 
   import DashboardLayout from
   "../components/layout/DashboardLayout";
@@ -1230,61 +1235,61 @@ const fuzzyMatch = (text, query) => {
 
               {/* TABLE */}
             <div className="overflow-x-auto">
-        <table className="w-full"> 
-                  <thead>
+        <Table className="w-full"> 
+                  <TableHeader>
 
-                <tr className="
+                <TableRow className="
                   bg-[#8B0000]
                   text-white
                 ">
 
-                  <th className="
+                  <TableHead className="
                     p-4
                     text-left
                   ">
                     Document ID
-                  </th>
+                  </TableHead>
 
-                  <th className="
+                  <TableHead className="
                     p-4
                     text-left
                   ">
                     Subject
-                  </th>
+                  </TableHead>
 
-                  <th className="
+                  <TableHead className="
                     p-4
                     text-left
                   ">
                     Document Type
-                  </th>
+                  </TableHead>
 
-                  <th className="
+                  <TableHead className="
                     p-4
                     text-left
                   ">
                     Month and Date
-                  </th>
+                  </TableHead>
 
-                  <th className="
+                  <TableHead className="
                     p-4
                     text-left
                   ">
                     Status
-                  </th>
+                  </TableHead>
 
-                  <th className="
+                  <TableHead className="
                     p-4
                     text-center
                   ">
                     Actions
-                  </th>
+                  </TableHead>
 
-                </tr>
+                </TableRow>
 
-              </thead>
+              </TableHeader>
 
-              <tbody>
+              <TableBody>
 
                 {
                   filteredFiles.length > 0
@@ -1296,7 +1301,7 @@ const fuzzyMatch = (text, query) => {
 
                 return (
                   
-                  <tr
+                  <TableRow
                     key={file.id}
                     className="
                       border-b
@@ -1305,28 +1310,28 @@ const fuzzyMatch = (text, query) => {
                   >
 
                       {/* DOCUMENT ID */}
-                      <td className="p-4 font-semibold text-[#8B0000]">
+                      <TableCell className="p-4 font-semibold text-[#8B0000]">
 
                        {highlightText(file.document_id)}
 
-                      </td>
+                      </TableCell>
 
                       {/* SUBJECT */}
-                      <td className="p-4">
+                      <TableCell className="p-4">
 
                         {highlightText(file.subject)}
 
-                      </td>
+                      </TableCell>
 
                       {/* DOC TYPE */}
-                      <td className="p-4">
+                      <TableCell className="p-4">
 
                         {highlightText(file.document_type)}
 
-                      </td>
+                      </TableCell>
 
                       {/* DATE */}
-                      <td className="p-4">
+                      <TableCell className="p-4">
 
                         {
                           file.memo_date
@@ -1342,10 +1347,10 @@ const fuzzyMatch = (text, query) => {
                           "No Date"
                         }
 
-                      </td>
+                      </TableCell>
 
                       {/* STATUS */}
-                      <td className="p-4">
+                      <TableCell className="p-4">
 
                         <span
                           className={`
@@ -1395,10 +1400,10 @@ const fuzzyMatch = (text, query) => {
 
                         </span>
 
-                      </td>
+                      </TableCell>
 
                       {/* ACTIONS */}
-                      <td className="
+                      <TableCell className="
                         p-4
                       ">
 
@@ -1528,8 +1533,8 @@ const fuzzyMatch = (text, query) => {
 
                           </div>
 
-                        </td>
-                        </tr>
+                        </TableCell>
+                        </TableRow>
 
                         );
 
@@ -1538,9 +1543,9 @@ const fuzzyMatch = (text, query) => {
                         )
 
                     :
-                <tr>
+                <TableRow>
 
-                  <td
+                  <TableCell
                     colSpan="6"
                     className="
                       text-center
@@ -1551,16 +1556,16 @@ const fuzzyMatch = (text, query) => {
 
                     No matching documents found
 
-                  </td>
+                  </TableCell>
 
-                </tr>
+                </TableRow>
 
                 }
                   
 
-                </tbody>
+                </TableBody>
 
-              </table>
+              </Table>
 
             </div>
 

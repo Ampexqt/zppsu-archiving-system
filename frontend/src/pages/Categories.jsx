@@ -1,5 +1,10 @@
 import { useEffect, useState } from "react";
 
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+
 import axios from "axios";
 
 import DashboardLayout from "../components/layout/DashboardLayout";
@@ -164,50 +169,50 @@ const handleDeleteCategory =
       {/* CATEGORY TABLE */}
       <div className="bg-white rounded-2xl shadow-md overflow-hidden">
 
-        <table className="w-full">
+        <Table className="w-full">
 
-          <thead className="bg-[#8B0000] text-white">
+          <TableHeader className="bg-[#8B0000] text-white">
 
-            <tr>
+            <TableRow>
 
-              <th className="text-left p-5">
+              <TableHead className="text-left p-5">
                 Category Name
-              </th>
+              </TableHead>
 
-              <th className="text-left p-5">
+              <TableHead className="text-left p-5">
                 Date Created
-              </th>
+              </TableHead>
 
-              <th className="p-5">
+              <TableHead className="p-5">
                 Actions
-                </th>
-            </tr>
+                </TableHead>
+            </TableRow>
 
-          </thead>
+          </TableHeader>
 
-          <tbody>
+          <TableBody>
 
   {categories.map(
     (category) => (
 
-      <tr
+      <TableRow
         key={category.id}
         className="border-b"
       >
 
-        <td className="p-5">
+        <TableCell className="p-5">
           {category.name}
-        </td>
+        </TableCell>
 
-        <td className="p-5">
+        <TableCell className="p-5">
 
           {new Date(
             category.created_at
           ).toLocaleDateString()}
 
-        </td>
+        </TableCell>
 
-        <td className="p-5 text-center">
+        <TableCell className="p-5 text-center">
           <button
 
             onClick={() =>
@@ -227,15 +232,15 @@ const handleDeleteCategory =
             Delete
           </button>
 
-        </td>
+        </TableCell>
 
-      </tr>
+      </TableRow>
     )
   )}
 
-</tbody>
+</TableBody>
 
-        </table>
+        </Table>
 
       </div>
 

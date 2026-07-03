@@ -1,5 +1,10 @@
 import { useEffect, useState } from "react";
 
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+
 import axios from "axios";
 
 import DashboardLayout from "../components/layout/DashboardLayout";
@@ -213,63 +218,63 @@ const handleDemote =
       {/* USERS TABLE */}
       <div className="bg-white dark:bg-[#111827] rounded-3xl shadow-xl overflow-hidden">
 
-        <table className="w-full">
+        <Table className="w-full">
 
           {/* TABLE HEADER */}
-          <thead className="bg-[#8B0000] text-white">
+          <TableHeader className="bg-[#8B0000] text-white">
 
-            <tr>
+            <TableRow>
 
-              <th className="text-left p-6 text-lg">
+              <TableHead className="text-left p-6 text-lg">
                 Full Name
-              </th>
+              </TableHead>
 
-              <th className="text-left p-6 text-lg">
+              <TableHead className="text-left p-6 text-lg">
                 Email
-              </th>
+              </TableHead>
 
-              <th className="text-left p-6 text-lg">
+              <TableHead className="text-left p-6 text-lg">
                 Role
-              </th>
+              </TableHead>
 
-              <th className="text-left p-6 text-lg">
+              <TableHead className="text-left p-6 text-lg">
                 Created At
-              </th>
+              </TableHead>
 
-              <th className="text-left p-6 text-lg">
+              <TableHead className="text-left p-6 text-lg">
                 Actions
-              </th>
+              </TableHead>
 
-            </tr>
+            </TableRow>
 
-          </thead>
+          </TableHeader>
 
           {/* TABLE BODY */}
-          <tbody>
+          <TableBody>
 
             {users.map((user) => (
 
-              <tr
+              <TableRow
                 key={user.id}
                 className="border-b border-gray-200 dark:border-gray-700 text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition"
               >
 
                 {/* NAME */}
-                <td className="p-6 text-lg font-medium">
+                <TableCell className="p-6 text-lg font-medium">
 
                   {user.name}
 
-                </td>
+                </TableCell>
 
                 {/* EMAIL */}
-                <td className="p-6 text-lg">
+                <TableCell className="p-6 text-lg">
 
                   {user.email}
 
-                </td>
+                </TableCell>
 
                 {/* ROLE */}
-                <td className="p-6">
+                <TableCell className="p-6">
 
                   <span className="bg-[#8B0000] text-white px-4 py-2 rounded-full text-sm font-bold">
 
@@ -277,19 +282,19 @@ const handleDemote =
 
                   </span>
 
-                </td>
+                </TableCell>
 
                 {/* CREATED AT */}
-                <td className="p-6 text-lg">
+                <TableCell className="p-6 text-lg">
 
                   {new Date(
                     user.created_at
                   ).toLocaleDateString()}
 
-                </td>
+                </TableCell>
 
                 {/* ACTIONS */}
-                <td className="p-6">
+                <TableCell className="p-6">
 
                   <div className="flex gap-2">
 
@@ -378,13 +383,13 @@ const handleDemote =
 
                   </div>
 
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ))}
 
-          </tbody>
+          </TableBody>
 
-        </table>
+        </Table>
 
       </div>
 

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { FileText, Printer, Download } from "lucide-react";
 import DashboardLayout from "../components/layout/DashboardLayout";
 
 function AccomplishmentReport() {
@@ -254,41 +255,23 @@ setActivities(
 
    <button
   onClick={fetchReport}
-  className="
-    h-[58px]
-    bg-[#8B0000]
-    text-white
-    px-6
-    rounded-xl
-  "
+  className="flex items-center justify-center gap-2 h-[58px] bg-primary hover:bg-primary/90 text-primary-foreground px-6 rounded-xl font-medium transition"
 >
-  Generate Report
+  <FileText className="w-5 h-5" /> Generate Report
 </button>
 
 <button
   onClick={() => window.print()}
-  className="
-    h-[58px]
-    bg-blue-600
-    text-white
-    px-6
-    rounded-xl
-  "
+  className="flex items-center justify-center gap-2 h-[58px] bg-primary/10 text-primary hover:bg-primary/20 px-6 rounded-xl font-medium transition"
 >
-  Print
+  <Printer className="w-5 h-5" /> Print
 </button>
 
 <button
   onClick={exportPDF}
-  className="
-    h-[58px]
-    bg-green-600
-    text-white
-    px-6
-    rounded-xl
-  "
+  className="flex items-center justify-center gap-2 h-[58px] bg-primary/10 text-primary hover:bg-primary/20 px-6 rounded-xl font-medium transition"
 >
-  Export PDF
+  <Download className="w-5 h-5" /> Export PDF
 </button>
 
   </div>
@@ -297,44 +280,44 @@ setActivities(
 
       <div className="grid grid-cols-3 gap-6">
 
-        <div className="bg-white p-6 rounded-2xl shadow">
-          <h3>Uploads</h3>
-          <p className="text-4xl font-bold text-green-600">
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+          <h3 className="text-sm font-medium text-muted-foreground">Uploads</h3>
+          <p className="text-4xl font-bold text-primary mt-2">
             {report.uploads}
           </p>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl shadow">
-          <h3>Deletes</h3>
-          <p className="text-4xl font-bold text-red-600">
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+          <h3 className="text-sm font-medium text-muted-foreground">Deletes</h3>
+          <p className="text-4xl font-bold text-accent mt-2">
             {report.deletes}
           </p>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl shadow">
-          <h3>Generated</h3>
-          <p className="text-4xl font-bold text-blue-600">
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+          <h3 className="text-sm font-medium text-muted-foreground">Generated</h3>
+          <p className="text-4xl font-bold text-primary/80 mt-2">
             {report.generated}
           </p>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl shadow">
-          <h3>Restores</h3>
-          <p className="text-4xl font-bold text-yellow-600">
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+          <h3 className="text-sm font-medium text-muted-foreground">Restores</h3>
+          <p className="text-4xl font-bold text-accent/80 mt-2">
             {report.restores}
           </p>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl shadow">
-          <h3>Moves</h3>
-          <p className="text-4xl font-bold text-purple-600">
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+          <h3 className="text-sm font-medium text-muted-foreground">Moves</h3>
+          <p className="text-4xl font-bold text-primary/60 mt-2">
             {report.moves}
           </p>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl shadow">
-          <h3>Archives</h3>
-          <p className="text-4xl font-bold text-gray-600">
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+          <h3 className="text-sm font-medium text-muted-foreground">Archives</h3>
+          <p className="text-4xl font-bold text-muted-foreground mt-2">
             {report.archives}
           </p>
         </div>
@@ -362,10 +345,7 @@ setActivities(
 
       <thead>
 
-        <tr className="
-          bg-[#8B0000]
-          text-white
-        ">
+        <tr>
 
           <th className="p-3 text-left">
             Action

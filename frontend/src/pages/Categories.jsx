@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 
 import axios from "axios";
+import { Plus, Trash2 } from "lucide-react";
 
 import DashboardLayout from "../components/layout/DashboardLayout";
 
@@ -133,61 +134,49 @@ const handleDeleteCategory =
       </div>
 
       {/* ADD CATEGORY */}
-      <div className="bg-white rounded-2xl shadow-md p-6 mb-8">
-
-        <h2 className="text-2xl font-bold mb-6">
-          Add Category
-        </h2>
-
-        <div className="flex gap-4">
-
-          <input
-            type="text"
-            placeholder="Category name"
-            value={name}
-            onChange={(e) =>
-              setName(
-                e.target.value
-              )
-            }
-            className="flex-1 border border-gray-300 rounded-xl p-4 outline-none focus:border-[#8B0000]"
-          />
-
-          <button
-            onClick={
-              handleAddCategory
-            }
-            className="bg-[#8B0000] hover:bg-[#6d0000] text-white px-8 rounded-xl transition"
-          >
-            Add
-          </button>
-
-        </div>
-
-      </div>
+      <Card className="mb-8 shadow-sm">
+        <CardHeader className="bg-primary/5 border-b pb-4">
+          <CardTitle className="flex items-center gap-2 text-primary">
+            <Plus className="w-5 h-5" />
+            Add Category
+          </CardTitle>
+          <CardDescription>Create a new classification category for documents.</CardDescription>
+        </CardHeader>
+        <CardContent className="p-6">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <Input
+              type="text"
+              placeholder="Category name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="flex-1 bg-white"
+            />
+            <button
+              onClick={handleAddCategory}
+              className="flex items-center justify-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90 px-6 h-10 rounded-md font-medium transition"
+            >
+              <Plus className="w-4 h-4" />
+              Add Category
+            </button>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* CATEGORY TABLE */}
-      <div className="bg-white rounded-2xl shadow-md overflow-hidden">
-
+      <Card className="overflow-hidden">
         <Table className="w-full">
-
-          <TableHeader className="bg-[#8B0000] text-white">
-
+          <TableHeader>
             <TableRow>
-
               <TableHead className="text-left p-5">
                 Category Name
               </TableHead>
-
               <TableHead className="text-left p-5">
                 Date Created
               </TableHead>
-
               <TableHead className="p-5">
                 Actions
-                </TableHead>
+              </TableHead>
             </TableRow>
-
           </TableHeader>
 
           <TableBody>
@@ -221,15 +210,10 @@ const handleDeleteCategory =
               )
             }
 
-            className="
-              bg-red-500
-              text-white
-              px-4
-              py-2
-              rounded-lg
-            "
+            className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-full transition"
+            title="Delete Category"
           >
-            Delete
+            <Trash2 className="w-5 h-5" />
           </button>
 
         </TableCell>
@@ -241,8 +225,7 @@ const handleDeleteCategory =
 </TableBody>
 
         </Table>
-
-      </div>
+      </Card>
 
     </DashboardLayout>
   );

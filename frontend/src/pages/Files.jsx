@@ -1,4 +1,4 @@
-  import React, {
+import React, {
     useState,
     useEffect
   } from "react";
@@ -8,8 +8,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 
-import axios
-    from "axios";
+import axios from "axios";
+import { FilePlus, UploadCloud } from "lucide-react";
 
     const documentCategories = {
   Administrative: [
@@ -111,15 +111,12 @@ import axios
   useState([]);
 
   const [
-  selectedInventory,
-  setSelectedInventory
-] = useState({});
+    selectedInventory,
+    setSelectedInventory
+  ] = useState({});
 
-const [legacyFile, setLegacyFile] =
-  useState(null);
-
-const [uploadingLegacy, setUploadingLegacy] =
-  useState(false);
+  const [legacyFile, setLegacyFile] = useState(null);
+  const [uploadingLegacy, setUploadingLegacy] = useState(false);
 
     // DOCUMENT CONFIGS
     const documentConfigs = {
@@ -1393,591 +1390,219 @@ await axios.post(
         }
       };
 
-      const handleLegacyUpload = async () => {
-
-  if (!legacyFile) {
-
-    alert("Please select a file.");
-
-    return;
-
-  }
-
-  try {
-
-    setUploadingLegacy(true);
-
-    const token =
-      localStorage.getItem("token");
-
-    const formData = new FormData();
-
-    formData.append(
-      "file",
-      legacyFile
-    );
-
-    const response =
-      await axios.post(
-
+  const handleLegacyUpload = async () => {
+    if (!legacyFile) {
+      alert("Please select a file.");
+      return;
+    }
+    try {
+      setUploadingLegacy(true);
+      const token = localStorage.getItem("token");
+      const formData = new FormData();
+      formData.append("file", legacyFile);
+      const response = await axios.post(
         "http://localhost:5000/api/files/upload-legacy",
-
         formData,
-
         {
-
           headers: {
-
-            Authorization:
-              `Bearer ${token}`,
-
-            "Content-Type":
-              "multipart/form-data",
-
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
           },
-
         }
-
       );
-
-    console.log(response.data.extractedText);
-    
-    setLegacyFile(null);
-
-  } catch (error) {
-
-    console.error(error);
-
-    alert(
-      "Legacy upload failed."
-    );
-
-  } finally {
-
-    setUploadingLegacy(false);
-
-  }
-
-};
+      console.log(response.data.extractedText);
+      setLegacyFile(null);
+      alert("Document uploaded successfully!");
+    } catch (error) {
+      console.error(error);
+      alert("Legacy upload failed.");
+    } finally {
+      setUploadingLegacy(false);
+    }
+  };
 
     return (
-
-      <div className="
-        w-full
-      ">
-
-        <h1 className="
-          text-5xl
-          font-bold
-          mb-2
-        ">
-          Files Management
-        </h1>
-
-        <p className="
-          text-gray-500
-          mb-10
-        ">
-          Smart automated
-          document generation
-        </p>
-
-        <div className="
-          bg-white
-          rounded-3xl
-          shadow-md
-          p-8
-        ">
-
-          <h2 className="
-            text-3xl
-            font-bold
-            mb-8
-          ">
-            Generate Document
-          </h2>
-
-          <form
-            onSubmit={
-              handleGenerate
-            }
-            className="
-              grid
-              grid-cols-3
-              gap-6
-            "
-          >
-
-            {/* CATEGORY */}
-            <select
-
-              value={category}
-
-              onChange={(e) => {
-
-                setCategory(
-                  e.target.value
-                );
-
-                setDocumentType("");
-
-                setFormData({});
-
-              }}
-              className="
-                border
-                rounded-2xl
-                p-4
-              "
-            >
-
-              <option value="">
-                Select Category
-              </option>
-
-              <option>
-                Administrative
-              </option>
-
-              <option>
-                Academic
-              </option>
-
-              <option>
-                Financial
-              </option>
-
-            </select>
-
-            {/* DOCUMENT TYPE */}
-            <select
-
-              value={
-                documentType
-              }
-              disabled={!category}
-
-              onChange={(e) => {
-
-                setDocumentType(
-                  e.target.value
-                );
-
-                setFormData({});
-              }}
-
-              className="
-                border
-                rounded-2xl
-                p-4
-              "
-            >
-
-              <option value="">
-                Select Document Type
-              </option>
-
-              {
-                category &&
-                documentCategories[category]?.map((doc) => (
-
-                  <option
-                    key={doc}
-                    value={doc}
-                  >
-                    {doc}
-                  </option>
-
-                ))
-              }
-
-            </select>
-
-            <div></div>
-
-            {/* DYNAMIC INPUTS */}
-            {
-
-              selectedFields.map(
-                (field) => (
-
-                  <input
-
-                    key={field}
-
-                    type="text"
-
-                    placeholder={
-
-                      field
-
-                        .replaceAll(
-                          "_",
-                          " "
-                        )
-
-                        .toUpperCase()
-
-                    }
-
-                    value={
-                      formData[
-                        field
-                      ] || ""
-                    }
-
-                    onChange={(e) =>
-                      handleChange(
-
-                        field,
-
-                        e.target.value
-
-                      )
-                    }
-
-                    className="
-                      border
-                      rounded-2xl
-                      p-4
-                    "
-                  />
-
-                )
-              )
-
-            }
-
-            {/* BUTTON */}
-            <button
-
-              type="submit"
-
-              className="
-                bg-[#8B0000]
-                text-white
-                rounded-2xl
-                p-4
-                font-bold
-                col-span-3
-                hover:bg-red-900
-                transition
-              "
-            >
-
-              Generate Document
-
-            </button>
-
-          </form>
-
-          {/* LEGACY DOCUMENT UPLOAD */}
-
-<div className="mt-10 border-t pt-8">
-
-  <h2 className="text-3xl font-bold mb-2">
-    📄 Digitize Legacy Documents
-  </h2>
-
-  <p className="text-gray-500 mb-6">
-    Upload scanned paper documents to convert them into searchable digital records using OCR.
-  </p>
-
-  <input
-    type="file"
-    accept=".pdf,.jpg,.jpeg,.png"
-    onChange={(e) =>
-      setLegacyFile(e.target.files[0])
-    }
-    className="
-      border
-      rounded-xl
-      p-3
-      w-full
-    "
-  />
-
-  <button
-
-  onClick={handleLegacyUpload}
-
-  type="button"
-
-  disabled={
-
-    !legacyFile ||
-
-    uploadingLegacy
-
-  }
-    className="
-      mt-4
-      bg-green-600
-      text-white
-      px-6
-      py-3
-      rounded-xl
-      hover:bg-green-700
-      disabled:bg-gray-400
-    "
-  >
-
-    {
-      uploadingLegacy
-
-      ?
-
-      "Uploading..."
-
-      :
-
-      "📤 Upload & Process OCR"
-
-    }
-
-  </button>
-
-</div>
-
-          {/* GENERATED RECORDS */}
-          <div className="
-            mt-10
-          ">
-
-            <h2 className="
-              text-3xl
-              font-bold
-              mb-6
-            ">
-              Generated Records
-            </h2>
-
-            <div className="
-              overflow-x-auto
-            ">
-
-              <Table className="
-                w-full
-                border-collapse
-              ">
-
-                <TableHeader>
-
-                  <TableRow className="
-                    bg-[#8B0000]
-                    text-white
-                  ">
-
-                    <TableHead className="
-                      p-4
-                    ">
-                      Document Type
-                    </TableHead>
-
-                    <TableHead className="
-                      p-4
-                    ">
-                      Access Code
-                    </TableHead>
-
-                    <TableHead className="
-                      p-4
-                    ">
-                      Subject
-                    </TableHead>
-
-                    <TableHead className="
-                      p-4
-                    ">
-                      Status
-                    </TableHead>
-
-                    <TableHead className="p-4">
-                      Cabinet
-                    </TableHead>
-
-                    <TableHead className="p-4">
-                      Action
-                    </TableHead>
-
-                    
-
-                  </TableRow>
-
-                </TableHeader>
-
-                <TableBody>
-
-                  {
-
-                    generatedRecords.map(
-                      (record) => (
-
-                        <TableRow
-                          key={record.id}
-                          className="
-                            border-b
-                          "
-                        >
-
-                          <TableCell className="
-                            p-4
-                          ">
-                            {
-                              record.document_type
-                            }
-                          </TableCell>
-
-                          <TableCell className="
-                            p-4
-                          ">
-                            {
-                              record.access_code
-                            }
-                          </TableCell>
-
-                          <TableCell className="
-                            p-4
-                          ">
-                            {
-                              record.subject
-                            }
-                          </TableCell>
-
-                          <TableCell className="
-                            p-4
-                          ">
-                            {
-                              record.status
-                            }
-                          </TableCell>
-
-                          <TableCell className="p-4">
-
-                          <select
-
-                            value={
-
-                              selectedInventory[
-                                record.id
-                              ] ||
-
-                              record.inventory_id ||
-
-                              ""
-
-                            }
-
-                            onChange={(e) =>
-
-                              setSelectedInventory({
-
-                                ...selectedInventory,
-
-                                [record.id]:
-                                  e.target.value,
-
-                              })
-
-                            }
-
-                            className="
-                              border
-                              rounded-lg
-                              p-2
-                            "
-
-                          >
-
-                            <option value="">
-                              Select Cabinet
-                            </option>
-
-                            {inventories.map((inv) => (
-
-                              <option
-
-                                key={inv.id}
-
-                                value={inv.id}
-
-                              >
-
-                                {inv.cabinet_name}
-
-                              </option>
-
-                            ))}
-
-                          </select>
-
-                        </TableCell>
-
-                        <TableCell className="p-4">
-
-                          <button
-
-                            onClick={() =>
-
-                              assignCabinet(
-
-                                record.id,
-
-                                selectedInventory[
-                                  record.id
-                                ] ||
-
-                                record.inventory_id
-
-                              )
-
-                            }
-
-                            className="
-                              bg-blue-500
-                              text-white
-                              px-4
-                              py-2
-                              rounded-lg
-                            "
-
-                          >
-
-                            {
-
-                              record.inventory_id
-
-                              ?
-
-                              "Move"
-
-                              :
-
-                              "Assign"
-
-                            }
-
-                          </button>
-
-                        </TableCell>
-                      </TableRow>
-
-                      )
-                    )
-
-                  }
-
-                </TableBody>
-
-              </Table>
-
-            </div>
-
-          </div>
-
+      <div className="w-full">
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold">
+            Files Management
+          </h1>
+          <p className="text-gray-500 mt-2">
+            Smart automated document generation
+          </p>
         </div>
 
-      </div>
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-8">
+          <Card className="flex flex-col shadow-sm">
+            <CardHeader className="bg-primary/5 border-b pb-4">
+              <CardTitle className="flex items-center gap-2 text-primary">
+                <FilePlus className="w-5 h-5" />
+                Generate Document
+              </CardTitle>
+              <CardDescription>Create automated official documents from templates.</CardDescription>
+            </CardHeader>
+            <CardContent className="flex-1 flex flex-col p-6">
+              <form
+                onSubmit={handleGenerate}
+                className="flex flex-col gap-4 flex-1"
+              >
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* CATEGORY */}
+                  <select
+                    value={category}
+                    onChange={(e) => {
+                      setCategory(e.target.value);
+                      setDocumentType("");
+                      setFormData({});
+                    }}
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  >
+                    <option value="">Select Category</option>
+                    <option>Administrative</option>
+                    <option>Academic</option>
+                    <option>Financial</option>
+                  </select>
+
+                  {/* DOCUMENT TYPE */}
+                  <select
+                    value={documentType}
+                    disabled={!category}
+                    onChange={(e) => {
+                      setDocumentType(e.target.value);
+                      setFormData({});
+                    }}
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <option value="">Select Document Type</option>
+                    {category && documentCategories[category]?.map((doc) => (
+                      <option key={doc} value={doc}>
+                        {doc}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* DYNAMIC INPUTS */}
+                {selectedFields.length > 0 && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                    {selectedFields.map((field) => (
+                      <Input
+                        key={field}
+                        type="text"
+                        placeholder={field.replaceAll("_", " ").toUpperCase()}
+                        value={formData[field] || ""}
+                        onChange={(e) => handleChange(field, e.target.value)}
+                        className="bg-white"
+                      />
+                    ))}
+                  </div>
+                )}
+
+                <div className="mt-auto pt-6">
+                  <button
+                    type="submit"
+                    className="flex items-center justify-center gap-2 bg-primary text-primary-foreground h-10 px-6 rounded-md font-medium hover:bg-primary/90 transition w-full"
+                  >
+                    <FilePlus className="w-4 h-4" />
+                    Generate Document
+                  </button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+
+          <Card className="flex flex-col shadow-sm">
+            <CardHeader className="bg-primary/5 border-b pb-4">
+              <CardTitle className="flex items-center gap-2 text-primary">
+                <UploadCloud className="w-5 h-5" />
+                Smart Document Upload
+              </CardTitle>
+              <CardDescription>Upload files directly. OCR is automatically applied for image-based PDFs.</CardDescription>
+            </CardHeader>
+            <CardContent className="flex-1 flex flex-col justify-center p-6">
+              <div className="flex flex-col gap-6 items-center justify-center border-2 border-dashed border-gray-200 rounded-xl p-8 bg-gray-50/50 hover:bg-gray-50 transition-colors h-full">
+                <div className="flex flex-col items-center text-center gap-2">
+                  <UploadCloud className="w-10 h-10 text-gray-400" />
+                  <p className="text-sm font-medium text-gray-600">Choose a file to upload</p>
+                  <p className="text-xs text-gray-400">PDF, DOCX, PPTX, JPG, PNG up to 10MB</p>
+                </div>
+                <Input
+                  type="file"
+                  accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png"
+                  onChange={(e) => setLegacyFile(e.target.files[0] || null)}
+                  className="w-full max-w-sm cursor-pointer bg-white"
+                />
+                <button
+                  onClick={handleLegacyUpload}
+                  disabled={!legacyFile || uploadingLegacy}
+                  className="flex items-center justify-center gap-2 bg-primary text-primary-foreground h-10 px-8 rounded-md font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition w-full max-w-sm"
+                >
+                  <UploadCloud className="w-4 h-4" />
+                  {uploadingLegacy ? "Uploading..." : "Upload Document"}
+                </button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+      {/* GENERATED RECORDS */}
+      <Card className="overflow-hidden">
+        <Table className="w-full">
+          <TableHeader>
+            <TableRow>
+              <TableHead className="p-4">Document Type</TableHead>
+              <TableHead className="p-4">Access Code</TableHead>
+              <TableHead className="p-4">Subject</TableHead>
+              <TableHead className="p-4">Status</TableHead>
+              <TableHead className="p-4">Cabinet</TableHead>
+              <TableHead className="p-4">Action</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {generatedRecords.map((record) => (
+              <TableRow key={record.id} className="border-b">
+                <TableCell className="p-4">{record.document_type}</TableCell>
+                <TableCell className="p-4">{record.access_code}</TableCell>
+                <TableCell className="p-4">{record.subject}</TableCell>
+                <TableCell className="p-4">{record.status}</TableCell>
+                <TableCell className="p-4">
+                  <select
+                    value={selectedInventory[record.id] || record.inventory_id || ""}
+                    onChange={(e) =>
+                      setSelectedInventory({
+                        ...selectedInventory,
+                        [record.id]: e.target.value,
+                      })
+                    }
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  >
+                    <option value="">Select Cabinet</option>
+                    {inventories.map((inv) => (
+                      <option key={inv.id} value={inv.id}>
+                        {inv.cabinet_name}
+                      </option>
+                    ))}
+                  </select>
+                </TableCell>
+                <TableCell className="p-4">
+                  <button
+                    onClick={() =>
+                      assignCabinet(
+                        record.id,
+                        selectedInventory[record.id] || record.inventory_id
+                      )
+                    }
+                    className="bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90 transition text-sm font-medium"
+                  >
+                    {record.inventory_id ? "Move" : "Assign"}
+                  </button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </Card>
+    </div>
     );
   }
 

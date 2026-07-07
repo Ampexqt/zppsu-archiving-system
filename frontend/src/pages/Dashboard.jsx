@@ -89,18 +89,18 @@ function Dashboard() {
     return { month, documents: count };
   });
 
-  const COLORS = ["#800000", "#FFD700", "#B22222"]; // Maroon, Gold, Dark Red
+  const COLORS = ["#8B0000", "#F59E0B", "#B22222"]; // Primary, Accent, Secondary
 
   return (
     <DashboardLayout>
-      <div className="mb-8 bg-gradient-to-r from-[#800000] to-[#B22222] rounded-2xl p-8 text-white shadow-lg relative overflow-hidden">
+      <div className="mb-8 bg-gradient-to-r from-primary to-primary/80 rounded-2xl p-8 text-primary-foreground shadow-lg relative overflow-hidden">
         <div className="relative z-10">
           <h1 className="text-3xl font-extrabold tracking-tight mb-2">Welcome to your Dashboard</h1>
           <p className="text-white/80 font-medium max-w-xl">
             Get an instant overview of your smart records, track storage limits, and analyze recent archiving activities.
           </p>
         </div>
-        <div className="absolute right-0 top-0 w-64 h-full bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-[#FFD700]/20 to-transparent pointer-events-none"></div>
+        <div className="absolute right-0 top-0 w-64 h-full bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-accent/20 to-transparent pointer-events-none"></div>
       </div>
 
       {/* STATS CARDS */}
@@ -114,10 +114,10 @@ function Dashboard() {
           const Icon = stat.icon;
           return (
             <Card key={index} className="cursor-pointer bg-white hover:-translate-y-1 hover:shadow-xl transition-all duration-300 border border-gray-100 shadow-sm relative overflow-hidden group" onClick={() => navigate("/document-center")}>
-              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#800000] to-[#FFD700] transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-accent transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-bold text-gray-500 uppercase tracking-wider">{stat.title}</CardTitle>
-                <div className="p-2 rounded-xl bg-[#800000]/5 text-[#800000] group-hover:bg-[#800000] group-hover:text-white transition-colors duration-300">
+                <CardTitle className="text-sm font-bold text-muted-foreground uppercase tracking-wider">{stat.title}</CardTitle>
+                <div className="p-2 rounded-xl bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors duration-300">
                   <Icon className="h-5 w-5" />
                 </div>
               </CardHeader>
@@ -134,8 +134,8 @@ function Dashboard() {
         <Card className="border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
           <CardHeader>
             <CardTitle className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-[#FFD700]/10 border border-[#FFD700]/20">
-                <TrendingUp className="w-5 h-5 text-[#800000]" /> 
+              <div className="p-2 rounded-lg bg-accent/10 border border-accent/20">
+                <TrendingUp className="w-5 h-5 text-primary" /> 
               </div>
               Most Used Type
             </CardTitle>
@@ -146,7 +146,7 @@ function Dashboard() {
                 <div className="text-3xl font-extrabold text-gray-900 text-center tracking-tight mb-2">
                   {mostUsedDocument[0]}
                 </div>
-                <div className="inline-flex items-center px-3 py-1 rounded-full bg-[#800000]/10 text-[#800000] text-sm font-bold">
+                <div className="inline-flex items-center px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-bold">
                   {mostUsedDocument[1]} Documents
                 </div>
               </>
@@ -163,8 +163,8 @@ function Dashboard() {
         <Card className="border border-gray-100 shadow-sm hover:shadow-md transition-shadow lg:col-span-2">
           <CardHeader>
             <CardTitle className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-[#FFD700]/10 border border-[#FFD700]/20">
-                <Users className="w-5 h-5 text-[#800000]" />
+              <div className="p-2 rounded-lg bg-accent/10 border border-accent/20">
+                <Users className="w-5 h-5 text-primary" />
               </div>
               Top Active Users
             </CardTitle>
@@ -175,12 +175,12 @@ function Dashboard() {
                 analytics.topUsers.slice(0, 3).map((user, index) => (
                   <div key={index} className="flex items-center justify-between bg-white hover:bg-gray-50 p-4 rounded-xl border border-gray-100 transition-colors shadow-sm">
                     <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#800000] to-[#B22222] text-white font-bold flex items-center justify-center shadow-md">
+                      <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground font-bold flex items-center justify-center shadow-md">
                         {index + 1}
                       </div>
-                      <span className="font-bold text-gray-900 text-lg">{user.name}</span>
+                      <span className="font-bold text-foreground text-lg">{user.name}</span>
                     </div>
-                    <div className="bg-[#800000]/5 text-[#800000] border border-[#800000]/10 px-4 py-1.5 rounded-full text-sm font-bold tracking-wide">
+                    <div className="bg-primary/10 text-primary border border-primary/20 px-4 py-1.5 rounded-full text-sm font-bold tracking-wide">
                       {user.activities} Actions
                     </div>
                   </div>
@@ -201,8 +201,8 @@ function Dashboard() {
         <Card className="border border-gray-100 shadow-sm hover:shadow-md transition-shadow flex flex-col">
           <CardHeader>
             <CardTitle className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-[#FFD700]/10 border border-[#FFD700]/20">
-                <Archive className="w-5 h-5 text-[#800000]" />
+              <div className="p-2 rounded-lg bg-accent/10 border border-accent/20">
+                <Archive className="w-5 h-5 text-primary" />
               </div>
               Storage Capacity
             </CardTitle>
@@ -212,9 +212,9 @@ function Dashboard() {
             <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100">
               <div className="flex justify-between items-end mb-4">
                 <div className="text-4xl font-extrabold text-gray-900 tracking-tight">{totalDocuments} <span className="text-xl font-medium text-gray-400">/ {maxCapacity}</span></div>
-                <div className="px-3 py-1 rounded-full bg-[#800000] text-white text-sm font-bold shadow-sm">{storagePercentage}% Used</div>
+                <div className="px-3 py-1 rounded-full bg-primary text-primary-foreground text-sm font-bold shadow-sm">{storagePercentage}% Used</div>
               </div>
-              <Progress value={storagePercentage} className="h-4 bg-gray-200 [&>div]:bg-gradient-to-r [&>div]:from-[#800000] [&>div]:to-[#B22222] shadow-inner" />
+              <Progress value={storagePercentage} className="h-4 bg-muted shadow-inner" />
             </div>
           </CardContent>
         </Card>
@@ -223,8 +223,8 @@ function Dashboard() {
         <Card className="border border-gray-100 shadow-sm hover:shadow-md transition-shadow flex flex-col">
           <CardHeader>
             <CardTitle className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-[#FFD700]/10 border border-[#FFD700]/20">
-                <FolderTree className="w-5 h-5 text-[#800000]" />
+              <div className="p-2 rounded-lg bg-accent/10 border border-accent/20">
+                <FolderTree className="w-5 h-5 text-primary" />
               </div>
               Cabinet Usage Monitoring
             </CardTitle>
@@ -241,9 +241,9 @@ function Dashboard() {
                         <Box className="w-4 h-4 text-gray-400" />
                         {cabinet.cabinet_name}
                       </span>
-                      <span className="text-gray-500 font-bold">{cabinet.files.length} <span className="font-medium text-gray-400">/ {cabinet.folder_count}</span> <span className="text-[#800000] ml-1">({percentage}%)</span></span>
+                      <span className="text-muted-foreground font-bold">{cabinet.files.length} <span className="font-medium text-muted-foreground">/ {cabinet.folder_count}</span> <span className="text-primary ml-1">({percentage}%)</span></span>
                     </div>
-                    <Progress value={percentage} className="h-2.5 bg-gray-100 [&>div]:bg-[#FFD700]" />
+                    <Progress value={percentage} className="h-2.5 bg-muted" />
                   </div>
                 );
               })}
@@ -270,7 +270,7 @@ function Dashboard() {
                 <XAxis dataKey="category" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
                 <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
                 <Tooltip cursor={{fill: '#f3f4f6'}} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
-                <Bar dataKey="count" fill="#800000" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="count" fill="#8B0000" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
@@ -314,7 +314,7 @@ function Dashboard() {
               <XAxis dataKey="month" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
               <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
               <Tooltip cursor={{fill: '#f3f4f6'}} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
-              <Bar dataKey="documents" fill="#800000" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="documents" fill="#8B0000" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </CardContent>
@@ -342,7 +342,7 @@ function Dashboard() {
                 {recentUploads.length > 0 ? (
                   recentUploads.map((file) => (
                     <tr key={file.id} className="bg-white border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
-                      <td className="px-6 py-4 font-bold text-[#800000]">{file.document_id}</td>
+                      <td className="px-6 py-4 font-bold text-primary">{file.document_id}</td>
                       <td className="px-6 py-4 font-medium text-gray-900">{file.subject}</td>
                       <td className="px-6 py-4 text-gray-500">{file.document_type}</td>
                       {user?.role === "Admin" && <td className="px-6 py-4 text-gray-500">{file.user?.email || "Unknown"}</td>}

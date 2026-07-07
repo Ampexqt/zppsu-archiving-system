@@ -1,24 +1,10 @@
-const express =
-  require("express");
+const express = require("express");
+const router = express.Router();
+const authMiddleware = require("../../middleware/auth.middleware");
+const controller = require("./accomplishment.controller");
 
-const router =
-  express.Router();
+router.get("/", authMiddleware, controller.getReport);
 
-const authMiddleware =
-  require("../../middleware/auth.middleware");
+router.post("/export", authMiddleware, controller.exportPdf);
 
-const controller =
-  require("./accomplishment.controller");
-
-router.get(
-
-  "/",
-
-  authMiddleware,
-
-  controller.getReport
-
-);
-
-module.exports =
-  router;
+module.exports = router;

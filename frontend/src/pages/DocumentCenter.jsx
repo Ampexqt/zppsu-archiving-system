@@ -714,144 +714,35 @@ const fuzzyMatch = (text, query) => {
         </div>
 
 
-  {/* MINI ANALYTICS */}
-  <div className="
-    grid
-    grid-cols-1
-    md:grid-cols-2
-    xl:grid-cols-4
-    gap-4
-    mb-6
-  ">
+    {/* MINI ANALYTICS */}
+  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-6">
+    <Card>
+      <CardHeader className="pb-2">
+        <CardDescription>Total Documents</CardDescription>
+        <CardTitle className="text-3xl font-bold text-primary">{totalDocuments}</CardTitle>
+      </CardHeader>
+    </Card>
 
-    {/* TOTAL */}
-    <div className="
-      bg-white
-      rounded-2xl
-      shadow-md
-      p-5
-    ">
+    <Card>
+      <CardHeader className="pb-2">
+        <CardDescription>Active</CardDescription>
+        <CardTitle className="text-3xl font-bold text-primary">{activeDocuments}</CardTitle>
+      </CardHeader>
+    </Card>
 
-      <p className="
-        text-gray-500
-        text-sm
-      ">
+    <Card>
+      <CardHeader className="pb-2">
+        <CardDescription>Archived</CardDescription>
+        <CardTitle className="text-3xl font-bold text-primary/60">{archivedDocuments}</CardTitle>
+      </CardHeader>
+    </Card>
 
-        Total Documents
-
-      </p>
-
-      <h2 className="
-        text-3xl
-        font-bold
-        mt-2
-        text-[#8B0000]
-      ">
-
-        {
-          totalDocuments
-        }
-
-      </h2>
-
-    </div>
-
-    {/* ACTIVE */}
-    <div className="
-      bg-white
-      rounded-2xl
-      shadow-md
-      p-5
-    ">
-
-      <p className="
-        text-gray-500
-        text-sm
-      ">
-
-        Active
-
-      </p>
-
-      <h2 className="
-        text-3xl
-        font-bold
-        mt-2
-        text-green-500
-      ">
-
-        {
-          activeDocuments
-        }
-
-      </h2>
-
-    </div>
-
-    {/* ARCHIVED */}
-    <div className="
-      bg-white
-      rounded-2xl
-      shadow-md
-      p-5
-    ">
-
-      <p className="
-        text-gray-500
-        text-sm
-      ">
-
-        Archived
-
-      </p>
-
-      <h2 className="
-        text-3xl
-        font-bold
-        mt-2
-        text-gray-500
-      ">
-
-        {
-          archivedDocuments
-        }
-
-      </h2>
-
-    </div>
-
-    {/* PENDING */}
-    <div className="
-      bg-white
-      rounded-2xl
-      shadow-md
-      p-5
-    ">
-
-      <p className="
-        text-gray-500
-        text-sm
-      ">
-
-        Pending
-
-      </p>
-
-      <h2 className="
-        text-3xl
-        font-bold
-        mt-2
-        text-yellow-500
-      ">
-
-        {
-          pendingDocuments
-        }
-
-      </h2>
-
-    </div>
-
+    <Card>
+      <CardHeader className="pb-2">
+        <CardDescription>Pending</CardDescription>
+        <CardTitle className="text-3xl font-bold text-accent">{pendingDocuments}</CardTitle>
+      </CardHeader>
+    </Card>
   </div>
 
 
@@ -1038,21 +929,15 @@ const fuzzyMatch = (text, query) => {
                       px-5
                       py-3
                       rounded-xl
-                      text-white
+                      text-sm font-medium
                       transition
 
                       ${
-
                         showTrash
-
                         ?
-
-                        "bg-red-500 hover:bg-red-600"
-
+                        "bg-primary text-primary-foreground hover:bg-primary/90"
                         :
-
-                        "bg-gray-500 hover:bg-gray-600"
-
+                        "bg-primary/10 text-primary hover:bg-primary/20"
                       }
                     `}
                   >
@@ -1075,24 +960,10 @@ const fuzzyMatch = (text, query) => {
 
               {/* PRINT */}
               <button
-
-                onClick={() =>
-                  window.print()
-                }
-
-                className="
-                  bg-[#8B0000]
-                  text-white
-                  px-5
-                  py-3
-                  rounded-xl
-                  hover:bg-red-900
-                  transition
-                "
+                onClick={() => window.print()}
+                className="bg-primary text-primary-foreground px-5 py-3 rounded-xl hover:bg-primary/90 transition"
               >
-
                 Print
-
               </button>
 
               </div>
@@ -1122,8 +993,11 @@ const fuzzyMatch = (text, query) => {
                               px-3
                               py-1
                               rounded-full
-                              bg-gray-100
-                              hover:bg-gray-200
+                              bg-primary/5
+                              text-primary
+                              border border-primary/20
+                              hover:bg-primary/10
+                              transition
                               text-sm
                             "
                           >
@@ -1140,97 +1014,23 @@ const fuzzyMatch = (text, query) => {
                   )
                 }
 
-              {  
-                  search && (
-                    <div
-                      className="
-                        mt-4
-                        bg-blue-50
-                        border
-                        border-blue-200
-                        rounded-xl
-                        p-4
-                      "
-                    >
-                      <div className="font-semibold text-blue-800">
-                      🔎 Smart Search Engine
-                      </div>
-
-                      <div className="text-sm text-gray-700">
-                        Search Scope:
-                        <span className="font-medium">
-                          {" "}
-                          Subject, Document Type,
-                          Document ID, Status,
-                          Category, User
-                        </span>
-                      </div>
-
-                      <div className="text-sm text-gray-700 mt-2">
-                        Query:
-                        <span className="font-medium">
-                          {" "}
-                          {search}
-                        </span>
-                      </div>
-
-                      <div className="text-sm text-gray-700">
-                        Results Found:
-                        <span className="font-medium">
-                          {" "}
-                          {filteredFiles.length}
-                        </span>
-                      </div>
-
-                      <div className="text-sm text-gray-700">
-                        Documents Scanned:
-                        <span className="font-medium">
-                          {" "}
-                          {files.length}
-                        </span>
-                      </div>
-                    </div>
-                  )
-                }
-
                 </div>
-              {
-    search && (
-      <div className="
-        flex
-        justify-between
-        items-center
-        mb-4
-      ">
 
-        <div className="
-          text-blue-600
-          text-sm
-          font-medium
-        ">
-          Found {searchResultCount}
-          matching document(s)
-        </div>
-
-        {
-          filteredFiles.length > 0 && (
-            <div className="
-              text-xs
-              text-gray-500
-            ">
-              Top Result:
-              {" "}
               {
-                filteredFiles[0]
-                  ?.document_id
+                search && (
+                  <div className="flex justify-between items-center bg-primary/5 border border-primary/20 rounded-lg px-4 py-3 mb-4 mt-4">
+                    <div className="text-sm text-foreground flex items-center gap-2">
+                      <span className="font-semibold text-primary">Smart Search:</span>
+                      <span>Found <span className="font-bold">{searchResultCount}</span> result(s) for "<span className="font-medium">{search}</span>"</span>
+                    </div>
+                    {filteredFiles.length > 0 && (
+                      <div className="text-xs text-muted-foreground">
+                        Top match: <span className="font-medium text-foreground">{filteredFiles[0]?.document_id}</span>
+                      </div>
+                    )}
+                  </div>
+                )
               }
-            </div>
-          )
-        }
-
-      </div>
-    )
-  }
 
 
               {/* TABLE */}
@@ -1238,10 +1038,7 @@ const fuzzyMatch = (text, query) => {
         <Table className="w-full"> 
                   <TableHeader>
 
-                <TableRow className="
-                  bg-[#8B0000]
-                  text-white
-                ">
+                <TableRow>
 
                   <TableHead className="
                     p-4
@@ -1310,10 +1107,8 @@ const fuzzyMatch = (text, query) => {
                   >
 
                       {/* DOCUMENT ID */}
-                      <TableCell className="p-4 font-semibold text-[#8B0000]">
-
+                      <TableCell className="p-4 font-semibold text-primary">
                        {highlightText(file.document_id)}
-
                       </TableCell>
 
                       {/* SUBJECT */}
@@ -1359,38 +1154,14 @@ const fuzzyMatch = (text, query) => {
                             rounded-full
                             text-white
                             text-sm
-
                             ${
-
-                              file.status ===
-                              "Active"
-
-                              ?
-
-                              "bg-green-500"
-
-                              :
-
-                              file.status ===
-                              "Archived"
-
-                              ?
-
-                              "bg-gray-500"
-
-                              :
-
-                              file.status ===
-                              "Pending"
-
-                              ?
-
-                              "bg-yellow-500"
-
-                              :
-
-                              "bg-blue-500"
-
+                              file.status === "Active"
+                              ? "bg-primary"
+                              : file.status === "Archived"
+                              ? "bg-primary/60"
+                              : file.status === "Pending"
+                              ? "bg-accent text-accent-foreground"
+                              : "bg-secondary"
                             }
                           `}
                         >
@@ -1417,25 +1188,10 @@ const fuzzyMatch = (text, query) => {
 
                           {/* VIEW */}
                           <button
-
-                            onClick={() =>
-                              setViewingFile(
-                                file
-                              )
-                            }
-
-                            className="
-                              bg-blue-500
-                              text-white
-                              px-4
-                              py-2
-                              rounded-xl
-                              text-sm
-                            "
+                            onClick={() => setViewingFile(file)}
+                            className="bg-primary text-primary-foreground px-4 py-2 rounded-xl text-sm hover:bg-primary/90 transition"
                           >
-
                             View
-
                           </button>
 
                         {!showTrash && (
@@ -1444,14 +1200,7 @@ const fuzzyMatch = (text, query) => {
                             <a
                               href={`http://localhost:5000/uploads/${file.file_name}`}
                               download
-                              className="
-                                bg-green-500
-                                text-white
-                                px-4
-                                py-2
-                                rounded-xl
-                                text-sm
-                              "
+                              className="bg-primary/80 text-primary-foreground px-4 py-2 rounded-xl text-sm hover:bg-primary/90 transition"
                             >
                               Download
                             </a>
@@ -1464,14 +1213,7 @@ const fuzzyMatch = (text, query) => {
                                 setEditDocumentType(file.document_type);
                                 setEditStatus(file.status || "Active");
                               }}
-                              className="
-                                bg-yellow-500
-                                text-white
-                                px-4
-                                py-2
-                                rounded-xl
-                                text-sm
-                              "
+                              className="bg-accent text-accent-foreground px-4 py-2 rounded-xl text-sm hover:bg-accent/90 transition"
                             >
                               Edit
                             </button>
@@ -1481,55 +1223,26 @@ const fuzzyMatch = (text, query) => {
                         )}
 
                             {/* RESTORE */}
-                              {
-                                showTrash && (
-
-                                  <button
-
-                                    onClick={() =>
-                                      handleQuickStatus(
-                                        file.id,
-                                        "Active"
-                                      ) 
-                                    }
-
-                                    className="
-                                      bg-green-500
-                                      text-white
-                                      px-4
-                                      py-2
-                                      rounded-xl
-                                      text-sm
-                                    "
-                                  >
-
-                                    Restore
-
-                                  </button>
-
-                                )
-                              }
+                              {showTrash && (
+                                <button
+                                  onClick={() => handleQuickStatus(file.id, "Active")}
+                                  className="bg-primary text-primary-foreground px-4 py-2 rounded-xl text-sm hover:bg-primary/90 transition"
+                                >
+                                  Restore
+                                </button>
+                              )}
 
 
 
                             {/* DELETE */}
-                                              <button
-                          onClick={() =>
-                            showTrash
-                              ? handlePermanentDelete(file.id)
-                              : handleDelete(file.id)
-                          }
-                          className="
-                            bg-red-500
-                            text-white
-                            px-4
-                            py-2
-                            rounded-xl
-                            text-sm
-                          "
-                        >
-                          Delete
-                        </button>
+                            <button
+                              onClick={() =>
+                                showTrash ? handlePermanentDelete(file.id) : handleDelete(file.id)
+                              }
+                              className="bg-destructive text-destructive-foreground px-4 py-2 rounded-xl text-sm hover:bg-destructive/90 transition"
+                            >
+                              Delete
+                            </button>
 
                           </div>
 

@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 
 import axios from "axios";
+import { Plus, Trash2, FolderOpen } from "lucide-react";
 
 import DashboardLayout
 from "../components/layout/DashboardLayout";
@@ -201,78 +202,57 @@ const handleViewFiles =
       </div>
 
       {/* CREATE INVENTORY */}
-      <div className="bg-white rounded-2xl shadow-md p-6 mb-8">
-
-        <h2 className="text-2xl font-bold mb-6">
-
-          Create Cabinet
-
-        </h2>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-
-          {/* CABINET */}
-          <input
-            type="text"
-            placeholder="Cabinet Name"
-            value={cabinetName}
-            onChange={(e) =>
-              setCabinetName(
-                e.target.value
-              )
-            }
-            className="border border-gray-300 rounded-xl p-4 outline-none focus:border-[#8B0000]"
-          />
-
-          {/* SHELF */}
-          <input
-            type="text"
-            placeholder="Shelf"
-            value={shelf}
-            onChange={(e) =>
-              setShelf(
-                e.target.value
-              )
-            }
-            className="border border-gray-300 rounded-xl p-4 outline-none focus:border-[#8B0000]"
-          />
-
-          {/* FOLDER COUNT */}
-          <input
-            type="number"
-            placeholder="Folder Capacity"
-            value={folderCount}
-            onChange={(e) =>
-              setFolderCount(
-                e.target.value
-              )
-            }
-            className="border border-gray-300 rounded-xl p-4 outline-none focus:border-[#8B0000]"
-          />
-
-        </div>
-
-        {/* BUTTON */}
-        <button
-          onClick={
-            handleCreateInventory
-          }
-          className="bg-[#8B0000] hover:bg-[#6d0000] text-white px-8 py-4 rounded-xl transition mt-6"
-        >
-
-          Create Cabinet
-
-        </button>
-
-      </div>
+      <Card className="mb-8 shadow-sm">
+        <CardHeader className="bg-primary/5 border-b pb-4">
+          <CardTitle className="flex items-center gap-2 text-primary">
+            <Plus className="w-5 h-5" />
+            Create Cabinet
+          </CardTitle>
+          <CardDescription>Add a new physical or virtual storage cabinet.</CardDescription>
+        </CardHeader>
+        <CardContent className="p-6">
+          <div className="flex flex-col md:flex-row gap-4">
+            {/* CABINET */}
+            <Input
+              type="text"
+              placeholder="Cabinet Name"
+              value={cabinetName}
+              onChange={(e) => setCabinetName(e.target.value)}
+              className="flex-1 bg-white"
+            />
+            {/* SHELF */}
+            <Input
+              type="text"
+              placeholder="Shelf"
+              value={shelf}
+              onChange={(e) => setShelf(e.target.value)}
+              className="flex-1 bg-white"
+            />
+            {/* FOLDER COUNT */}
+            <Input
+              type="number"
+              placeholder="Folder Capacity"
+              value={folderCount}
+              onChange={(e) => setFolderCount(e.target.value)}
+              className="flex-1 bg-white"
+            />
+            {/* BUTTON */}
+            <button
+              onClick={handleCreateInventory}
+              className="flex items-center justify-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90 px-6 h-10 rounded-md font-medium transition"
+            >
+              <Plus className="w-4 h-4" />
+              Create Cabinet
+            </button>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* INVENTORY TABLE */}
-      <div className="bg-white rounded-2xl shadow-md overflow-hidden">
-
+      <Card className="overflow-hidden">
         <Table className="w-full">
-
           {/* HEADER */}
-          <TableHeader className="bg-[#8B0000] text-white">
+          <TableHeader>
 
             <TableRow>
 
@@ -359,17 +339,7 @@ const handleViewFiles =
                     <div className="w-40 bg-gray-200 rounded-full h-4 overflow-hidden">
 
                         <div
-                        className={`h-4 rounded-full
-
-                            ${
-                            inventory.used_space >=
-                            inventory.folder_count
-
-                                ? "bg-red-500"
-
-                                : "bg-green-500"
-                            }
-                        `}
+                        className={`h-4 rounded-full bg-primary`}
                         style={{
 
                             width: `${
@@ -402,7 +372,7 @@ const handleViewFiles =
 
                   <TableCell className="p-5">
 
-                    <span className="bg-green-500 text-white px-4 py-2 rounded-full text-sm">
+                    <span className="bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium">
 
                       {inventory.status}
 
@@ -413,16 +383,11 @@ const handleViewFiles =
                 <TableCell className="p-5">
 
                     <button
-                      onClick={() =>
-                        handleViewFiles(
-                          inventory
-                        )
-                      }
-                      className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg"
+                      onClick={() => handleViewFiles(inventory)}
+                      className="flex items-center gap-2 bg-primary/10 text-primary hover:bg-primary/20 px-4 py-2 rounded-lg transition"
+                      title="View Files"
                     >
-
-                      View Files
-
+                      <FolderOpen className="w-4 h-4" /> View
                     </button>
 
                   </TableCell>
@@ -435,11 +400,10 @@ const handleViewFiles =
                           inventory.id
                         )
                       }
-                      className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg"
+                      className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-full transition"
+                      title="Delete Cabinet"
                     >
-
-                      Delete
-
+                      <Trash2 className="w-5 h-5" />
                     </button>
 
                   </TableCell>
@@ -450,8 +414,7 @@ const handleViewFiles =
           </TableBody>
 
         </Table>
-
-      </div>
+      </Card>
 
       {/* FILES MODAL */}
   {
@@ -479,7 +442,7 @@ const handleViewFiles =
                 setSelectedCabinet("");
 
               }}
-              className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg"
+              className="bg-destructive hover:bg-destructive/90 text-destructive-foreground px-4 py-2 rounded-lg transition"
             >
 
               Close

@@ -61,7 +61,7 @@ function Logs() {
           {/* HEADER */}
           <TableHeader>
 
-              <TableRow className="bg-[#8B0000] text-white">
+              <TableRow>
 
                 <TableHead className="p-5 text-left">
                   Email
@@ -105,7 +105,7 @@ function Logs() {
       {/* ACTION */}
       <TableCell className="p-5">
 
-        <span className="bg-[#8B0000] text-white px-3 py-1 rounded-full text-sm">
+        <span className="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-medium">
           {log.action}
         </span>
 

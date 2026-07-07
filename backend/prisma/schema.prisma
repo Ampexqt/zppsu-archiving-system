@@ -12,7 +12,7 @@ model users {
   name       String
   email      String   @unique
   password   String
-   role       String   @default("User")
+  role       String   @default("User")
   created_at DateTime @default(now())
 
   logs  logs[]
@@ -25,30 +25,33 @@ model categories {
   created_at DateTime @default(now())
 }
 
-    model files {
-      id          Int      @id @default(autoincrement())
-      title       String
-      category    String
-      file_name String?
-      file_path String?
-      uploaded_by Int?
-      inventory_id Int?
-      access_code   String?
-      subject       String?
-      document_type String?
-      dynamic_data Json?
-      ocr_text String?
-      document_id String?
-      memo_date     DateTime?
-      received_date DateTime?
-      created_at  DateTime @default(now())
-      status String? @default("Active")
-      is_deleted Boolean @default(false)
+model files {
+  id            Int      @id @default(autoincrement())
+  title         String
+  category      String
+  file_name     String?
+  file_path     String?
+  uploaded_by   Int?
+  file_box_id   Int?
+  access_code   String?
+  subject       String?
+  document_type String?
+  file_type     String?
+  is_generated  Boolean @default(false)
+  generated_type String?
+  dynamic_data  Json?
+  ocr_text      String?
+  document_id   String?
+  memo_date     DateTime?
+  received_date DateTime?
+  created_at    DateTime @default(now())
+  status        String? @default("Active")
+  is_deleted    Boolean @default(false)
 
-      user users? @relation(fields: [uploaded_by], references: [id])
+  user users? @relation(fields: [uploaded_by], references: [id])
 
-      inventory inventory? @relation("InventoryFiles", fields: [inventory_id], references: [id])
-    }
+  file_box file_boxes? @relation("FileBoxFiles", fields: [file_box_id], references: [id])
+}
 
 model logs {
   id          Int      @id @default(autoincrement())
@@ -60,15 +63,25 @@ model logs {
   user users? @relation(fields: [user_id], references: [id])
 }
 
-model inventory {
+model cabinets {
   id            Int      @id @default(autoincrement())
-  cabinet_name  String
-  shelf         String
-  folder_count  Int
-  used_space Int @default(0)
+  name          String
+  capacity      Int
   status        String
-
-  files files[] @relation("InventoryFiles")
-
   created_at    DateTime @default(now())
+
+  file_boxes    file_boxes[] @relation("CabinetFileBoxes")
+}
+
+model file_boxes {
+  id            Int      @id @default(autoincrement())
+  name          String
+  cabinet_id    Int
+  capacity      Int
+  used_space    Int @default(0)
+  status        String
+  created_at    DateTime @default(now())
+
+  cabinet       cabinets @relation("CabinetFileBoxes", fields: [cabinet_id], references: [id])
+  files         files[] @relation("FileBoxFiles")
 }

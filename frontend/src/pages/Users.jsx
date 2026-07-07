@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 
 import axios from "axios";
+import { ArrowUpToLine, ArrowDownToLine, Trash2 } from "lucide-react";
 
 import DashboardLayout from "../components/layout/DashboardLayout";
 
@@ -216,32 +217,32 @@ const handleDemote =
       </div>
 
       {/* USERS TABLE */}
-      <div className="bg-white dark:bg-[#111827] rounded-3xl shadow-xl overflow-hidden">
+      <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
 
         <Table className="w-full">
 
           {/* TABLE HEADER */}
-          <TableHeader className="bg-[#8B0000] text-white">
+          <TableHeader>
 
             <TableRow>
 
-              <TableHead className="text-left p-6 text-lg">
+              <TableHead className="text-left p-6">
                 Full Name
               </TableHead>
 
-              <TableHead className="text-left p-6 text-lg">
+              <TableHead className="text-left p-6">
                 Email
               </TableHead>
 
-              <TableHead className="text-left p-6 text-lg">
+              <TableHead className="text-left p-6">
                 Role
               </TableHead>
 
-              <TableHead className="text-left p-6 text-lg">
+              <TableHead className="text-left p-6">
                 Created At
               </TableHead>
 
-              <TableHead className="text-left p-6 text-lg">
+              <TableHead className="text-left p-6">
                 Actions
               </TableHead>
 
@@ -256,18 +257,18 @@ const handleDemote =
 
               <TableRow
                 key={user.id}
-                className="border-b border-gray-200 dark:border-gray-700 text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+                className="border-b border-gray-100 hover:bg-gray-50 transition"
               >
 
                 {/* NAME */}
-                <TableCell className="p-6 text-lg font-medium">
+                <TableCell className="p-6 font-medium">
 
                   {user.name}
 
                 </TableCell>
 
                 {/* EMAIL */}
-                <TableCell className="p-6 text-lg">
+                <TableCell className="p-6">
 
                   {user.email}
 
@@ -276,7 +277,7 @@ const handleDemote =
                 {/* ROLE */}
                 <TableCell className="p-6">
 
-                  <span className="bg-[#8B0000] text-white px-4 py-2 rounded-full text-sm font-bold">
+                  <span className="bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium">
 
                     {user.role} 
 
@@ -285,7 +286,7 @@ const handleDemote =
                 </TableCell>
 
                 {/* CREATED AT */}
-                <TableCell className="p-6 text-lg">
+                <TableCell className="p-6">
 
                   {new Date(
                     user.created_at
@@ -308,19 +309,12 @@ const handleDemote =
                           )
                         }
 
-                        className="
-                          bg-green-500
-                          hover:bg-green-600
-                          text-white
-                          px-4
-                          py-2
-                          rounded-xl
-                          font-semibold
-                        "
+                        className="p-2 text-muted-foreground hover:text-emerald-600 hover:bg-emerald-50 rounded-full transition"
+                        title="Promote User"
 
                       >
 
-                        Promote
+                        <ArrowUpToLine className="w-5 h-5" />
 
                       </button>
 
@@ -339,19 +333,12 @@ const handleDemote =
                           )
                         }
 
-                        className="
-                          bg-yellow-500
-                          hover:bg-yellow-600
-                          text-white
-                          px-4
-                          py-2
-                          rounded-xl
-                          font-semibold
-                        "
+                        className="p-2 text-muted-foreground hover:text-accent hover:bg-accent/10 rounded-full transition"
+                        title="Demote User"
 
                       >
 
-                        Demote
+                        <ArrowDownToLine className="w-5 h-5" />
 
                       </button>
 
@@ -365,19 +352,12 @@ const handleDemote =
                         )
                       }
 
-                      className="
-                        bg-red-500
-                        hover:bg-red-600
-                        text-white
-                        px-4
-                        py-2
-                        rounded-xl
-                        font-semibold
-                      "
+                      className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-full transition"
+                        title="Delete User"
 
                     >
 
-                      Delete
+                      <Trash2 className="w-5 h-5" />
 
                     </button>
 

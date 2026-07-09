@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 import axios from "axios";
 import { Plus, Trash2, FolderOpen } from "lucide-react";
@@ -39,6 +40,8 @@ const [
   selectedCabinet,
   setSelectedCabinet
 ] = useState("");
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const [
     inventories,
@@ -169,6 +172,7 @@ const handleViewFiles =
 
       // REFRESH
       fetchInventories();
+      setIsModalOpen(false);
 
     } catch (error) {
 
@@ -185,72 +189,72 @@ const handleViewFiles =
     <DashboardLayout>
 
       {/* HEADER */}
-      <div className="mb-8">
-
-        <h1 className="text-4xl font-bold">
-
-          Inventory Management
-
-        </h1>
-
-        <p className="text-gray-500 mt-2">
-
-          Manage cabinets and storage
-
-        </p>
-
-      </div>
-
-      {/* CREATE INVENTORY */}
-      <Card className="mb-8 shadow-sm">
-        <CardHeader className="bg-primary/5 border-b pb-4">
-          <CardTitle className="flex items-center gap-2 text-primary">
-            <Plus className="w-5 h-5" />
-            Create Cabinet
-          </CardTitle>
-          <CardDescription>Add a new physical or virtual storage cabinet.</CardDescription>
-        </CardHeader>
-        <CardContent className="p-6">
-          <div className="flex flex-col md:flex-row gap-4">
-            {/* CABINET */}
-            <Input
-              type="text"
-              placeholder="Cabinet Name"
-              value={cabinetName}
-              onChange={(e) => setCabinetName(e.target.value)}
-              className="flex-1 bg-white"
-            />
-            {/* SHELF */}
-            <Input
-              type="text"
-              placeholder="Shelf"
-              value={shelf}
-              onChange={(e) => setShelf(e.target.value)}
-              className="flex-1 bg-white"
-            />
-            {/* FOLDER COUNT */}
-            <Input
-              type="number"
-              placeholder="Folder Capacity"
-              value={folderCount}
-              onChange={(e) => setFolderCount(e.target.value)}
-              className="flex-1 bg-white"
-            />
-            {/* BUTTON */}
-            <button
-              onClick={handleCreateInventory}
-              className="flex items-center justify-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90 px-6 h-10 rounded-md font-medium transition"
-            >
+      <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-4xl font-bold">Inventory Management</h1>
+          <p className="text-gray-500 mt-2">Manage cabinets and storage</p>
+        </div>
+        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+          <DialogTrigger asChild>
+            <button className="flex items-center justify-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90 px-5 h-11 rounded-lg font-medium transition shadow-sm">
               <Plus className="w-4 h-4" />
               Create Cabinet
             </button>
-          </div>
-        </CardContent>
-      </Card>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px] p-6 bg-white border border-gray-100 rounded-2xl shadow-xl">
+            <DialogHeader className="mb-4">
+              <DialogTitle className="text-xl font-bold text-gray-900">Create New Cabinet</DialogTitle>
+              <DialogDescription className="text-gray-500 text-sm mt-1">
+                Add a new physical or virtual storage cabinet.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex flex-col gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-gray-700">Cabinet Name</label>
+                <Input
+                  type="text"
+                  placeholder="e.g. Cabinet A"
+                  value={cabinetName}
+                  onChange={(e) => setCabinetName(e.target.value)}
+                  className="bg-gray-50/50 border-gray-200 focus-visible:ring-primary/20 h-11 px-4 rounded-xl text-base"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-gray-700">Shelf</label>
+                <Input
+                  type="text"
+                  placeholder="e.g. Top Shelf"
+                  value={shelf}
+                  onChange={(e) => setShelf(e.target.value)}
+                  className="bg-gray-50/50 border-gray-200 focus-visible:ring-primary/20 h-11 px-4 rounded-xl text-base"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-gray-700">Folder Capacity</label>
+                <Input
+                  type="number"
+                  placeholder="e.g. 50"
+                  value={folderCount}
+                  onChange={(e) => setFolderCount(e.target.value)}
+                  className="bg-gray-50/50 border-gray-200 focus-visible:ring-primary/20 h-11 px-4 rounded-xl text-base"
+                />
+              </div>
+              <button
+                onClick={handleCreateInventory}
+                className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90 h-11 rounded-xl font-semibold transition shadow-sm mt-2"
+              >
+                <Plus className="w-4 h-4" />
+                Create Cabinet
+              </button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
 
       {/* INVENTORY TABLE */}
       <Card className="overflow-hidden">
-        <Table className="w-full">
+        <div className="overflow-x-auto">
+          <Table className="w-full">
           {/* HEADER */}
           <TableHeader>
 
@@ -414,15 +418,16 @@ const handleViewFiles =
           </TableBody>
 
         </Table>
+        </div>
       </Card>
 
       {/* FILES MODAL */}
   {
   selectedFiles.length > 0 && (
 
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
 
-        <div className="bg-white w-full max-w-3xl rounded-2xl p-6 max-h-[80vh] overflow-y-auto">
+        <div className="bg-white w-full max-w-3xl rounded-2xl p-4 sm:p-6 max-h-[80vh] overflow-y-auto">
 
           <div className="flex items-center justify-between mb-6">
 

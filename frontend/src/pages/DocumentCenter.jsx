@@ -754,15 +754,16 @@ const fuzzyMatch = (text, query) => {
             bg-white
             rounded-2xl
             shadow-md
-            p-6
+            p-4 sm:p-6
           "
         >
-
           {/* TOP BAR */}
         <div className="
             flex
-            flex-wrap
-            items-center
+            flex-col
+            md:flex-row
+            items-start
+            md:items-center
             justify-between
             gap-4
             mb-6
@@ -780,8 +781,14 @@ const fuzzyMatch = (text, query) => {
             {/* FILTERS */}
           <div className="
             flex
-            items-center
+            flex-col
+            sm:flex-row
+            flex-wrap
+            items-stretch
+            sm:items-center
             gap-3
+            w-full
+            md:w-auto
           ">
 
               {/* SEARCH */}
@@ -793,7 +800,8 @@ const fuzzyMatch = (text, query) => {
                 setSearch(e.target.value)
               }
               className="
-                w-[320px]
+                w-full
+                md:w-[320px]
                 border
                 border-gray-300
                 rounded-xl

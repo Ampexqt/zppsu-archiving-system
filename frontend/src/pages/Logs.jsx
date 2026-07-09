@@ -55,99 +55,99 @@ function Logs() {
 
       {/* LOGS TABLE */}
       <div className="bg-white rounded-2xl shadow-md overflow-hidden">
+        <div className="overflow-x-auto">
+          <Table className="w-full">
 
-        <Table className="w-full">
+            {/* HEADER */}
+            <TableHeader>
 
-          {/* HEADER */}
-          <TableHeader>
+                <TableRow>
 
-              <TableRow>
+                  <TableHead className="p-5 text-left">
+                    Email
+                  </TableHead>
 
-                <TableHead className="p-5 text-left">
-                  Email
-                </TableHead>
+                  <TableHead className="p-5 text-left">
+                    Action
+                  </TableHead>
 
-                <TableHead className="p-5 text-left">
-                  Action
-                </TableHead>
+                  <TableHead className="p-5 text-left">
+                    Description
+                  </TableHead>
 
-                <TableHead className="p-5 text-left">
-                  Description
-                </TableHead>
+                  <TableHead className="p-5 text-left">
+                    Date
+                  </TableHead>
 
-                <TableHead className="p-5 text-left">
-                  Date
-                </TableHead>
+                  <TableHead className="p-5 text-left">
+                    Time
+                  </TableHead>
 
-                <TableHead className="p-5 text-left">
-                  Time
-                </TableHead>
+                </TableRow>
 
-              </TableRow>
+              </TableHeader>
 
-            </TableHeader>
+            {/* BODY */}
+  <TableBody>
 
-          {/* BODY */}
-<TableBody>
+    {logs.map((log) => (
 
-  {logs.map((log) => (
+      <TableRow
+        key={log.id}
+        className="border-b"
+      >
 
-    <TableRow
-      key={log.id}
-      className="border-b"
-    >
+        {/* EMAIL */}
+        <TableCell className="p-5">
+          {log.user?.email || "System"}
+        </TableCell>
 
-      {/* EMAIL */}
-      <TableCell className="p-5">
-        {log.user?.email || "System"}
-      </TableCell>
+        {/* ACTION */}
+        <TableCell className="p-5">
 
-      {/* ACTION */}
-      <TableCell className="p-5">
+          <span className="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-medium">
+            {log.action}
+          </span>
 
-        <span className="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-medium">
-          {log.action}
-        </span>
+        </TableCell>
 
-      </TableCell>
+        {/* DESCRIPTION */}
+        <TableCell className="p-5">
+          {log.description}
+        </TableCell>
 
-      {/* DESCRIPTION */}
-      <TableCell className="p-5">
-        {log.description}
-      </TableCell>
+        {/* DATE */}
+        <TableCell className="p-5">
 
-      {/* DATE */}
-      <TableCell className="p-5">
+          {new Date(
+            log.created_at
+          ).toLocaleDateString()}
 
-        {new Date(
-          log.created_at
-        ).toLocaleDateString()}
+        </TableCell>
 
-      </TableCell>
+        {/* TIME */}
+        <TableCell className="p-5">
 
-      {/* TIME */}
-      <TableCell className="p-5">
+          {new Date(
+            log.created_at
+          ).toLocaleTimeString([], {
 
-        {new Date(
-          log.created_at
-        ).toLocaleTimeString([], {
+            hour: "numeric",
 
-          hour: "numeric",
+            minute: "2-digit",
 
-          minute: "2-digit",
+          })}
 
-        })}
+        </TableCell>
 
-      </TableCell>
+      </TableRow>
 
-    </TableRow>
+    ))}
 
-  ))}
+  </TableBody>
 
-</TableBody>
-
-        </Table>
-
+          </Table>
+        </div>
       </div>
 
     </DashboardLayout>

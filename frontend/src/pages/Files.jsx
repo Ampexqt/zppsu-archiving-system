@@ -117,6 +117,8 @@ import { FilePlus, UploadCloud } from "lucide-react";
 
   const [legacyFile, setLegacyFile] = useState(null);
   const [uploadingLegacy, setUploadingLegacy] = useState(false);
+  const [selectedUploadCabinet, setSelectedUploadCabinet] = useState("");
+  const [selectedUploadFileBox, setSelectedUploadFileBox] = useState("");
 
     // DOCUMENT CONFIGS
     const documentConfigs = {
@@ -1407,8 +1409,11 @@ await axios.post(
       const token = localStorage.getItem("token");
       const formData = new FormData();
       formData.append("file", legacyFile);
+      if (selectedUploadFileBox) {
+        formData.append("file_box_id", selectedUploadFileBox);
+      }
       const response = await axios.post(
-        "http://localhost:5000/api/files/upload-legacy",
+        "http://localhost:5000/api/files/upload",
         formData,
         {
           headers: {
@@ -1417,8 +1422,11 @@ await axios.post(
           },
         }
       );
-      console.log(response.data.extractedText);
       setLegacyFile(null);
+      setSelectedUploadCabinet("");
+      setSelectedUploadFileBox("");
+      fetchFiles();
+      fetchInventories();
       alert("Document uploaded successfully!");
     } catch (error) {
       console.error(error);
@@ -1533,6 +1541,36 @@ await axios.post(
                   <p className="text-sm font-medium text-gray-600">Choose a file to upload</p>
                   <p className="text-xs text-gray-400">PDF, DOCX, PPTX, JPG, PNG up to 10MB</p>
                 </div>
+
+                <div className="w-full max-w-sm flex gap-2">
+                  <select
+                    value={selectedUploadCabinet}
+                    onChange={(e) => {
+                      setSelectedUploadCabinet(e.target.value);
+                      setSelectedUploadFileBox("");
+                    }}
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  >
+                    <option value="">Select Cabinet</option>
+                    {inventories.map((inv) => (
+                      <option key={inv.id} value={inv.id}>
+                        {inv.name || inv.cabinet_name || `Cabinet ${inv.id}`}
+                      </option>
+                    ))}
+                  </select>
+                  <select
+                    value={selectedUploadFileBox}
+                    onChange={(e) => setSelectedUploadFileBox(e.target.value)}
+                    disabled={!selectedUploadCabinet}
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <option value="">Select File Box</option>
+                    {inventories.find(inv => String(inv.id) === String(selectedUploadCabinet))?.file_boxes?.map(box => (
+                      <option key={box.id} value={box.id}>{box.name}</option>
+                    ))}
+                  </select>
+                </div>
+
                 <Input
                   type="file"
                   accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png"

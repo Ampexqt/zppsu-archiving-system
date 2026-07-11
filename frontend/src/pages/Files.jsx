@@ -1257,9 +1257,16 @@ const response =
 
     try {
 
+      const token = localStorage.getItem("token");
+
       const response =
         await axios.get(
-          "http://localhost:5000/api/inventory"
+          "http://localhost:5000/api/inventory/cabinets",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
         );
 
       setInventories(
@@ -1309,7 +1316,7 @@ const response =
 
 await axios.post(
 
-  "http://localhost:5000/api/files/upload",
+  "http://localhost:5000/api/files/generate",
 
   {
 

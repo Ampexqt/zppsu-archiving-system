@@ -18,12 +18,15 @@ Replace the old scan-first OCR workflow with a modern document upload workflow.
   - PDF
   - DOCX
   - PPTX
+  - XLSX
 
 - OCR should NOT run on every upload.
 
 - OCR should only execute when:
   - the uploaded PDF is image-based
   - the uploaded file contains no machine-readable text
+
+- Office documents (DOCX, PPTX, XLSX) must have their text automatically extracted using `officeparser` for full-text indexing.
 
 ## Expected Workflow
 
@@ -247,6 +250,7 @@ Search should support filtering by:
 - File Type
 - Date
 - Generated Documents
+- Full-text content (Smart Search inside document contents)
 
 ---
 

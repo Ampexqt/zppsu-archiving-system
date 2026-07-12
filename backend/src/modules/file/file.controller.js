@@ -3,6 +3,7 @@ const fs = require("fs");
 const path = require("path");
 const Tesseract = require("tesseract.js");
 const pdf = require("pdf-parse");
+const officeParser = require("officeparser");
 const { appendToExcel, getTemplateFileName } = require("../../utils/excelManager");
 const logsService = require("../logs/logs.service");
 
@@ -27,7 +28,7 @@ exports.uploadFile = async (req, res) => {
     const fileExtension = path.extname(req.file.originalname).toLowerCase();
     let extractedText = "";
 
-    // Text Extraction and Conditional OCR for PDFs
+    // Text Extraction and Conditional OCR for PDFs and Office Docs
     if (fileExtension === ".pdf") {
       try {
         const dataBuffer = fs.readFileSync(req.file.path);
@@ -42,6 +43,13 @@ exports.uploadFile = async (req, res) => {
         }
       } catch (err) {
         console.error("PDF Parsing/OCR Error:", err);
+      }
+    } else if ([".docx", ".pptx", ".xlsx"].includes(fileExtension)) {
+      try {
+        console.log(`Parsing office document: ${req.file.path}`);
+        extractedText = await officeParser.parseOfficeAsync(req.file.path);
+      } catch (err) {
+        console.error("Office Document Parsing Error:", err);
       }
     }
 

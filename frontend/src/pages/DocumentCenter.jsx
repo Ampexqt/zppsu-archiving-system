@@ -596,6 +596,12 @@ const fuzzyMatch = (text, query) => {
 
   file.inventory?.shelf
   ?.toLowerCase()
+  .includes(smartSearch)
+  
+    ||
+    
+  file.ocr_text
+  ?.toLowerCase()
   .includes(smartSearch);  
 
         const matchesYear =

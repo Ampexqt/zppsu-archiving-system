@@ -9,7 +9,13 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 
 import axios from "axios";
-import { FilePlus, UploadCloud } from "lucide-react";
+import { FilePlus, UploadCloud, CalendarIcon, Check, ChevronsUpDown } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
     const documentCategories = {
   Administrative: [
@@ -1463,53 +1469,173 @@ await axios.post(
               >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* CATEGORY */}
-                  <select
-                    value={category}
-                    onChange={(e) => {
-                      setCategory(e.target.value);
-                      setDocumentType("");
-                      setFormData({});
-                    }}
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                  >
-                    <option value="">Select Category</option>
-                    <option>Administrative</option>
-                    <option>Academic</option>
-                    <option>Financial</option>
-                  </select>
+                  <Popover modal={true}>
+                    <PopoverTrigger
+                      type="button"
+                      className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <span className="truncate">{category || "Select Category"}</span>
+                      <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[var(--anchor-width)] p-0" align="start">
+                      <Command>
+                        <CommandList>
+                          <CommandGroup>
+                            {["Administrative", "Academic", "Financial"].map((cat) => (
+                              <CommandItem
+                                key={cat}
+                                value={cat}
+                                onSelect={() => {
+                                  setCategory(cat);
+                                  setDocumentType("");
+                                  setFormData({});
+                                  document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+                                }}
+                              >
+                                <Check
+                                  className={cn(
+                                    "mr-2 h-4 w-4",
+                                    category === cat ? "opacity-100" : "opacity-0"
+                                  )}
+                                />
+                                {cat}
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
 
                   {/* DOCUMENT TYPE */}
-                  <select
-                    value={documentType}
-                    disabled={!category}
-                    onChange={(e) => {
-                      setDocumentType(e.target.value);
-                      setFormData({});
-                    }}
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    <option value="">Select Document Type</option>
-                    {category && documentCategories[category]?.map((doc) => (
-                      <option key={doc} value={doc}>
-                        {doc}
-                      </option>
-                    ))}
-                  </select>
+                  <Popover modal={true}>
+                    <PopoverTrigger
+                      type="button"
+                      disabled={!category}
+                      className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <span className="truncate">{documentType || "Select Document Type"}</span>
+                      <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[var(--anchor-width)] p-0" align="start">
+                      <Command>
+                        <CommandInput placeholder="Search document type..." />
+                        <CommandList>
+                          <CommandEmpty>No document type found.</CommandEmpty>
+                          <CommandGroup>
+                            {category && documentCategories[category]?.map((doc) => (
+                              <CommandItem
+                                key={doc}
+                                value={doc}
+                                onSelect={() => {
+                                  setDocumentType(doc);
+                                  setFormData({});
+                                  document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+                                }}
+                              >
+                                <Check
+                                  className={cn(
+                                    "mr-2 h-4 w-4",
+                                    documentType === doc ? "opacity-100" : "opacity-0"
+                                  )}
+                                />
+                                {doc}
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
                 </div>
 
                 {/* DYNAMIC INPUTS */}
                 {selectedFields.length > 0 && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
-                    {selectedFields.map((field) => (
-                      <Input
-                        key={field}
-                        type="text"
-                        placeholder={field.replaceAll("_", " ").toUpperCase()}
-                        value={formData[field] || ""}
-                        onChange={(e) => handleChange(field, e.target.value)}
-                        className="bg-white"
-                      />
-                    ))}
+                    {selectedFields.map((field) => {
+                      if (field === "date") {
+                        return (
+                          <Popover modal={true} key={field}>
+                            <PopoverTrigger
+                              type="button"
+                              className={cn(
+                                "flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+                                !formData[field] && "text-muted-foreground"
+                              )}
+                            >
+                              {formData[field] ? format(new Date(formData[field]), "PPP") : <span>Pick a date</span>}
+                              <CalendarIcon className="h-4 w-4 opacity-50" />
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                              <Calendar
+                                mode="single"
+                                selected={formData[field] ? new Date(formData[field]) : undefined}
+                                onSelect={(date) => handleChange(field, date ? format(date, "yyyy-MM-dd") : "")}
+                                initialFocus
+                                captionLayout="dropdown"
+                                fromYear={1990}
+                                toYear={new Date().getFullYear() + 5}
+                              />
+                            </PopoverContent>
+                          </Popover>
+                        );
+                      } else if (field === "action_taken") {
+                        const commonActions = ["Approved", "Pending", "Forwarded", "Archived", "For Revisions"];
+                        return (
+                          <Popover modal={true} key={field}>
+                            <PopoverTrigger
+                              type="button"
+                              className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                              <span className="truncate">{formData[field] || "Select or type action..."}</span>
+                              <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
+                            </PopoverTrigger>
+                            <PopoverContent className="w-[var(--anchor-width)] p-0" align="start">
+                              <Command>
+                                <CommandInput 
+                                  placeholder="Type action..." 
+                                  value={formData[field] || ""} 
+                                  onValueChange={(val) => handleChange(field, val)} 
+                                />
+                                <CommandList>
+                                  <CommandEmpty>Press enter or click outside to save.</CommandEmpty>
+                                  <CommandGroup heading="Common Actions">
+                                    {commonActions.map((action) => (
+                                      <CommandItem
+                                        key={action}
+                                        value={action}
+                                        onSelect={(currentValue) => {
+                                          handleChange(field, action);
+                                        }}
+                                      >
+                                        <Check
+                                          className={cn(
+                                            "mr-2 h-4 w-4",
+                                            formData[field] === action ? "opacity-100" : "opacity-0"
+                                          )}
+                                        />
+                                        {action}
+                                      </CommandItem>
+                                    ))}
+                                  </CommandGroup>
+                                </CommandList>
+                              </Command>
+                            </PopoverContent>
+                          </Popover>
+                        );
+                      } else {
+                        return (
+                          <Input
+                            key={field}
+                            type="text"
+                            placeholder={field.replaceAll("_", " ").toUpperCase()}
+                            value={formData[field] || ""}
+                            onChange={(e) => handleChange(field, e.target.value)}
+                            className="bg-background"
+                          />
+                        );
+                      }
+                    })}
                   </div>
                 )}
 

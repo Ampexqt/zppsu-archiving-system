@@ -1477,7 +1477,7 @@ await axios.post(
                       <span className="truncate">{category || "Select Category"}</span>
                       <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
                     </PopoverTrigger>
-                    <PopoverContent className="w-[var(--anchor-width)] max-h-[var(--available-height)] overflow-y-auto p-0" align="start">
+                    <PopoverContent className="max-h-[300px] overflow-y-auto p-0" style={{ width: "var(--anchor-width)" }} align="start">
                       <Command>
                         <CommandList>
                           <CommandGroup>
@@ -1517,7 +1517,7 @@ await axios.post(
                       <span className="truncate">{documentType || "Select Document Type"}</span>
                       <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
                     </PopoverTrigger>
-                    <PopoverContent className="w-[var(--anchor-width)] max-h-[var(--available-height)] overflow-y-auto p-0" align="start">
+                    <PopoverContent className="max-h-[300px] overflow-y-auto p-0" style={{ width: "var(--anchor-width)" }} align="start">
                       <Command>
                         <CommandInput placeholder="Search document type..." />
                         <CommandList>
@@ -1590,7 +1590,7 @@ await axios.post(
                               <span className="truncate">{formData[field] || "Select or type action..."}</span>
                               <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
                             </PopoverTrigger>
-                            <PopoverContent className="w-[var(--anchor-width)] max-h-[var(--available-height)] overflow-y-auto p-0" align="start">
+                            <PopoverContent className="max-h-[300px] overflow-y-auto p-0" style={{ width: "var(--anchor-width)" }} align="start">
                               <Command>
                                 <CommandInput 
                                   placeholder="Type action..." 

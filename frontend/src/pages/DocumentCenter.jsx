@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 
 import axios from "axios";
-
+import { Eye, Download, Edit, RefreshCcw, Trash2 } from "lucide-react";
   import DashboardLayout from
   "../components/layout/DashboardLayout";
 
@@ -1192,20 +1192,15 @@ const fuzzyMatch = (text, query) => {
                         p-4
                       ">
 
-                      <div className="
-                        flex
-                        flex-wrap
-                        items-center
-                        gap-2
-                        min-w-[350px]
-                      ">
+                      <div className="flex flex-wrap items-center gap-1 justify-center min-w-fit">
 
                           {/* VIEW */}
                           <button
                             onClick={() => setViewingFile(file)}
-                            className="bg-primary text-primary-foreground px-4 py-2 rounded-xl text-sm hover:bg-primary/90 transition"
+                            className="p-2.5 rounded-lg bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground transition flex items-center justify-center shadow-sm"
+                            title="View"
                           >
-                            View
+                            <Eye className="w-4 h-4" />
                           </button>
 
                         {!showTrash && (
@@ -1214,9 +1209,10 @@ const fuzzyMatch = (text, query) => {
                             <a
                               href={`http://localhost:5000/uploads/${file.file_name}`}
                               download
-                              className="bg-primary/80 text-primary-foreground px-4 py-2 rounded-xl text-sm hover:bg-primary/90 transition"
+                              className="p-2.5 rounded-lg bg-accent/20 text-yellow-700 hover:bg-accent hover:text-accent-foreground transition flex items-center justify-center shadow-sm"
+                              title="Download"
                             >
-                              Download
+                              <Download className="w-4 h-4" />
                             </a>
 
                             {/* EDIT */}
@@ -1227,12 +1223,11 @@ const fuzzyMatch = (text, query) => {
                                 setEditDocumentType(file.document_type);
                                 setEditStatus(file.status || "Active");
                               }}
-                              className="bg-accent text-accent-foreground px-4 py-2 rounded-xl text-sm hover:bg-accent/90 transition"
+                              className="p-2.5 rounded-lg bg-accent/20 text-yellow-700 hover:bg-accent hover:text-accent-foreground transition flex items-center justify-center shadow-sm"
+                              title="Edit"
                             >
-                              Edit
+                              <Edit className="w-4 h-4" />
                             </button>
-
-                      
                           </>
                         )}
 
@@ -1240,22 +1235,22 @@ const fuzzyMatch = (text, query) => {
                               {showTrash && (
                                 <button
                                   onClick={() => handleQuickStatus(file.id, "Active")}
-                                  className="bg-primary text-primary-foreground px-4 py-2 rounded-xl text-sm hover:bg-primary/90 transition"
+                                  className="p-2.5 rounded-lg bg-green-100 text-green-700 hover:bg-green-600 hover:text-white transition flex items-center justify-center shadow-sm"
+                                  title="Restore"
                                 >
-                                  Restore
+                                  <RefreshCcw className="w-4 h-4" />
                                 </button>
                               )}
-
-
 
                             {/* DELETE */}
                             <button
                               onClick={() =>
                                 showTrash ? handlePermanentDelete(file.id) : handleDelete(file.id)
                               }
-                              className="bg-destructive text-destructive-foreground px-4 py-2 rounded-xl text-sm hover:bg-destructive/90 transition"
+                              className="p-2.5 rounded-lg bg-destructive/10 text-destructive hover:bg-destructive hover:text-destructive-foreground transition flex items-center justify-center shadow-sm"
+                              title="Delete"
                             >
-                              Delete
+                              <Trash2 className="w-4 h-4" />
                             </button>
 
                           </div>
@@ -1465,50 +1460,7 @@ const fuzzyMatch = (text, query) => {
 
                     </div>
 
-                    {/* DYNAMIC DATA */}
-                    {
-                      viewingFile.dynamic_data &&
-
-                      Object.entries(
-                        viewingFile.dynamic_data
-                      ).map(
-
-                        ([key, value]) => (
-
-                          <div
-                            key={key}
-                          >
-
-                            <p className="
-                              text-gray-500
-                              text-sm
-                              capitalize
-                            ">
-
-                              {
-                                key
-                                  .replaceAll(
-                                    "_",
-                                    " "
-                                  )
-                              }
-
-                            </p>
-
-                            <p className="
-                              font-semibold
-                            ">
-
-                              {value}
-
-                            </p>
-
-                          </div>
-
-                        )
-
-                      )
-                    }
+                    {/* DYNAMIC DATA IS RENDERED IN THE TABLE TEMPLATE ON THE RIGHT */}
 
                   </div>
 
@@ -2242,61 +2194,27 @@ const fuzzyMatch = (text, query) => {
                 ">
 
                   <a
-                    href={
-                      `http://localhost:5000/uploads/${viewingFile.file_name}`
-                    }
+                    href={`http://localhost:5000/uploads/${viewingFile.file_name}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="
-                      bg-blue-500
-                      text-white
-                      px-5
-                      py-3
-                      rounded-xl
-                    "
+                    className="bg-primary text-primary-foreground hover:bg-primary/90 transition px-5 py-3 rounded-xl font-medium shadow-sm"
                   >
-
                     Open File
-
                   </a>
 
                   <a
-                    href={
-                      `http://localhost:5000/uploads/${viewingFile.file_name}`
-                    }
+                    href={`http://localhost:5000/uploads/${viewingFile.file_name}`}
                     download
-                    className="
-                      bg-green-500
-                      text-white
-                      px-5
-                      py-3
-                      rounded-xl
-                    "
+                    className="bg-accent/20 text-yellow-700 hover:bg-accent hover:text-accent-foreground transition px-5 py-3 rounded-xl font-medium shadow-sm"
                   >
-
                     Download
-
                   </a>
 
                   <button
-
-                    onClick={() =>
-                      setViewingFile(
-                        null
-                      )
-                    }
-
-                    className="
-                      bg-gray-300
-                      text-black
-                      px-5
-                      py-3
-                      rounded-xl
-                    "
+                    onClick={() => setViewingFile(null)}
+                    className="bg-gray-100 text-gray-700 border border-gray-200 hover:bg-gray-200 transition px-5 py-3 rounded-xl font-medium shadow-sm"
                   >
-
                     Close
-
                   </button>
 
                 </div>

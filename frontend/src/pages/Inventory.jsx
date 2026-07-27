@@ -277,6 +277,33 @@ function Inventory() {
                   )}
                 </TableBody>
               </Table>
+              {/* CABINETS PAGINATION CONTROLS */}
+              {totalCabinetPages > 1 && (
+                <div className="flex flex-col sm:flex-row items-center justify-between px-4 py-4 border-t border-gray-100 bg-white gap-4">
+                  <div className="text-sm text-gray-500 text-center sm:text-left">
+                    Showing <span className="font-medium text-gray-900">{indexOfFirstCabinet + 1}</span> to <span className="font-medium text-gray-900">{Math.min(indexOfLastCabinet, cabinets.length)}</span> of <span className="font-medium text-gray-900">{cabinets.length}</span> results
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setCabinetPage(prev => Math.max(prev - 1, 1))}
+                      disabled={cabinetPage === 1}
+                      className="px-4 py-2 text-sm border rounded-lg disabled:opacity-50 hover:bg-gray-50 transition font-medium text-gray-700"
+                    >
+                      Previous
+                    </button>
+                    <div className="text-sm text-gray-600 font-medium px-2">
+                      Page {cabinetPage} of {totalCabinetPages}
+                    </div>
+                    <button
+                      onClick={() => setCabinetPage(prev => Math.min(prev + 1, totalCabinetPages))}
+                      disabled={cabinetPage === totalCabinetPages}
+                      className="px-4 py-2 text-sm border rounded-lg disabled:opacity-50 hover:bg-gray-50 transition font-medium text-gray-700"
+                    >
+                      Next
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </Card>
         </div>

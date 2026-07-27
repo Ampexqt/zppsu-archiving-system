@@ -19,6 +19,7 @@ function Inventory() {
   const [isCabinetModalOpen, setIsCabinetModalOpen] = useState(false);
   const [cabinetName, setCabinetName] = useState("");
   const [cabinetCapacity, setCabinetCapacity] = useState("");
+  const [cabinetPage, setCabinetPage] = useState(1);
 
   // File Boxes State
   const [fileBoxes, setFileBoxes] = useState([]);
@@ -26,6 +27,9 @@ function Inventory() {
   const [fileBoxName, setFileBoxName] = useState("");
   const [selectedCabinetId, setSelectedCabinetId] = useState("");
   const [fileBoxCapacity, setFileBoxCapacity] = useState("");
+  const [fileBoxPage, setFileBoxPage] = useState(1);
+  
+  const [itemsPerPage] = useState(10);
 
   // View Files Modal
   const [selectedFiles, setSelectedFiles] = useState([]);
@@ -135,6 +139,16 @@ function Inventory() {
     setIsFilesModalOpen(true);
   };
 
+  const indexOfLastCabinet = cabinetPage * itemsPerPage;
+  const indexOfFirstCabinet = indexOfLastCabinet - itemsPerPage;
+  const currentCabinets = cabinets.slice(indexOfFirstCabinet, indexOfLastCabinet);
+  const totalCabinetPages = Math.ceil(cabinets.length / itemsPerPage);
+
+  const indexOfLastBox = fileBoxPage * itemsPerPage;
+  const indexOfFirstBox = indexOfLastBox - itemsPerPage;
+  const currentFileBoxes = fileBoxes.slice(indexOfFirstBox, indexOfLastBox);
+  const totalFileBoxPages = Math.ceil(fileBoxes.length / itemsPerPage);
+
   return (
     <DashboardLayout>
       {/* HEADER */}
@@ -226,7 +240,7 @@ function Inventory() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {cabinets.map((cabinet) => (
+                  {currentCabinets.map((cabinet) => (
                     <TableRow key={cabinet.id} className="border-b">
                       <TableCell className="p-5 font-bold">{cabinet.name}</TableCell>
                       <TableCell className="p-5">{cabinet.capacity}</TableCell>
@@ -344,7 +358,7 @@ function Inventory() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {fileBoxes.map((box) => (
+                  {currentFileBoxes.map((box) => (
                     <TableRow key={box.id} className="border-b">
                       <TableCell className="p-5 font-bold">{box.name}</TableCell>
                       <TableCell className="p-5 text-gray-500">{box.cabinet?.name || "Unassigned"}</TableCell>
@@ -391,6 +405,33 @@ function Inventory() {
                   )}
                 </TableBody>
               </Table>
+              {/* FILE BOXES PAGINATION CONTROLS */}
+              {totalFileBoxPages > 1 && (
+                <div className="flex flex-col sm:flex-row items-center justify-between px-4 py-4 border-t border-gray-100 bg-white gap-4">
+                  <div className="text-sm text-gray-500 text-center sm:text-left">
+                    Showing <span className="font-medium text-gray-900">{indexOfFirstBox + 1}</span> to <span className="font-medium text-gray-900">{Math.min(indexOfLastBox, fileBoxes.length)}</span> of <span className="font-medium text-gray-900">{fileBoxes.length}</span> results
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setFileBoxPage(prev => Math.max(prev - 1, 1))}
+                      disabled={fileBoxPage === 1}
+                      className="px-4 py-2 text-sm border rounded-lg disabled:opacity-50 hover:bg-gray-50 transition font-medium text-gray-700"
+                    >
+                      Previous
+                    </button>
+                    <div className="text-sm text-gray-600 font-medium px-2">
+                      Page {fileBoxPage} of {totalFileBoxPages}
+                    </div>
+                    <button
+                      onClick={() => setFileBoxPage(prev => Math.min(prev + 1, totalFileBoxPages))}
+                      disabled={fileBoxPage === totalFileBoxPages}
+                      className="px-4 py-2 text-sm border rounded-lg disabled:opacity-50 hover:bg-gray-50 transition font-medium text-gray-700"
+                    >
+                      Next
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </Card>
         </div>

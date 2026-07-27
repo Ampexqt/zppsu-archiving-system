@@ -158,14 +158,6 @@ import { Eye, Download, Edit, RefreshCcw, Trash2 } from "lucide-react";
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage] = useState(10);
 
-      const suggestions = [
-    "Archived",
-    "Active",
-    "Annual Reports",
-    "Board Resolutions",
-    "AACCUP",
-    "CSC Circulars",
-  ];
 
     const [selectedYear,
       setSelectedYear] =
@@ -1002,61 +994,7 @@ const fuzzyMatch = (text, query) => {
 
                   </button>
 
-              {/* PRINT */}
-              <button
-                onClick={() => window.print()}
-                className="bg-primary text-primary-foreground px-5 py-3 rounded-xl hover:bg-primary/90 transition"
-              >
-                Print
-              </button>
-
               </div>
-
-              {
-                  !search && (
-
-                    <div
-                      className="
-                        flex
-                        flex-wrap
-                        gap-2
-                        mt-4
-                      "
-                    >
-
-                      {
-                        suggestions.map((item)=>(
-
-                          <button
-                            key={item}
-                            onClick={() =>
-                              setSearch(item)
-                            }
-
-                            className="
-                              px-3
-                              py-1
-                              rounded-full
-                              bg-primary/5
-                              text-primary
-                              border border-primary/20
-                              hover:bg-primary/10
-                              transition
-                              text-sm
-                            "
-                          >
-
-                            {item}
-
-                          </button>
-
-                        ))
-                      }
-
-                    </div>
-
-                  )
-                }
 
                 </div>
 
@@ -2481,39 +2419,6 @@ const fuzzyMatch = (text, query) => {
 
           )
         }
-
-        {/* PRINT STYLE */}
-        <style>
-
-        {`
-        @media print {
-
-          body * {
-            visibility: hidden;
-          }
-
-          #print-area,
-          #print-area * {
-            visibility: visible;
-          }
-
-          #print-area {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-          }
-
-          button,
-          input,
-          select {
-            display: none !important;
-          }
-
-        }
-        `}
-
-        </style>
 
       </DashboardLayout>
     );

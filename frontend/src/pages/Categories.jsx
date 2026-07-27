@@ -178,72 +178,50 @@ const handleDeleteCategory =
       </div>
 
       {/* CATEGORY TABLE */}
-      <Card className="overflow-hidden">
+      <Card className="border border-gray-100 shadow-sm hover:shadow-md transition-shadow overflow-hidden rounded-2xl">
         <div className="overflow-x-auto">
           <Table className="w-full">
-            <TableHeader>
-              <TableRow>
-                <TableHead className="text-left p-5">
-                  Category Name
-                </TableHead>
-                <TableHead className="text-left p-5">
-                  Date Created
-                </TableHead>
-                <TableHead className="p-5">
-                  Actions
-                </TableHead>
+            <TableHeader className="bg-gray-50/50">
+              <TableRow className="border-b border-gray-100">
+                <TableHead className="text-left font-semibold text-gray-600 p-5 w-1/2">Category Name</TableHead>
+                <TableHead className="text-left font-semibold text-gray-600 p-5">Date Created</TableHead>
+                <TableHead className="text-left font-semibold text-gray-600 p-5 w-24">Actions</TableHead>
               </TableRow>
             </TableHeader>
-
             <TableBody>
-
-    {categories.map(
-      (category) => (
-
-        <TableRow
-          key={category.id}
-          className="border-b"
-        >
-
-          <TableCell className="p-5">
-            {category.name}
-          </TableCell>
-
-          <TableCell className="p-5">
-
-            {new Date(
-              category.created_at
-            ).toLocaleDateString()}
-
-          </TableCell>
-
-          <TableCell className="p-5 text-center">
-            <button
-
-              onClick={() =>
-                handleDeleteCategory(
-                  category.id
-                )
-              }
-
-              className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-full transition"
-              title="Delete Category"
-            >
-              <Trash2 className="w-5 h-5" />
-            </button>
-
-          </TableCell>
-
-        </TableRow>
-      )
-    )}
-
-  </TableBody>
-
+              {categories.map((category) => (
+                <TableRow key={category.id} className="border-b border-gray-50 hover:bg-gray-50/80 transition-colors">
+                  <TableCell className="p-5 font-semibold text-gray-900">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold shadow-sm">
+                        {category.name.charAt(0).toUpperCase()}
+                      </div>
+                      {category.name}
+                    </div>
+                  </TableCell>
+                  <TableCell className="p-5 text-gray-500 font-medium">
+                    {new Date(category.created_at).toLocaleDateString("en-US", { year: 'numeric', month: 'short', day: 'numeric' })}
+                  </TableCell>
+                  <TableCell className="p-5">
+                    <button
+                      onClick={() => handleDeleteCategory(category.id)}
+                      className="p-2 text-gray-400 hover:text-destructive hover:bg-destructive/10 rounded-lg transition-all"
+                      title="Delete Category"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
           </Table>
+          {categories.length === 0 && (
+            <div className="text-center py-12 text-gray-400 font-medium">
+              No categories found. Create one to get started!
+            </div>
+          )}
         </div>
       </Card>
-
     </DashboardLayout>
   );
 }

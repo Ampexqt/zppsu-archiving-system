@@ -15,6 +15,14 @@ function Logs() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
+  // Pagination States
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchEmail, selectedAction, startDate, endDate]);
+
   const fetchLogs = async () => {
     try {
       const response = await axios.get("http://localhost:5000/api/logs");
@@ -57,6 +65,12 @@ function Logs() {
 
   // Unique Actions for Dropdown
   const uniqueActions = [...new Set(logs.map(log => log.action))].sort();
+
+  // Pagination Logic
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentLogs = filteredLogs.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredLogs.length / itemsPerPage);
 
   // Export CSV
   const exportCSV = () => {
@@ -180,8 +194,8 @@ function Logs() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredLogs.length > 0 ? (
-                filteredLogs.map((log) => (
+              {currentLogs.length > 0 ? (
+                currentLogs.map((log) => (
                   <TableRow key={log.id} className="hover:bg-gray-50/50 transition-colors">
                     <TableCell className="px-6 py-4 font-medium">
                       {log.user?.email || (
@@ -217,6 +231,33 @@ function Logs() {
             </TableBody>
           </Table>
         </div>
+        {/* PAGINATION CONTROLS */}
+        {totalPages > 1 && (
+          <div className="flex flex-col sm:flex-row items-center justify-between px-4 py-4 border-t border-gray-100 bg-white gap-4">
+            <div className="text-sm text-gray-500 text-center sm:text-left">
+              Showing <span className="font-medium text-gray-900">{indexOfFirstItem + 1}</span> to <span className="font-medium text-gray-900">{Math.min(indexOfLastItem, filteredLogs.length)}</span> of <span className="font-medium text-gray-900">{filteredLogs.length}</span> results
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                className="px-4 py-2 text-sm border rounded-lg disabled:opacity-50 hover:bg-gray-50 transition font-medium text-gray-700"
+              >
+                Previous
+              </button>
+              <div className="text-sm text-gray-600 font-medium px-2">
+                Page {currentPage} of {totalPages}
+              </div>
+              <button
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages}
+                className="px-4 py-2 text-sm border rounded-lg disabled:opacity-50 hover:bg-gray-50 transition font-medium text-gray-700"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        )}
       </Card>
     </DashboardLayout>
   );

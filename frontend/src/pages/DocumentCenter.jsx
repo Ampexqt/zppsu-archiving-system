@@ -154,6 +154,9 @@ import { Eye, Download, Edit, RefreshCcw, Trash2 } from "lucide-react";
 
     const [search, setSearch] =
       useState("");
+      
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage] = useState(10);
 
       const suggestions = [
     "Archived",
@@ -242,6 +245,10 @@ import { Eye, Download, Edit, RefreshCcw, Trash2 } from "lucide-react";
       fetchFiles();
 
     }, []);
+
+    useEffect(() => {
+      setCurrentPage(1);
+    }, [search, selectedYear, selectedMonth, selectedStatus, selectedType, showTrash]);
 
     const trackAction = async (action, description) => {
       try {
@@ -715,6 +722,11 @@ const fuzzyMatch = (text, query) => {
     );
 };
 
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredFiles.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredFiles.length / itemsPerPage);
+
     return (
 
       <DashboardLayout>
@@ -1125,8 +1137,7 @@ const fuzzyMatch = (text, query) => {
 
                   ?(
           
-
-                filteredFiles.map((file) => {  
+                currentItems.map((file) => {
 
                 return (
                   
@@ -1307,6 +1318,34 @@ const fuzzyMatch = (text, query) => {
                 </TableBody>
 
               </Table>
+
+              {/* PAGINATION CONTROLS */}
+              {totalPages > 1 && (
+                <div className="flex flex-col sm:flex-row items-center justify-between px-4 py-4 border-t border-gray-100 bg-white gap-4">
+                  <div className="text-sm text-gray-500 text-center sm:text-left">
+                    Showing <span className="font-medium text-gray-900">{indexOfFirstItem + 1}</span> to <span className="font-medium text-gray-900">{Math.min(indexOfLastItem, filteredFiles.length)}</span> of <span className="font-medium text-gray-900">{filteredFiles.length}</span> results
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                      disabled={currentPage === 1}
+                      className="px-4 py-2 text-sm border rounded-lg disabled:opacity-50 hover:bg-gray-50 transition font-medium text-gray-700"
+                    >
+                      Previous
+                    </button>
+                    <div className="text-sm text-gray-600 font-medium px-2">
+                      Page {currentPage} of {totalPages}
+                    </div>
+                    <button
+                      onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                      disabled={currentPage === totalPages}
+                      className="px-4 py-2 text-sm border rounded-lg disabled:opacity-50 hover:bg-gray-50 transition font-medium text-gray-700"
+                    >
+                      Next
+                    </button>
+                  </div>
+                </div>
+              )}
 
             </div>
 

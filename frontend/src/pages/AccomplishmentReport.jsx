@@ -1,335 +1,185 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import axios from "axios";
+import { Printer, Download, Search } from "lucide-react";
+import DashboardLayout from "../components/layout/DashboardLayout";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import { FileText, Printer, Download } from "lucide-react";
-import DashboardLayout from "../components/layout/DashboardLayout";
 
 function AccomplishmentReport() {
+  const [reports, setReports] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const printRef = useRef();
 
-  const [report, setReport] = useState({
-    uploads: 0,
-    deletes: 0,
-    archives: 0,
-    restores: 0,
-    moves: 0,
-    generated: 0,
-  });
-
-  const [activities, setActivities] = useState([]);
-
-  const [startDate,
-  setStartDate] =
-  useState("");
-
-const [endDate,
-  setEndDate] =
-  useState("");
-
-  const fetchReport = async () => {
-
+  const fetchReports = async () => {
     try {
-
-      const token =
-        localStorage.getItem("token");
-
-      const res =
-  await axios.get(
-
-  `http://localhost:5000/api/accomplishment?startDate=${startDate}&endDate=${endDate}`,
-
-    {
-      headers: {
-        Authorization:
-          `Bearer ${token}`,
-      },
-    }
-  );
-
-setReport(res.data);
-
-setActivities(
-  res.data.recentActivities || []
-);
+      const token = localStorage.getItem("token");
+      const response = await axios.get("http://localhost:5000/api/files", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      // Filter only Accomplishment Reports
+      const accomplishmentReports = response.data.filter(
+        (file) => file.document_type === "ACCOMPLISHMENT REPORTS"
+      );
+      // Sort by newest first
+      accomplishmentReports.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      setReports(accomplishmentReports);
     } catch (error) {
-
       console.error(error);
-
     }
-
   };
 
-  const exportPDF = () => {
-
-  const doc = new jsPDF();
-
-  doc.setFontSize(18);
-
-  doc.text(
-    "ZPPSU Guidance Office",
-    14,
-    20
-  );
-
-  doc.setFontSize(16);
-
-  doc.text(
-    "Accomplishment Report",
-    14,
-    30
-  );
-
-  doc.setFontSize(11);
-
-  doc.text(
-    `Start Date: ${
-      startDate || "All"
-    }`,
-    14,
-    40
-  );
-
-  doc.text(
-    `End Date: ${
-      endDate || "All"
-    }`,
-    14,
-    48
-  );
-
-  autoTable(doc, {
-
-    startY: 60,
-
-    head: [[
-      "Metric",
-      "Count"
-    ]],
-
-    body: [
-
-      [
-        "Uploads",
-        report.uploads
-      ],
-
-      [
-        "Deletes",
-        report.deletes
-      ],
-
-      [
-        "Archives",
-        report.archives
-      ],
-
-      [
-        "Restores",
-        report.restores
-      ],
-
-      [
-        "Moves",
-        report.moves
-      ],
-
-      [
-        "Generated",
-        report.generated
-      ],
-
-    ],
-
-  });
-
-  autoTable(doc, {
-
-    startY:
-      doc.lastAutoTable.finalY + 15,
-
-    head: [[
-      "Action",
-      "Description",
-      "Date"
-    ]],
-
-    body:
-      activities.map(
-        (activity) => [
-
-          activity.action,
-
-          activity.description,
-
-          new Date(
-            activity.created_at
-          ).toLocaleString(),
-
-        ]
-      ),
-
-  });
-
-  doc.save(
-    "Accomplishment_Report.pdf"
-  );
-
-};
-
   useEffect(() => {
-
-    fetchReport();
-
+    fetchReports();
   }, []);
 
+  // Filter based on search query
+  const filteredReports = reports.filter((report) => {
+    const query = searchQuery.toLowerCase();
+    const data = report.dynamic_data || {};
+    return (
+      (data.subject && data.subject.toLowerCase().includes(query)) ||
+      (data.access_code && data.access_code.toLowerCase().includes(query)) ||
+      (data.file_location && data.file_location.toLowerCase().includes(query))
+    );
+  });
+
+  const handlePrint = () => {
+    const printContent = printRef.current;
+    const windowPrint = window.open('', '', 'left=0,top=0,width=800,height=900,toolbar=0,scrollbars=0,status=0');
+    windowPrint.document.write(`
+      <html>
+        <head>
+          <title>Print Masterlist</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 20px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            th, td { border: 1px solid black; padding: 12px; text-align: left; }
+            th { font-weight: bold; text-align: center; }
+            .header-title { border: 1px solid black; text-align: center; font-weight: bold; font-size: 22px; padding: 12px; }
+          </style>
+        </head>
+        <body>
+          ${printContent.innerHTML}
+        </body>
+      </html>
+    `);
+    windowPrint.document.close();
+    windowPrint.focus();
+    windowPrint.print();
+    windowPrint.close();
+  };
+
+  const handleExportPDF = () => {
+    const doc = new jsPDF();
+    
+    doc.setFontSize(14);
+    doc.text("MASTERLIST OF RECORDS FOR ACCOMPLISHMENT REPORTS", 14, 20);
+    
+    const tableData = filteredReports.map((file) => {
+      const data = file.dynamic_data || {};
+      return [
+        data.access_code || "",
+        data.subject || "",
+        data.file_location || ""
+      ];
+    });
+
+    autoTable(doc, {
+      startY: 30,
+      head: [["ACCESS CODE", "SUBJECT", "FILE LOCATION"]],
+      body: tableData,
+      theme: 'grid',
+      headStyles: { fillColor: [255, 255, 255], textColor: [0, 0, 0], lineWidth: 0.1, lineColor: [0, 0, 0], halign: 'center' },
+      bodyStyles: { lineWidth: 0.1, lineColor: [0, 0, 0] },
+    });
+
+    doc.save("Masterlist_Accomplishment_Reports.pdf");
+  };
+
   return (
-
     <DashboardLayout>
-
-      <h1 className="text-4xl font-bold mb-2">
-
-        Accomplishment Report
-
-      </h1>
-
-      <p className="text-gray-500 mb-8">
-
-        Records and activity summary
-
-      </p>
-
-      <div className="
-  bg-white
-  p-6
-  rounded-2xl
-  shadow-md
-  mb-8
-">
-
-  <div className="
-  flex
-  items-end
-  gap-4
-  flex-wrap
-">
-
-   <div>
-  <p className="text-sm font-medium mb-2">
-    Start Date
-  </p>
-
-  <input
-    type="date"
-    value={startDate}
-    onChange={(e) =>
-      setStartDate(e.target.value)
-    }
-    className="
-      border
-      p-3
-      rounded-xl
-      h-[58px]
-    "
-  />
-</div>
-
-<div>
-  <p className="text-sm font-medium mb-2">
-    End Date
-  </p>
-
-  <input
-    type="date"
-    value={endDate}
-    onChange={(e) =>
-      setEndDate(e.target.value)
-    }
-    className="
-      border
-      p-3
-      rounded-xl
-      h-[58px]
-    "
-  />
-</div>
-
-   <button
-  onClick={fetchReport}
-  className="flex items-center justify-center gap-2 h-[58px] bg-primary hover:bg-primary/90 text-primary-foreground px-6 rounded-xl font-medium transition"
->
-  <FileText className="w-5 h-5" /> Generate Report
-</button>
-
-<button
-  onClick={() => window.print()}
-  className="flex items-center justify-center gap-2 h-[58px] bg-primary/10 text-primary hover:bg-primary/20 px-6 rounded-xl font-medium transition"
->
-  <Printer className="w-5 h-5" /> Print
-</button>
-
-<button
-  onClick={exportPDF}
-  className="flex items-center justify-center gap-2 h-[58px] bg-primary/10 text-primary hover:bg-primary/20 px-6 rounded-xl font-medium transition"
->
-  <Download className="w-5 h-5" /> Export PDF
-</button>
-
-  </div>
-
-</div>
-
-      <div className="grid grid-cols-3 gap-6">
-
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-          <h3 className="text-sm font-medium text-muted-foreground">Uploads</h3>
-          <p className="text-4xl font-bold text-primary mt-2">
-            {report.uploads}
-          </p>
+      <div className="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h1 className="text-3xl font-extrabold tracking-tight text-gray-900">Accomplishment Reports</h1>
+          <p className="text-gray-500 font-medium">Manage and generate the masterlist of records.</p>
         </div>
-
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-          <h3 className="text-sm font-medium text-muted-foreground">Deletes</h3>
-          <p className="text-4xl font-bold text-accent mt-2">
-            {report.deletes}
-          </p>
-        </div>
-
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-          <h3 className="text-sm font-medium text-muted-foreground">Generated</h3>
-          <p className="text-4xl font-bold text-primary/80 mt-2">
-            {report.generated}
-          </p>
-        </div>
-
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-          <h3 className="text-sm font-medium text-muted-foreground">Restores</h3>
-          <p className="text-4xl font-bold text-accent/80 mt-2">
-            {report.restores}
-          </p>
-        </div>
-
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-          <h3 className="text-sm font-medium text-muted-foreground">Moves</h3>
-          <p className="text-4xl font-bold text-primary/60 mt-2">
-            {report.moves}
-          </p>
-        </div>
-
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-          <h3 className="text-sm font-medium text-muted-foreground">Archives</h3>
-          <p className="text-4xl font-bold text-muted-foreground mt-2">
-            {report.archives}
-          </p>
+        
+        <div className="flex gap-3">
+          <button 
+            onClick={handlePrint}
+            className="h-11 px-6 rounded-md bg-white border border-gray-200 text-gray-700 font-bold hover:bg-gray-50 transition flex items-center justify-center gap-2 shadow-sm"
+          >
+            <Printer className="w-4 h-4" /> Print
+          </button>
+          <button 
+            onClick={handleExportPDF}
+            className="h-11 px-6 rounded-md bg-accent text-accent-foreground font-bold hover:bg-accent/90 transition flex items-center justify-center gap-2 shadow-sm"
+          >
+            <Download className="w-4 h-4" /> Export PDF
+          </button>
         </div>
       </div>
 
+      <Card className="border-none shadow-sm mb-6">
+        <CardContent className="p-4">
+          <div className="relative max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <Input 
+              placeholder="Search masterlist..." 
+              className="pl-9 h-11 bg-gray-50 border-gray-200 focus-visible:ring-primary"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+        </CardContent>
+      </Card>
 
+      <Card className="border-none shadow-sm overflow-hidden bg-white">
+        <CardContent className="p-0 overflow-x-auto">
+          
+          {/* Printable Area */}
+          <div ref={printRef} className="p-8 min-w-[800px]">
+            <div style={{ border: "1px solid black", textAlign: "center", fontWeight: "bold", fontSize: "22px", padding: "12px", borderBottom: "none" }}>
+              MASTERLIST OF RECORDS FOR ACCOMPLISHMENT REPORTS
+            </div>
+            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+              <thead>
+                <tr>
+                  <th style={{ border: "1px solid black", padding: "12px", width: "20%", textAlign: "center" }}>ACCESS CODE</th>
+                  <th style={{ border: "1px solid black", padding: "12px", width: "50%", textAlign: "center" }}>SUBJECT</th>
+                  <th style={{ border: "1px solid black", padding: "12px", width: "30%", textAlign: "center" }}>FILE LOCATION</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredReports.length > 0 ? (
+                  filteredReports.map((file) => {
+                    const data = file.dynamic_data || {};
+                    return (
+                      <tr key={file.id}>
+                        <td style={{ border: "1px solid black", padding: "12px" }}>{data.access_code}</td>
+                        <td style={{ border: "1px solid black", padding: "12px" }}>{data.subject}</td>
+                        <td style={{ border: "1px solid black", padding: "12px" }}>{data.file_location}</td>
+                      </tr>
+                    );
+                  })
+                ) : (
+                  <tr>
+                    <td colSpan="3" style={{ border: "1px solid black", padding: "24px", textAlign: "center", color: "#666" }}>
+                      No records found.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
 
-
-
-
+        </CardContent>
+      </Card>
     </DashboardLayout>
-
   );
 }
 

@@ -1,5 +1,4 @@
-import { useEffect, useState }
-from "react";
+import { useEffect, useState } from "react";
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -8,496 +7,435 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 import axios from "axios";
-import { Plus, Trash2, FolderOpen } from "lucide-react";
+import { Plus, Trash2, FolderOpen, Box, Archive } from "lucide-react";
 
-import DashboardLayout
-from "../components/layout/DashboardLayout";
+import DashboardLayout from "../components/layout/DashboardLayout";
 
 function Inventory() {
+  const [activeTab, setActiveTab] = useState("cabinets");
 
-  const [
-    cabinetName,
-    setCabinetName
-  ] = useState("");
+  // Cabinets State
+  const [cabinets, setCabinets] = useState([]);
+  const [isCabinetModalOpen, setIsCabinetModalOpen] = useState(false);
+  const [cabinetName, setCabinetName] = useState("");
+  const [cabinetCapacity, setCabinetCapacity] = useState("");
 
-  const [
-    shelf,
-    setShelf
-  ] = useState("");
+  // File Boxes State
+  const [fileBoxes, setFileBoxes] = useState([]);
+  const [isFileBoxModalOpen, setIsFileBoxModalOpen] = useState(false);
+  const [fileBoxName, setFileBoxName] = useState("");
+  const [selectedCabinetId, setSelectedCabinetId] = useState("");
+  const [fileBoxCapacity, setFileBoxCapacity] = useState("");
 
-  const [
-    folderCount,
-    setFolderCount
-  ] = useState("");
+  // View Files Modal
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [isFilesModalOpen, setIsFilesModalOpen] = useState(false);
+  const [selectedViewTitle, setSelectedViewTitle] = useState("");
 
-  // VIEW FILES
-const [
-  selectedFiles,
-  setSelectedFiles
-] = useState([]);
-
-const [
-  selectedCabinet,
-  setSelectedCabinet
-] = useState("");
-
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const [
-    inventories,
-    setInventories
-  ] = useState([]);
-
-  const handleDeleteInventory =
-  async (inventoryId) => {
-
-    const confirmDelete =
-      window.confirm(
-        "Are you sure you want to delete this cabinet?"
-      );
-
-    if (!confirmDelete)
-      return;
-
+  // Fetch Data
+  const fetchData = async () => {
     try {
+      const token = localStorage.getItem("token");
+      
+      const cabinetsRes = await axios.get("http://localhost:5000/api/inventory/cabinets", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setCabinets(cabinetsRes.data);
 
-      await axios.delete(
-
-        `http://localhost:5000/api/inventory/${inventoryId}`
-
-      );
-
-      alert(
-        "Cabinet deleted successfully"
-      );
-
-      fetchInventories();
-
+      const fileBoxesRes = await axios.get("http://localhost:5000/api/inventory/file-boxes", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setFileBoxes(fileBoxesRes.data);
+      
     } catch (error) {
-
-      console.error(error);
-
-      alert(
-
-        error.response?.data?.message ||
-
-        "Delete failed"
-
-      );
-
-    }
-
-  };
-
-  // FETCH INVENTORY
-  const fetchInventories =
-    async () => {
-
-    try {
-
-      const response =
-        await axios.get(
-          "http://localhost:5000/api/inventory"
-        );
-
-      setInventories(
-        response.data
-      );
-
-    } catch (error) {
-
       console.error(error);
     }
   };
 
-  // LOAD DATA
   useEffect(() => {
-
-    fetchInventories();
-
+    fetchData();
   }, []);
 
-  
-  // VIEW CABINET FILES
-const handleViewFiles =
-  (inventory) => {
-
-    setSelectedCabinet(
-      inventory.cabinet_name
-    );
-
-    setSelectedFiles(
-      inventory.files || []
-    );
+  // CRUD Cabinets
+  const handleCreateCabinet = async () => {
+    if (!cabinetName || !cabinetCapacity) return alert("All fields are required");
+    try {
+      const token = localStorage.getItem("token");
+      await axios.post(
+        "http://localhost:5000/api/inventory/cabinets",
+        { name: cabinetName, capacity: parseInt(cabinetCapacity) },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      alert("Cabinet created successfully");
+      setCabinetName("");
+      setCabinetCapacity("");
+      setIsCabinetModalOpen(false);
+      fetchData();
+    } catch (error) {
+      console.error(error);
+      alert(error.response?.data?.message || "Failed to create cabinet");
+    }
   };
 
-  // CREATE INVENTORY
-  const handleCreateInventory =
-    async () => {
-
-    if (
-      !cabinetName ||
-      !shelf ||
-      !folderCount
-    ) {
-
-      return alert(
-        "All fields are required"
-      );
-    }
-
+  const handleDeleteCabinet = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this cabinet?")) return;
     try {
-
-      await axios.post(
-        "http://localhost:5000/api/inventory/create",
-        {
-          cabinet_name:
-            cabinetName,
-
-          shelf,
-
-          folder_count:
-            parseInt(folderCount),
-        }
-      );
-
-      alert(
-        "Inventory created successfully!"
-      );
-
-      // RESET
-      setCabinetName("");
-      setShelf("");
-      setFolderCount("");
-
-      // REFRESH
-      fetchInventories();
-      setIsModalOpen(false);
-
+      const token = localStorage.getItem("token");
+      await axios.delete(`http://localhost:5000/api/inventory/cabinets/${id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      alert("Cabinet deleted successfully");
+      fetchData();
     } catch (error) {
-
       console.error(error);
-
-      alert(
-        "Failed to create inventory"
-      );
+      alert(error.response?.data?.message || "Delete failed");
     }
+  };
+
+  // CRUD File Boxes
+  const handleCreateFileBox = async () => {
+    if (!fileBoxName || !selectedCabinetId || !fileBoxCapacity) return alert("All fields are required");
+    try {
+      const token = localStorage.getItem("token");
+      await axios.post(
+        "http://localhost:5000/api/inventory/file-boxes",
+        { name: fileBoxName, cabinet_id: selectedCabinetId, capacity: parseInt(fileBoxCapacity) },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      alert("File Box created successfully");
+      setFileBoxName("");
+      setSelectedCabinetId("");
+      setFileBoxCapacity("");
+      setIsFileBoxModalOpen(false);
+      fetchData();
+    } catch (error) {
+      console.error(error);
+      alert(error.response?.data?.message || "Failed to create file box");
+    }
+  };
+
+  const handleDeleteFileBox = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this file box?")) return;
+    try {
+      const token = localStorage.getItem("token");
+      await axios.delete(`http://localhost:5000/api/inventory/file-boxes/${id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      alert("File box deleted successfully");
+      fetchData();
+    } catch (error) {
+      console.error(error);
+      alert(error.response?.data?.message || "Delete failed");
+    }
+  };
+
+  const handleViewFiles = (title, filesArray) => {
+    setSelectedViewTitle(title);
+    setSelectedFiles(filesArray || []);
+    setIsFilesModalOpen(true);
   };
 
   return (
-
     <DashboardLayout>
-
       {/* HEADER */}
       <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-4xl font-bold">Inventory Management</h1>
-          <p className="text-gray-500 mt-2">Manage cabinets and storage</p>
+          <p className="text-gray-500 mt-2">Manage cabinets, file boxes, and physical storage</p>
         </div>
-        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-          <DialogTrigger asChild>
-            <button className="flex items-center justify-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90 px-5 h-11 rounded-lg font-medium transition shadow-sm">
-              <Plus className="w-4 h-4" />
-              Create Cabinet
-            </button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px] p-6 bg-white border border-gray-100 rounded-2xl shadow-xl">
-            <DialogHeader className="mb-4">
-              <DialogTitle className="text-xl font-bold text-gray-900">Create New Cabinet</DialogTitle>
-              <DialogDescription className="text-gray-500 text-sm mt-1">
-                Add a new physical or virtual storage cabinet.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="flex flex-col gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700">Cabinet Name</label>
-                <Input
-                  type="text"
-                  placeholder="e.g. Cabinet A"
-                  value={cabinetName}
-                  onChange={(e) => setCabinetName(e.target.value)}
-                  className="bg-gray-50/50 border-gray-200 focus-visible:ring-primary/20 h-11 px-4 rounded-xl text-base"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700">Shelf</label>
-                <Input
-                  type="text"
-                  placeholder="e.g. Top Shelf"
-                  value={shelf}
-                  onChange={(e) => setShelf(e.target.value)}
-                  className="bg-gray-50/50 border-gray-200 focus-visible:ring-primary/20 h-11 px-4 rounded-xl text-base"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700">Folder Capacity</label>
-                <Input
-                  type="number"
-                  placeholder="e.g. 50"
-                  value={folderCount}
-                  onChange={(e) => setFolderCount(e.target.value)}
-                  className="bg-gray-50/50 border-gray-200 focus-visible:ring-primary/20 h-11 px-4 rounded-xl text-base"
-                />
-              </div>
+      </div>
+
+      {/* TABS */}
+      <div className="flex gap-4 mb-6 border-b border-gray-200">
+        <button
+          onClick={() => setActiveTab("cabinets")}
+          className={`pb-4 px-2 font-medium text-lg transition ${activeTab === "cabinets" ? "text-primary border-b-2 border-primary" : "text-gray-500 hover:text-gray-700"}`}
+        >
+          <div className="flex items-center gap-2">
+            <Archive className="w-5 h-5" /> Cabinets
+          </div>
+        </button>
+        <button
+          onClick={() => setActiveTab("fileBoxes")}
+          className={`pb-4 px-2 font-medium text-lg transition ${activeTab === "fileBoxes" ? "text-primary border-b-2 border-primary" : "text-gray-500 hover:text-gray-700"}`}
+        >
+          <div className="flex items-center gap-2">
+            <Box className="w-5 h-5" /> File Boxes
+          </div>
+        </button>
+      </div>
+
+      {/* CABINETS SECTION */}
+      {activeTab === "cabinets" && (
+        <div className="space-y-6">
+          <div className="flex justify-end">
+            <Dialog open={isCabinetModalOpen} onOpenChange={setIsCabinetModalOpen}>
+              <DialogTrigger asChild>
+                <button className="flex items-center justify-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90 px-5 h-11 rounded-lg font-medium transition shadow-sm">
+                  <Plus className="w-4 h-4" /> Create Cabinet
+                </button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px] p-6 bg-white border border-gray-100 rounded-2xl shadow-xl">
+                <DialogHeader className="mb-4">
+                  <DialogTitle className="text-xl font-bold text-gray-900">Create New Cabinet</DialogTitle>
+                  <DialogDescription className="text-gray-500 text-sm mt-1">Add a new physical storage cabinet.</DialogDescription>
+                </DialogHeader>
+                <div className="flex flex-col gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-gray-700">Cabinet Name</label>
+                    <Input
+                      type="text"
+                      placeholder="e.g. Main Cabinet A"
+                      value={cabinetName}
+                      onChange={(e) => setCabinetName(e.target.value)}
+                      className="bg-gray-50/50 border-gray-200 focus-visible:ring-primary/20 h-11 px-4 rounded-xl text-base"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-gray-700">Capacity (Number of File Boxes)</label>
+                    <Input
+                      type="number"
+                      placeholder="e.g. 20"
+                      value={cabinetCapacity}
+                      onChange={(e) => setCabinetCapacity(e.target.value)}
+                      className="bg-gray-50/50 border-gray-200 focus-visible:ring-primary/20 h-11 px-4 rounded-xl text-base"
+                    />
+                  </div>
+                  <button
+                    onClick={handleCreateCabinet}
+                    className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90 h-11 rounded-xl font-semibold transition shadow-sm mt-2"
+                  >
+                    <Plus className="w-4 h-4" /> Create Cabinet
+                  </button>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
+
+          <Card className="overflow-hidden">
+            <div className="overflow-x-auto">
+              <Table className="w-full">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="text-left p-5">Cabinet Name</TableHead>
+                    <TableHead className="text-left p-5">File Boxes Capacity</TableHead>
+                    <TableHead className="text-left p-5">Used Space</TableHead>
+                    <TableHead className="text-left p-5">Storage Usage</TableHead>
+                    <TableHead className="text-left p-5">Status</TableHead>
+                    <TableHead className="p-5">Action</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {cabinets.map((cabinet) => (
+                    <TableRow key={cabinet.id} className="border-b">
+                      <TableCell className="p-5 font-bold">{cabinet.name}</TableCell>
+                      <TableCell className="p-5">{cabinet.capacity}</TableCell>
+                      <TableCell className="p-5">{cabinet.file_boxes?.length || 0}</TableCell>
+                      <TableCell className="p-5">
+                        <div className="w-40 bg-gray-200 rounded-full h-4 overflow-hidden">
+                          <div
+                            className={`h-4 rounded-full bg-primary`}
+                            style={{
+                              width: `${cabinet.capacity > 0 ? ((cabinet.file_boxes?.length || 0) / cabinet.capacity) * 100 : 0}%`,
+                            }}
+                          />
+                        </div>
+                        <p className="text-sm mt-1">{cabinet.file_boxes?.length || 0} / {cabinet.capacity}</p>
+                      </TableCell>
+                      <TableCell className="p-5">
+                        <span className="bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium">{cabinet.status}</span>
+                      </TableCell>
+                      <TableCell className="p-5">
+                        <button
+                          onClick={() => handleDeleteCabinet(cabinet.id)}
+                          className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-full transition"
+                          title="Delete Cabinet"
+                        >
+                          <Trash2 className="w-5 h-5" />
+                        </button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  {cabinets.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center p-8 text-gray-500">No cabinets found.</TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {/* FILE BOXES SECTION */}
+      {activeTab === "fileBoxes" && (
+        <div className="space-y-6">
+          <div className="flex justify-end">
+            <Dialog open={isFileBoxModalOpen} onOpenChange={setIsFileBoxModalOpen}>
+              <DialogTrigger asChild>
+                <button className="flex items-center justify-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90 px-5 h-11 rounded-lg font-medium transition shadow-sm">
+                  <Plus className="w-4 h-4" /> Create File Box
+                </button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px] p-6 bg-white border border-gray-100 rounded-2xl shadow-xl">
+                <DialogHeader className="mb-4">
+                  <DialogTitle className="text-xl font-bold text-gray-900">Create New File Box</DialogTitle>
+                  <DialogDescription className="text-gray-500 text-sm mt-1">Add a new file box inside a cabinet.</DialogDescription>
+                </DialogHeader>
+                <div className="flex flex-col gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-gray-700">File Box Name</label>
+                    <Input
+                      type="text"
+                      placeholder="e.g. Box 101"
+                      value={fileBoxName}
+                      onChange={(e) => setFileBoxName(e.target.value)}
+                      className="bg-gray-50/50 border-gray-200 focus-visible:ring-primary/20 h-11 px-4 rounded-xl text-base"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-gray-700">Assign to Cabinet</label>
+                    <select
+                      value={selectedCabinetId}
+                      onChange={(e) => setSelectedCabinetId(e.target.value)}
+                      className="w-full bg-gray-50/50 border border-gray-200 focus-visible:ring-primary/20 h-11 px-4 rounded-xl text-base outline-none"
+                    >
+                      <option value="">Select a Cabinet</option>
+                      {cabinets.map(cab => (
+                        <option key={cab.id} value={cab.id}>{cab.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-gray-700">Capacity (Number of Files)</label>
+                    <Input
+                      type="number"
+                      placeholder="e.g. 100"
+                      value={fileBoxCapacity}
+                      onChange={(e) => setFileBoxCapacity(e.target.value)}
+                      className="bg-gray-50/50 border-gray-200 focus-visible:ring-primary/20 h-11 px-4 rounded-xl text-base"
+                    />
+                  </div>
+                  <button
+                    onClick={handleCreateFileBox}
+                    className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90 h-11 rounded-xl font-semibold transition shadow-sm mt-2"
+                  >
+                    <Plus className="w-4 h-4" /> Create File Box
+                  </button>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
+
+          <Card className="overflow-hidden">
+            <div className="overflow-x-auto">
+              <Table className="w-full">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="text-left p-5">File Box Name</TableHead>
+                    <TableHead className="text-left p-5">Cabinet Location</TableHead>
+                    <TableHead className="text-left p-5">Files Capacity</TableHead>
+                    <TableHead className="text-left p-5">Used Space</TableHead>
+                    <TableHead className="text-left p-5">Storage Usage</TableHead>
+                    <TableHead className="text-left p-5">Status</TableHead>
+                    <TableHead className="p-5">Files</TableHead>
+                    <TableHead className="p-5">Action</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {fileBoxes.map((box) => (
+                    <TableRow key={box.id} className="border-b">
+                      <TableCell className="p-5 font-bold">{box.name}</TableCell>
+                      <TableCell className="p-5 text-gray-500">{box.cabinet?.name || "Unassigned"}</TableCell>
+                      <TableCell className="p-5">{box.capacity}</TableCell>
+                      <TableCell className="p-5">{box.used_space}</TableCell>
+                      <TableCell className="p-5">
+                        <div className="w-40 bg-gray-200 rounded-full h-4 overflow-hidden">
+                          <div
+                            className={`h-4 rounded-full bg-primary`}
+                            style={{
+                              width: `${box.capacity > 0 ? (box.used_space / box.capacity) * 100 : 0}%`,
+                            }}
+                          />
+                        </div>
+                        <p className="text-sm mt-1">{box.used_space} / {box.capacity}</p>
+                      </TableCell>
+                      <TableCell className="p-5">
+                        <span className="bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium">{box.status}</span>
+                      </TableCell>
+                      <TableCell className="p-5">
+                        <button
+                          onClick={() => handleViewFiles(box.name, box.files)}
+                          className="flex items-center gap-2 bg-primary/10 text-primary hover:bg-primary/20 px-4 py-2 rounded-lg transition"
+                          title="View Files"
+                        >
+                          <FolderOpen className="w-4 h-4" /> View
+                        </button>
+                      </TableCell>
+                      <TableCell className="p-5">
+                        <button
+                          onClick={() => handleDeleteFileBox(box.id)}
+                          className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-full transition"
+                          title="Delete File Box"
+                        >
+                          <Trash2 className="w-5 h-5" />
+                        </button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  {fileBoxes.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={8} className="text-center p-8 text-gray-500">No file boxes found.</TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {/* VIEW FILES MODAL */}
+      {isFilesModalOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white w-full max-w-3xl rounded-2xl p-4 sm:p-6 max-h-[80vh] flex flex-col">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold">{selectedViewTitle} Files</h2>
               <button
-                onClick={handleCreateInventory}
-                className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90 h-11 rounded-xl font-semibold transition shadow-sm mt-2"
+                onClick={() => {
+                  setSelectedFiles([]);
+                  setSelectedViewTitle("");
+                  setIsFilesModalOpen(false);
+                }}
+                className="bg-destructive hover:bg-destructive/90 text-destructive-foreground px-4 py-2 rounded-lg transition"
               >
-                <Plus className="w-4 h-4" />
-                Create Cabinet
+                Close
               </button>
             </div>
-          </DialogContent>
-        </Dialog>
-      </div>
-
-      {/* INVENTORY TABLE */}
-      <Card className="overflow-hidden">
-        <div className="overflow-x-auto">
-          <Table className="w-full">
-          {/* HEADER */}
-          <TableHeader>
-
-            <TableRow>
-
-              <TableHead className="text-left p-5">
-                Cabinet
-              </TableHead>
-
-              <TableHead className="text-left p-5">
-                Shelf
-              </TableHead>
-
-              <TableHead className="text-left p-5">
-                Folder Capacity
-              </TableHead>
-
-
-            <TableHead className="text-left p-5">
-                Used Space
-                </TableHead>
-
-            <TableHead className="text-left p-5">
-                Storage
-                </TableHead>
-
-              <TableHead className="text-left p-5">
-                Status
-              </TableHead>
-
-            <TableHead className="p-5">
-                  Files
-                </TableHead>
-
-                <TableHead className="p-5">
-                  Action
-                </TableHead>
-              </TableRow>
-
-          </TableHeader>
-
-          {/* BODY */}
-          <TableBody>
-
-            {inventories.map(
-              (inventory) => (
-
-                <TableRow
-                  key={inventory.id}
-                  className="border-b"
-                >
-
-                  <TableCell className="p-5">
-
-                    {
-                      inventory.cabinet_name
-                    }
-
-                  </TableCell>
-
-                  <TableCell className="p-5">
-
-                    {inventory.shelf}
-
-                  </TableCell>
-
-                  <TableCell className="p-5">
-
-                    {
-                      inventory.folder_count
-                    }
-
-                  </TableCell>
-
-                 <TableCell className="p-5">
-
-                    {
-                        inventory.used_space
-                    }
-
-                    </TableCell>
-
-
-                    <TableCell className="p-5">
-
-                    <div className="w-40 bg-gray-200 rounded-full h-4 overflow-hidden">
-
-                        <div
-                        className={`h-4 rounded-full bg-primary`}
-                        style={{
-
-                            width: `${
-                            (
-                                inventory.used_space /
-
-                                inventory.folder_count
-                            ) * 100
-                            }%`,
-                        }}
-                        />
-
-                    </div>
-
-                    <p className="text-sm mt-1">
-
-                        {
-                        inventory.used_space
-                        } /
-
-                        {
-                        inventory.folder_count
-                        }
-
-                    </p>
-
-                    </TableCell>
-
-
-
-                  <TableCell className="p-5">
-
-                    <span className="bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium">
-
-                      {inventory.status}
-
-                    </span>
-
-                  </TableCell>
-                
-                <TableCell className="p-5">
-
-                    <button
-                      onClick={() => handleViewFiles(inventory)}
-                      className="flex items-center gap-2 bg-primary/10 text-primary hover:bg-primary/20 px-4 py-2 rounded-lg transition"
-                      title="View Files"
-                    >
-                      <FolderOpen className="w-4 h-4" /> View
-                    </button>
-
-                  </TableCell>
-
-                  <TableCell className="p-5">
-
-                    <button
-                      onClick={() =>
-                        handleDeleteInventory(
-                          inventory.id
-                        )
-                      }
-                      className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-full transition"
-                      title="Delete Cabinet"
-                    >
-                      <Trash2 className="w-5 h-5" />
-                    </button>
-
-                  </TableCell>
-                </TableRow>
-              )
-            )}
-
-          </TableBody>
-
-        </Table>
-        </div>
-      </Card>
-
-      {/* FILES MODAL */}
-  {
-  selectedFiles.length > 0 && (
-
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-
-        <div className="bg-white w-full max-w-3xl rounded-2xl p-4 sm:p-6 max-h-[80vh] overflow-y-auto">
-
-          <div className="flex items-center justify-between mb-6">
-
-            <h2 className="text-2xl font-bold">
-
-              {
-                selectedCabinet
-              } Files
-
-            </h2>
-
-            <button
-              onClick={() => {
-
-                setSelectedFiles([]);
-
-                setSelectedCabinet("");
-
-              }}
-              className="bg-destructive hover:bg-destructive/90 text-destructive-foreground px-4 py-2 rounded-lg transition"
-            >
-
-              Close
-
-            </button>
-
-          </div>
-
-          <div className="space-y-4">
-
-            {
-              selectedFiles.map(
-                (file) => (
-
-                  <div
-                    key={file.id}
-                    className="border border-gray-200 rounded-xl p-4"
-                  >
-
-                    <h3 className="font-bold">
-                      {file.title}
-                    </h3>
-
-                    <p className="text-gray-500 text-sm">
-                      {file.file_name}
-                    </p>
-
+            <div className="space-y-4 overflow-y-auto flex-1 pr-2">
+              {selectedFiles.map((file) => (
+                <div key={file.id} className="border border-gray-200 rounded-xl p-4 flex justify-between items-center">
+                  <div>
+                    <h3 className="font-bold text-gray-900">{file.subject || file.title}</h3>
+                    <p className="text-gray-500 text-sm">{file.file_name || file.document_id}</p>
                   </div>
-                )
-              )
-            }
-
-            {
-              selectedFiles.length === 0 && (
-
-                <p>
-                  No files found
-                </p>
-              )
-            }
-
+                  <Badge variant="outline">{file.document_type}</Badge>
+                </div>
+              ))}
+              {selectedFiles.length === 0 && (
+                <div className="text-center py-12 text-gray-500 bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                  <FolderOpen className="w-12 h-12 mx-auto text-gray-300 mb-3" />
+                  <p>No files found in this container.</p>
+                </div>
+              )}
+            </div>
           </div>
-
         </div>
+      )}
 
-      </div>
-    )
-  }
+    </DashboardLayout>
+  );
+}
 
-      </DashboardLayout>
-    );
-  }
-  export default Inventory;
+export default Inventory;

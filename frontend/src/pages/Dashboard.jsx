@@ -242,9 +242,9 @@ function Dashboard() {
           <CardContent className="flex-1">
             <div className="space-y-5 max-h-[180px] overflow-y-auto pr-4 custom-scrollbar">
               {cabinetUsage.map((cabinet) => {
-                const totalUsed = cabinet.file_boxes ? cabinet.file_boxes.length : 0;
-                const capacity = cabinet.capacity || 1;
-                const percentage = Math.round((totalUsed / capacity) * 100);
+                const totalUsed = cabinet.file_boxes ? cabinet.file_boxes.reduce((sum, box) => sum + (box.used_space || 0), 0) : 0;
+                const totalCapacity = cabinet.file_boxes ? cabinet.file_boxes.reduce((sum, box) => sum + (box.capacity || 0), 0) : 0;
+                const percentage = totalCapacity > 0 ? Math.round((totalUsed / totalCapacity) * 100) : 0;
                 
                 return (
                   <div key={cabinet.id} className="space-y-2">
@@ -253,7 +253,7 @@ function Dashboard() {
                         <Box className="w-4 h-4 text-gray-400" />
                         {cabinet.name}
                       </span>
-                      <span className="text-muted-foreground font-bold">{totalUsed} <span className="font-medium text-muted-foreground">/ {cabinet.capacity} boxes</span> <span className="text-primary ml-1">({percentage}%)</span></span>
+                      <span className="text-muted-foreground font-bold">{totalUsed} <span className="font-medium text-muted-foreground">/ {totalCapacity} docs</span> <span className="text-primary ml-1">({percentage}%)</span></span>
                     </div>
                     <Progress value={percentage} className="h-2.5 bg-muted" />
                   </div>

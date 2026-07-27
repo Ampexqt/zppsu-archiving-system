@@ -311,162 +311,88 @@ const handleDemote =
       </div>
 
       {/* USERS TABLE */}
-      <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+      <Card className="border border-gray-100 shadow-sm hover:shadow-md transition-shadow overflow-hidden rounded-2xl">
         <div className="overflow-x-auto">
           <Table className="w-full">
-
-            {/* TABLE HEADER */}
-            <TableHeader>
-
-              <TableRow>
-
-                <TableHead className="text-left p-6">
-                  Full Name
-                </TableHead>
-
-                <TableHead className="text-left p-6">
-                  Email
-                </TableHead>
-
-                <TableHead className="text-left p-6">
-                  Role
-                </TableHead>
-
-                <TableHead className="text-left p-6">
-                  Created At
-                </TableHead>
-
-                <TableHead className="text-left p-6">
-                  Actions
-                </TableHead>
-
+            <TableHeader className="bg-gray-50/50">
+              <TableRow className="border-b border-gray-100">
+                <TableHead className="text-left font-semibold text-gray-600 p-5">Full Name</TableHead>
+                <TableHead className="text-left font-semibold text-gray-600 p-5">Email</TableHead>
+                <TableHead className="text-left font-semibold text-gray-600 p-5">Role</TableHead>
+                <TableHead className="text-left font-semibold text-gray-600 p-5">Created At</TableHead>
+                <TableHead className="text-left font-semibold text-gray-600 p-5">Actions</TableHead>
               </TableRow>
-
             </TableHeader>
-
-            {/* TABLE BODY */}
             <TableBody>
-
               {users.map((user) => (
-
-                <TableRow
-                  key={user.id}
-                  className="border-b border-gray-100 hover:bg-gray-50 transition"
-                >
-
+                <TableRow key={user.id} className="border-b border-gray-50 hover:bg-gray-50/80 transition-colors">
                   {/* NAME */}
-                  <TableCell className="p-6 font-medium">
-
-                    {user.name}
-
+                  <TableCell className="p-5">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold shadow-sm">
+                        {user.name ? user.name.charAt(0).toUpperCase() : "U"}
+                      </div>
+                      <span className="font-semibold text-gray-900">{user.name}</span>
+                    </div>
                   </TableCell>
 
                   {/* EMAIL */}
-                  <TableCell className="p-6">
-
+                  <TableCell className="p-5 text-gray-600">
                     {user.email}
-
                   </TableCell>
 
                   {/* ROLE */}
-                  <TableCell className="p-6">
-
-                    <span className="bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium">
-
+                  <TableCell className="p-5">
+                    <span className={`px-3 py-1 rounded-full text-xs font-bold tracking-wide shadow-sm ${
+                      user.role === "Admin" ? "bg-amber-100 text-amber-700 border border-amber-200" : "bg-blue-100 text-blue-700 border border-blue-200"
+                    }`}>
                       {user.role} 
-
                     </span>
-
                   </TableCell>
 
                   {/* CREATED AT */}
-                  <TableCell className="p-6">
-
-                    {new Date(
-                      user.created_at
-                    ).toLocaleDateString()}
-
+                  <TableCell className="p-5 text-gray-500 font-medium">
+                    {new Date(user.created_at).toLocaleDateString("en-US", { year: 'numeric', month: 'short', day: 'numeric' })}
                   </TableCell>
 
                   {/* ACTIONS */}
-                  <TableCell className="p-6">
-
+                  <TableCell className="p-5">
                     <div className="flex gap-2">
-
                       {user.role === "User" && (
-
                         <button
-
-                          onClick={() =>
-                            handlePromote(
-                              user.id
-                            )
-                          }
-
-                          className="p-2 text-muted-foreground hover:text-emerald-600 hover:bg-emerald-50 rounded-full transition"
-                          title="Promote User"
-
+                          onClick={() => handlePromote(user.id)}
+                          className="p-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all"
+                          title="Promote to Admin"
                         >
-
-                          <ArrowUpToLine className="w-5 h-5" />
-
+                          <ArrowUpToLine className="w-4 h-4" />
                         </button>
-
                       )}
 
-                      {user.role === "Admin" &&
-
-                        currentUser?.id !==
-                        user.id && (
-
+                      {user.role === "Admin" && currentUser?.id !== user.id && (
                         <button
-
-                          onClick={() =>
-                            handleDemote(
-                              user.id
-                            )
-                          }
-
-                          className="p-2 text-muted-foreground hover:text-accent hover:bg-accent/10 rounded-full transition"
-                          title="Demote User"
-
+                          onClick={() => handleDemote(user.id)}
+                          className="p-2 text-gray-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-all"
+                          title="Demote to User"
                         >
-
-                          <ArrowDownToLine className="w-5 h-5" />
-
+                          <ArrowDownToLine className="w-4 h-4" />
                         </button>
-
                       )}
 
                       <button
-
-                        onClick={() =>
-                          handleDelete(
-                            user.id
-                          )
-                        }
-
-                        className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-full transition"
-                          title="Delete User"
-
+                        onClick={() => handleDelete(user.id)}
+                        className="p-2 text-gray-400 hover:text-destructive hover:bg-destructive/10 rounded-lg transition-all"
+                        title="Delete User"
                       >
-
-                        <Trash2 className="w-5 h-5" />
-
+                        <Trash2 className="w-4 h-4" />
                       </button>
-
                     </div>
-
                   </TableCell>
                 </TableRow>
               ))}
-
             </TableBody>
-
           </Table>
         </div>
-      </div>
-
+      </Card>
     </DashboardLayout>
   );
 }

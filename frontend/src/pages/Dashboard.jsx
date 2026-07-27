@@ -71,6 +71,7 @@ function Dashboard() {
 
   const mostUsedDocument = Object.entries(documentTypeCounts).sort((a, b) => b[1] - a[1])[0];
   const recentUploads = files.slice(0, 5);
+  const recentAccomplishments = files.filter(f => f.document_type === "ACCOMPLISHMENT REPORTS").slice(0, 3);
 
   const statusData = [
     { name: "Active", value: activeDocuments },
@@ -371,6 +372,35 @@ function Dashboard() {
                 )}
               </tbody>
             </table>
+          </div>
+        </CardContent>
+      </Card>
+      
+      {/* RECENT ACCOMPLISHMENT REPORTS */}
+      <Card className="border-none shadow-sm mt-10">
+        <CardHeader>
+          <CardTitle>Recent Accomplishment Reports</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {recentAccomplishments.length > 0 ? (
+              recentAccomplishments.map(file => (
+                <div key={file.id} className="p-4 rounded-xl border border-gray-100 bg-gray-50 flex flex-col gap-2">
+                  <div className="flex items-center gap-2">
+                    <FileText className="w-5 h-5 text-primary" />
+                    <span className="font-bold text-gray-800 line-clamp-1">{file.subject || "Untitled Report"}</span>
+                  </div>
+                  <div className="text-sm text-gray-500">ID: {file.document_id}</div>
+                  <div className="text-xs font-semibold text-primary/80 mt-2">
+                    {new Date(file.created_at).toLocaleDateString()}
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="col-span-full py-8 text-center text-gray-500 italic">
+                No accomplishment reports uploaded yet.
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>

@@ -121,6 +121,11 @@ import { cn } from "@/lib/utils";
     setSelectedInventory
   ] = useState({});
 
+  const [
+    selectedFileBox,
+    setSelectedFileBox
+  ] = useState({});
+
   const [legacyFile, setLegacyFile] = useState(null);
   const [uploadingLegacy, setUploadingLegacy] = useState(false);
   const [selectedUploadCabinet, setSelectedUploadCabinet] = useState("");
@@ -1172,10 +1177,10 @@ import { cn } from "@/lib/utils";
         documentType
       ]?.fields || [];
 
-     const assignCabinet =
+     const assignFileBox =
 async (
   fileId,
-  inventoryId
+  fileBoxId
 ) => {
 
   try {
@@ -1190,8 +1195,8 @@ async (
       `http://localhost:5000/api/files/assign/${fileId}`,
 
       {
-        inventory_id:
-          inventoryId
+        file_box_id:
+          fileBoxId
       },
 
       {
@@ -1737,35 +1742,59 @@ await axios.post(
                 <TableCell className="p-4">{record.subject}</TableCell>
                 <TableCell className="p-4">{record.status}</TableCell>
                 <TableCell className="p-4">
-                  <select
-                    value={selectedInventory[record.id] || record.inventory_id || ""}
-                    onChange={(e) =>
-                      setSelectedInventory({
-                        ...selectedInventory,
-                        [record.id]: e.target.value,
-                      })
-                    }
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                  >
-                    <option value="">Select Cabinet</option>
-                    {inventories.map((inv) => (
-                      <option key={inv.id} value={inv.id}>
-                        {inv.cabinet_name}
-                      </option>
-                    ))}
-                  </select>
+                  <div className="flex gap-2">
+                    <select
+                      value={selectedInventory[record.id] || record.file_box?.cabinet?.id || ""}
+                      onChange={(e) => {
+                        setSelectedInventory({
+                          ...selectedInventory,
+                          [record.id]: e.target.value,
+                        });
+                        setSelectedFileBox({
+                          ...selectedFileBox,
+                          [record.id]: "",
+                        });
+                      }}
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    >
+                      <option value="">Select Cabinet</option>
+                      {inventories.map((inv) => (
+                        <option key={inv.id} value={inv.id}>
+                          {inv.name || inv.cabinet_name || `Cabinet ${inv.id}`}
+                        </option>
+                      ))}
+                    </select>
+
+                    <select
+                      value={selectedFileBox[record.id] || record.file_box_id || ""}
+                      onChange={(e) =>
+                        setSelectedFileBox({
+                          ...selectedFileBox,
+                          [record.id]: e.target.value,
+                        })
+                      }
+                      disabled={!(selectedInventory[record.id] || record.file_box?.cabinet?.id)}
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50"
+                    >
+                      <option value="">Select File Box</option>
+                      {inventories.find(inv => String(inv.id) === String(selectedInventory[record.id] || record.file_box?.cabinet?.id))?.file_boxes?.map(box => (
+                        <option key={box.id} value={box.id}>{box.name}</option>
+                      ))}
+                    </select>
+                  </div>
                 </TableCell>
                 <TableCell className="p-4">
                   <button
                     onClick={() =>
-                      assignCabinet(
+                      assignFileBox(
                         record.id,
-                        selectedInventory[record.id] || record.inventory_id
+                        selectedFileBox[record.id] || record.file_box_id
                       )
                     }
-                    className="bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90 transition text-sm font-medium"
+                    disabled={!(selectedFileBox[record.id] || record.file_box_id)}
+                    className="bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90 transition text-sm font-medium disabled:opacity-50"
                   >
-                    {record.inventory_id ? "Move" : "Assign"}
+                    {record.file_box_id ? "Move" : "Assign"}
                   </button>
                 </TableCell>
               </TableRow>

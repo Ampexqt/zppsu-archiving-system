@@ -36,9 +36,13 @@ const handleDeleteCategory =
       if (!confirmDelete)
         return;
 
+      const token = localStorage.getItem("token");
       await axios.delete(
 
-        `http://localhost:5000/api/categories/${id}`
+        `http://localhost:5000/api/categories/${id}`,
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
 
       );
 
@@ -64,10 +68,13 @@ const handleDeleteCategory =
     async () => {
 
     try {
-
+      const token = localStorage.getItem("token");
       const response =
         await axios.get(
-          "http://localhost:5000/api/categories"
+          "http://localhost:5000/api/categories",
+          {
+            headers: { Authorization: `Bearer ${token}` }
+          }
         );
 
       setCategories(
@@ -96,10 +103,13 @@ const handleDeleteCategory =
     }
 
     try {
-
+      const token = localStorage.getItem("token");
       await axios.post(
         "http://localhost:5000/api/categories",
-        { name }
+        { name },
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
       );
 
       alert(

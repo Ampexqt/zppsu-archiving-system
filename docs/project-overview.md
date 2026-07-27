@@ -21,8 +21,8 @@ The system caters to both modern born-digital files and scanned physical archive
 ### 3.2. Physical Storage & Inventory Mapping
 Unlike standard cloud drives, this system bridges the gap between physical and digital storage.
 - **Inventory Tracking:** The system manages physical `inventory` locations (Cabinets, Shelves, Folder counts, and Used space).
-- **Digital-to-Physical Assignment:** A digital record can be assigned a specific `inventory_id`, telling personnel exactly which physical cabinet and shelf the hard copy resides in.
-- **Capacity Monitoring:** Real-time tracking of cabinet usage and overall storage percentage limits.
+- **Digital-to-Physical Assignment:** A digital record can be assigned to a specific Cabinet and subsequently a specific File Box within that cabinet, ensuring precise physical location tracking.
+- **Capacity Monitoring:** Real-time tracking of cabinet usage based on the total document capacity and current occupancy of all its assigned file boxes, rather than just box counts.
 
 ### 3.3. Document Lifecycle & Retention Workflow
 Documents follow a strict lifecycle ensuring nothing is accidentally lost.
@@ -36,9 +36,8 @@ To maintain high standards of administrative productivity, the system tracks all
 - **Accomplishment Module:** Generates filtered reports based on date ranges (startDate, endDate) to summarize how many uploads, deletes, archives, or restores a specific department or the entire staff completed.
 - **Dashboard Analytics:** Displays real-time metrics including:
   - Total Files, Users, Categories, and Logs.
-  - Document distribution per category.
-  - Top Active Users based on their log count.
-  - Overall storage capacity usage.
+  - Visual breakdowns including a Pie Chart for documents grouped by main Categories and a Bar Chart for Document Status.
+  - Overall storage capacity usage and detailed Cabinet Usage monitoring based on exact document counts.
 
 ## 4. User Roles & Access Control
 - **Administrators (Admin):** Have global access to modify any file, manage users, perform permanent deletions, and view comprehensive system analytics.
@@ -54,5 +53,5 @@ To maintain high standards of administrative productivity, the system tracks all
 ## 6. Design Principles
 - **Simplicity First:** Avoid unnecessary decorations. Whitespace is heavily utilized to structure information logically.
 - **Document-Centric UI:** Documents receive the highest visual priority. Everything else serves to support document discovery and management.
-- **Information Hierarchy:** Strict visual separation between primary actions (Solid Maroon buttons), secondary actions, and metadata.
-- **Consistency:** Uniform styling across all pages regarding spacing, typography, and interactions.
+- **Information Hierarchy:** Strict visual separation between primary actions (Solid Maroon buttons), secondary actions, and metadata. Tables use distinct styling including colored status/role badges and user avatars for clear scannability.
+- **Consistency:** Uniform styling across all pages regarding spacing, typography, pagination (limited to 10 records per page to reduce clutter), and hover interactions.

@@ -233,15 +233,18 @@ function Dashboard() {
           <CardContent className="flex-1">
             <div className="space-y-5 max-h-[180px] overflow-y-auto pr-4 custom-scrollbar">
               {cabinetUsage.map((cabinet) => {
-                const percentage = Math.round((cabinet.files.length / cabinet.folder_count) * 100);
+                const totalUsed = cabinet.file_boxes ? cabinet.file_boxes.length : 0;
+                const capacity = cabinet.capacity || 1;
+                const percentage = Math.round((totalUsed / capacity) * 100);
+                
                 return (
                   <div key={cabinet.id} className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span className="font-bold text-gray-700 flex items-center gap-2">
                         <Box className="w-4 h-4 text-gray-400" />
-                        {cabinet.cabinet_name}
+                        {cabinet.name}
                       </span>
-                      <span className="text-muted-foreground font-bold">{cabinet.files.length} <span className="font-medium text-muted-foreground">/ {cabinet.folder_count}</span> <span className="text-primary ml-1">({percentage}%)</span></span>
+                      <span className="text-muted-foreground font-bold">{totalUsed} <span className="font-medium text-muted-foreground">/ {cabinet.capacity} boxes</span> <span className="text-primary ml-1">({percentage}%)</span></span>
                     </div>
                     <Progress value={percentage} className="h-2.5 bg-muted" />
                   </div>

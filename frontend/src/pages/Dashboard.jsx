@@ -62,6 +62,14 @@ function Dashboard() {
   const archivedDocuments = files.filter((file) => file.status === "Archived").length;
   const pendingDocuments = files.filter((file) => file.status === "Pending").length;
 
+  const categoryCounts = {};
+  files.forEach((file) => {
+    if (file.category) {
+      categoryCounts[file.category] = (categoryCounts[file.category] || 0) + 1;
+    }
+  });
+  const pieChartData = Object.entries(categoryCounts).map(([name, value]) => ({ name, value }));
+
   const documentTypeCounts = {};
   files.forEach((file) => {
     if (file.document_type) {
@@ -270,13 +278,23 @@ function Dashboard() {
           </CardHeader>
           <CardContent className="h-80">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={categoryChartData}>
-                <XAxis dataKey="category" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
-                <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
-                <Tooltip cursor={{fill: '#f3f4f6'}} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
-                <Bar dataKey="count" fill="#8B0000" radius={[4, 4, 0, 0]} />
-              </BarChart>
+              <PieChart>
+                <Pie data={pieChartData} cx="50%" cy="50%" innerRadius={80} outerRadius={110} paddingAngle={5} dataKey="value" nameKey="name">
+                  {pieChartData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+              </PieChart>
             </ResponsiveContainer>
+            <div className="flex justify-center gap-6 mt-4">
+              {pieChartData.map((entry, index) => (
+                <div key={entry.name} className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }} />
+                  <span className="text-sm font-medium text-gray-600">{entry.name}</span>
+                </div>
+              ))}
+            </div>
           </CardContent>
         </Card>
 
@@ -286,23 +304,13 @@ function Dashboard() {
           </CardHeader>
           <CardContent className="h-80">
             <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie data={statusData} cx="50%" cy="50%" innerRadius={80} outerRadius={110} paddingAngle={5} dataKey="value">
-                  {statusData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
-              </PieChart>
+              <BarChart data={statusData}>
+                <XAxis dataKey="name" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
+                <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
+                <Tooltip cursor={{fill: '#f3f4f6'}} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                <Bar dataKey="value" fill="#B22222" radius={[4, 4, 0, 0]} />
+              </BarChart>
             </ResponsiveContainer>
-            <div className="flex justify-center gap-6 mt-4">
-              {statusData.map((entry, index) => (
-                <div key={entry.name} className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[index] }} />
-                  <span className="text-sm font-medium text-gray-600">{entry.name}</span>
-                </div>
-              ))}
-            </div>
           </CardContent>
         </Card>
       </div>

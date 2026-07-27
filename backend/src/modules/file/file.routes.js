@@ -81,6 +81,8 @@ router.put(
 
       if (status === "Active" && is_deleted === false && file.is_deleted === true) {
         await logsService.createLog("RESTORE", `Restored ${updatedFile.document_type || 'File'}`, req.user.id);
+      } else {
+        await logsService.createLog("EDIT", `Edited ${updatedFile.document_type || 'File'} ${updatedFile.document_id}`, req.user.id);
       }
 
       res.json(updatedFile);

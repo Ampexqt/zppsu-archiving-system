@@ -243,6 +243,24 @@ import { Eye, Download, Edit, RefreshCcw, Trash2 } from "lucide-react";
 
     }, []);
 
+    const trackAction = async (action, description) => {
+      try {
+        const token = localStorage.getItem("token");
+        await axios.post("http://localhost:5000/api/logs/track", {
+          action,
+          description
+        }, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+      } catch (error) {
+        console.error("Failed to track action:", error);
+      }
+    };
+
+    const handleViewFile = (file) => {
+      setViewingFile(file);
+      trackAction("VIEW", `Viewed ${file.document_type || 'File'} ${file.document_id}`);
+    };
   
   // DELETE FILE
   const handleDelete =
@@ -1196,7 +1214,7 @@ const fuzzyMatch = (text, query) => {
 
                           {/* VIEW */}
                           <button
-                            onClick={() => setViewingFile(file)}
+                            onClick={() => handleViewFile(file)}
                             className="p-2.5 rounded-lg bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground transition flex items-center justify-center shadow-sm"
                             title="View"
                           >
@@ -1209,6 +1227,7 @@ const fuzzyMatch = (text, query) => {
                             <a
                               href={`http://localhost:5000/uploads/${file.file_name}`}
                               download
+                              onClick={() => trackAction("DOWNLOAD", `Downloaded ${file.document_type || 'File'} ${file.document_id}`)}
                               className="p-2.5 rounded-lg bg-accent/20 text-yellow-700 hover:bg-accent hover:text-accent-foreground transition flex items-center justify-center shadow-sm"
                               title="Download"
                             >
@@ -2305,19 +2324,17 @@ const fuzzyMatch = (text, query) => {
                   <input
                     type="text"
                     value={editDocumentType}
-                    onChange={(e) =>
-                      setEditDocumentType(
-                        e.target.value
-                      )
-                    }
+                    disabled
                     className="
                       w-full
                       border
                       border-gray-300
+                      bg-gray-100
+                      text-gray-500
+                      cursor-not-allowed
                       rounded-xl
                       p-3
                       outline-none
-                      focus:border-[#8B0000]
                     "
                   />
 

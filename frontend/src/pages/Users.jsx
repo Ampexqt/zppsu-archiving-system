@@ -34,7 +34,10 @@ function Users() {
   const handleCreateUser = async (e) => {
     e.preventDefault();
     try {
-      await axios.post("http://localhost:5000/api/auth/register", formData);
+      const token = localStorage.getItem("token");
+      await axios.post("http://localhost:5000/api/auth/register", formData, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       alert("User created successfully!");
       setIsModalOpen(false);
       setFormData({ name: "", email: "", password: "" });
@@ -49,10 +52,13 @@ function Users() {
   const fetchUsers = async () => {
 
     try {
-
+      const token = localStorage.getItem("token");
       const response =
         await axios.get(
-          "http://localhost:5000/api/users"
+          "http://localhost:5000/api/users",
+          {
+            headers: { Authorization: `Bearer ${token}` }
+          }
         );
 
       setUsers(response.data);

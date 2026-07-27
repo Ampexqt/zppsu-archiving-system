@@ -100,9 +100,9 @@ Includes:
 
 - Cabinets
 - File Boxes
-- Capacity Monitoring
+- Capacity Monitoring (Document-based occupancy aggregated across File Boxes)
 - Storage Status
-- Document Mapping
+- Dual Document Mapping (Assignment of both Cabinet and File Box)
 
 ---
 
@@ -197,6 +197,18 @@ Log system activities including:
 ---
 
 ## User Management
+
+Manage system users including creation, role assignment (Admin/User), and deletion.
+
+---
+
+## User Interface & Experience Standards (UI/UX)
+
+The application follows premium, modern design standards:
+- **Consistent Pagination:** All data tables (Files, Inventory, Logs, Users, Categories) utilize a standardized pagination system (10 rows per page) to prevent visual clutter and long scrolling.
+- **Premium Table UI:** Data tables are housed within rounded cards with subtle drop shadows, featuring clear column headers and responsive hover states.
+- **Visual Enhancements:** Distinct user/category avatars (colored circles with initials) and custom colored badges for Roles and Statuses (e.g., Active, Admin) ensure high scannability.
+- **Responsive Dashboard:** Dashboard analytics utilize distinct visual formats, including Pie charts for broad categories and Bar charts for statuses, alongside real-time capacity progress bars.
 
 Administrators can:
 

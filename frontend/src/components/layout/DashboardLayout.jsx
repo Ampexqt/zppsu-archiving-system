@@ -132,22 +132,6 @@ function DashboardLayout({ children }) {
 
         {/* USER PROFILE & LOGOUT */}
         <div className="relative z-10 p-4 border-t border-white/10">
-          <div className={`flex items-center gap-3 mb-4 px-2 ${isCollapsed ? "lg:hidden" : ""}`}>
-            <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center font-bold text-sm shrink-0">
-              {user?.name?.charAt(0).toUpperCase() || "U"}
-            </div>
-            <div className="flex flex-col overflow-hidden">
-              <span className="text-sm font-bold truncate">{user?.name}</span>
-              <span className="text-xs text-white/70">{role}</span>
-            </div>
-          </div>
-          {isCollapsed && (
-            <div className="hidden lg:flex justify-center mb-4">
-              <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center font-bold text-sm shrink-0" title={user?.name}>
-                {user?.name?.charAt(0).toUpperCase() || "U"}
-              </div>
-            </div>
-          )}
           <button
             onClick={handleLogout}
             title={isCollapsed ? "Logout" : ""}
@@ -175,15 +159,6 @@ function DashboardLayout({ children }) {
             </h1>
           </div>
           
-          <div className="flex items-center gap-4">
-            <div className="hidden md:flex flex-col items-end mr-2">
-              <span className="text-sm font-bold text-gray-900 leading-none">Welcome back,</span>
-              <span className="text-xs text-gray-500">{user?.name}</span>
-            </div>
-            <div className="w-10 h-10 rounded-full border-2 border-gray-200 bg-gray-50 flex items-center justify-center font-bold text-[#800000] shadow-sm">
-              {user?.name?.charAt(0).toUpperCase() || "U"}
-            </div>
-          </div>
         </header>
 
         {/* PAGE CONTENT */}

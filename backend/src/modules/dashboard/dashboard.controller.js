@@ -37,11 +37,29 @@ const getAnalytics = async (req, res) => {
       )
     ).filter(Boolean);
 
-    // DOCUMENTS PER CATEGORY
-    const documentsPerCategory = await prisma.files.groupBy({
+    // DOCUMENTS PER TYPE
+    const documentsPerType = await prisma.files.groupBy({
       by: ["document_type"],
       _count: { id: true },
       orderBy: { _count: { id: "desc" } },
+    });
+
+    // DOCUMENTS PER CATEGORY
+    const documentsByCategory = await prisma.files.groupBy({
+      by: ["category"],
+      _count: { id: true },
+      orderBy: { _count: { id: "desc" } },
+    });
+
+    // DOCUMENTS PER STATUS
+    const documentsByStatus = await prisma.files.groupBy({
+      by: ["status"],
+      _count: { id: true },
+    });
+
+    // MONTHLY DATA
+    const allFilesDates = await prisma.files.findMany({
+      select: { created_at: true }
     });
 
     // CABINET USAGE
@@ -75,7 +93,10 @@ const getAnalytics = async (req, res) => {
       totalLogs,
       maxCapacity,
       storagePercentage,
-      documentsPerCategory,
+      documentsPerType,
+      documentsByCategory,
+      documentsByStatus,
+      allFilesDates,
       cabinetUsage,
       topUsers: topUsersWithInfo,
       recentActivities,

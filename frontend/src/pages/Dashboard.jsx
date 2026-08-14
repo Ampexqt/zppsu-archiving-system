@@ -38,11 +38,6 @@ function Dashboard() {
         headers: { Authorization: `Bearer ${token}` },
       });
       setAnalytics(response.data);
-      const chartData = response.data.documentsPerCategory.map((item) => ({
-        category: item.document_type,
-        count: item._count.id,
-      }));
-      setCategoryChartData(chartData);
       setMaxCapacity(response.data.maxCapacity);
       setStoragePercentage(response.data.storagePercentage);
       setCabinetUsage(response.data.cabinetUsage || []);
@@ -57,27 +52,27 @@ function Dashboard() {
     fetchAnalytics();
   }, []);
 
-  const totalDocuments = files.length;
-  const activeDocuments = files.filter((file) => file.status === "Active").length;
-  const archivedDocuments = files.filter((file) => file.status === "Archived").length;
-  const pendingDocuments = files.filter((file) => file.status === "Pending").length;
+  // Use system-wide data from analytics
+  const totalDocuments = analytics.totalFiles || 0;
+  
+  const getStatusCount = (status) => {
+    const item = analytics.documentsByStatus?.find(d => d.status === status);
+    return item ? item._count.id : 0;
+  };
+  const activeDocuments = getStatusCount("Active");
+  const archivedDocuments = getStatusCount("Archived");
+  const pendingDocuments = getStatusCount("Pending");
 
-  const categoryCounts = {};
-  files.forEach((file) => {
-    if (file.category) {
-      categoryCounts[file.category] = (categoryCounts[file.category] || 0) + 1;
-    }
-  });
-  const pieChartData = Object.entries(categoryCounts).map(([name, value]) => ({ name, value }));
+  const pieChartData = (analytics.documentsByCategory || []).map(item => ({
+    name: item.category || "Uncategorized",
+    value: item._count.id
+  }));
 
-  const documentTypeCounts = {};
-  files.forEach((file) => {
-    if (file.document_type) {
-      documentTypeCounts[file.document_type] = (documentTypeCounts[file.document_type] || 0) + 1;
-    }
-  });
+  const mostUsedDocument = analytics.documentsPerType?.length > 0 
+    ? [analytics.documentsPerType[0].document_type, analytics.documentsPerType[0]._count.id]
+    : null;
 
-  const mostUsedDocument = Object.entries(documentTypeCounts).sort((a, b) => b[1] - a[1])[0];
+  // Recent uploads table only shows files user has access to
   const recentUploads = files.slice(0, 5);
 
   const statusData = [
@@ -90,7 +85,7 @@ function Dashboard() {
     "Jan", "Feb", "Mar", "Apr", "May", "Jun", 
     "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
   ].map((month, index) => {
-    const count = files.filter((file) => {
+    const count = (analytics.allFilesDates || []).filter((file) => {
       if (!file.created_at) return false;
       return new Date(file.created_at).getMonth() === index;
     }).length;

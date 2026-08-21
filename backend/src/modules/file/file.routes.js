@@ -21,6 +21,13 @@ router.post(
   fileController.generateDocument
 );
 
+// SEARCH FILES
+router.get(
+  "/search",
+  authMiddleware,
+  fileController.searchFiles
+);
+
 // GET FILES
 router.get(
   "/",

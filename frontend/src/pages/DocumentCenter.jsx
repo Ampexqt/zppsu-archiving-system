@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 
 import axios from "axios";
-import { Eye, Download, Edit, RefreshCcw, Trash2 } from "lucide-react";
+import { Eye, Download, Edit, RefreshCcw, Trash2, Search, Sparkles, Filter, FileText, CheckCircle, Archive, Clock } from "lucide-react";
   import DashboardLayout from
   "../components/layout/DashboardLayout";
 
@@ -155,6 +155,23 @@ import { Eye, Download, Edit, RefreshCcw, Trash2 } from "lucide-react";
     const [search, setSearch] =
       useState("");
       
+    const [searchMode, setSearchMode] = useState("standard"); // "standard" or "ai"
+    const [debouncedSearch, setDebouncedSearch] = useState("");
+      
+    useEffect(() => {
+      if (searchMode === "standard") {
+        const handler = setTimeout(() => {
+          setDebouncedSearch(search);
+        }, 300);
+        return () => clearTimeout(handler);
+      } else {
+        setDebouncedSearch("");
+      }
+    }, [search, searchMode]);
+
+    const [isAISearching, setIsAISearching] = useState(false);
+    const [aiResults, setAiResults] = useState(null);
+      
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage] = useState(10);
 
@@ -237,6 +254,34 @@ import { Eye, Download, Edit, RefreshCcw, Trash2 } from "lucide-react";
       fetchFiles();
 
     }, []);
+
+    // AI SEMANTIC SEARCH
+    const handleAISearch = async () => {
+      if (!search.trim()) {
+        setAiResults(null);
+        return;
+      }
+      setIsAISearching(true);
+      try {
+        const token = localStorage.getItem("token");
+        const response = await axios.get(
+          `http://localhost:5000/api/files/search?query=${encodeURIComponent(search)}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setAiResults(response.data);
+      } catch (error) {
+        console.error("AI Search failed", error);
+      } finally {
+        setIsAISearching(false);
+      }
+    };
+
+    // CLEAR SEARCH
+    useEffect(() => {
+      if (search === "") {
+        setAiResults(null);
+      }
+    }, [search]);
 
     useEffect(() => {
       setCurrentPage(1);
@@ -483,10 +528,11 @@ import { Eye, Download, Edit, RefreshCcw, Trash2 } from "lucide-react";
 
 
     // FILTER FILES
+    const baseFiles = aiResults !== null ? aiResults : files;
     const filteredFiles =
-      files.filter((file) => {
+      baseFiles.filter((file) => {
 
-     let smartSearch = search
+     let smartSearch = debouncedSearch
   .toLowerCase()
   .trim();
 
@@ -557,9 +603,9 @@ const fuzzyMatch = (text, query) => {
 };  
 
   const matchesSearch =
-
-    smartSearch === ""
-
+    aiResults !== null 
+    ? true // If AI results are present, skip fuzzy matching
+    : smartSearch === ""
     ||
 
     fuzzyMatch
@@ -744,32 +790,56 @@ const fuzzyMatch = (text, query) => {
 
     {/* MINI ANALYTICS */}
   <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-6">
-    <Card>
-      <CardHeader className="pb-2">
-        <CardDescription>Total Documents</CardDescription>
-        <CardTitle className="text-3xl font-bold text-primary">{totalDocuments}</CardTitle>
+    <Card className="bg-white border border-gray-100 shadow-sm relative overflow-hidden group hover:shadow-md transition-shadow">
+      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-accent opacity-50"></div>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-sm font-bold text-muted-foreground uppercase tracking-wider">Total Documents</CardTitle>
+        <div className="p-2 rounded-xl bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors duration-300">
+          <FileText className="h-5 w-5" />
+        </div>
       </CardHeader>
+      <CardContent>
+        <div className="text-4xl font-extrabold text-gray-900 tracking-tight">{totalDocuments}</div>
+      </CardContent>
     </Card>
 
-    <Card>
-      <CardHeader className="pb-2">
-        <CardDescription>Active</CardDescription>
-        <CardTitle className="text-3xl font-bold text-primary">{activeDocuments}</CardTitle>
+    <Card className="bg-white border border-gray-100 shadow-sm relative overflow-hidden group hover:shadow-md transition-shadow">
+      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-accent opacity-50"></div>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-sm font-bold text-muted-foreground uppercase tracking-wider">Active</CardTitle>
+        <div className="p-2 rounded-xl bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors duration-300">
+          <CheckCircle className="h-5 w-5" />
+        </div>
       </CardHeader>
+      <CardContent>
+        <div className="text-4xl font-extrabold text-gray-900 tracking-tight">{activeDocuments}</div>
+      </CardContent>
     </Card>
 
-    <Card>
-      <CardHeader className="pb-2">
-        <CardDescription>Archived</CardDescription>
-        <CardTitle className="text-3xl font-bold text-primary/60">{archivedDocuments}</CardTitle>
+    <Card className="bg-white border border-gray-100 shadow-sm relative overflow-hidden group hover:shadow-md transition-shadow">
+      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-accent opacity-50"></div>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-sm font-bold text-muted-foreground uppercase tracking-wider">Archived</CardTitle>
+        <div className="p-2 rounded-xl bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors duration-300">
+          <Archive className="h-5 w-5" />
+        </div>
       </CardHeader>
+      <CardContent>
+        <div className="text-4xl font-extrabold text-gray-900 tracking-tight">{archivedDocuments}</div>
+      </CardContent>
     </Card>
 
-    <Card>
-      <CardHeader className="pb-2">
-        <CardDescription>Pending</CardDescription>
-        <CardTitle className="text-3xl font-bold text-accent">{pendingDocuments}</CardTitle>
+    <Card className="bg-white border border-gray-100 shadow-sm relative overflow-hidden group hover:shadow-md transition-shadow">
+      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-accent opacity-50"></div>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-sm font-bold text-muted-foreground uppercase tracking-wider">Pending</CardTitle>
+        <div className="p-2 rounded-xl bg-accent/10 text-accent group-hover:bg-accent group-hover:text-accent-foreground transition-colors duration-300">
+          <Clock className="h-5 w-5" />
+        </div>
       </CardHeader>
+      <CardContent>
+        <div className="text-4xl font-extrabold text-gray-900 tracking-tight">{pendingDocuments}</div>
+      </CardContent>
     </Card>
   </div>
 
@@ -820,24 +890,73 @@ const fuzzyMatch = (text, query) => {
           ">
 
               {/* SEARCH */}
-              <input
-              type="text"
-              placeholder="Smart Search (document, type, uploader, status...)"
-              value={search}
-              onChange={(e) =>
-                setSearch(e.target.value)
-              }
-              className="
-                w-full
-                md:w-[320px]
-                border
-                border-gray-300
-                rounded-xl
-                p-3
-                focus:outline-none
-                focus:border-[#8B0000]
-              "
-            />
+              <div className="flex flex-col gap-2 w-full md:w-[450px]">
+                {/* Search Mode Toggle */}
+                <div className="flex bg-gray-100 p-1 rounded-lg w-full max-w-[300px]">
+                  <button
+                    onClick={() => { setSearchMode("standard"); setAiResults(null); }}
+                    className={`flex-1 flex items-center justify-center gap-1.5 text-xs font-medium py-1.5 px-3 rounded-md transition-all ${
+                      searchMode === "standard" 
+                        ? "bg-white text-[#8B0000] shadow-sm" 
+                        : "text-gray-500 hover:text-gray-700"
+                    }`}
+                  >
+                    <Filter className="w-3.5 h-3.5" />
+                    Standard Filter
+                  </button>
+                  <button
+                    onClick={() => { setSearchMode("ai"); setAiResults(null); }}
+                    className={`flex-1 flex items-center justify-center gap-1.5 text-xs font-medium py-1.5 px-3 rounded-md transition-all ${
+                      searchMode === "ai" 
+                        ? "bg-white text-[#8B0000] shadow-sm" 
+                        : "text-gray-500 hover:text-gray-700"
+                    }`}
+                  >
+                    <Sparkles className="w-3.5 h-3.5" />
+                    Smart AI Search
+                  </button>
+                </div>
+
+                <div className="flex items-center gap-2 w-full">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <input
+                      type="text"
+                      placeholder={searchMode === "ai" ? "Ask a question about your documents..." : "Search by title, subject, or ID..."}
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && searchMode === "ai" && handleAISearch()}
+                      className="
+                        w-full
+                        border
+                        border-gray-300
+                        rounded-xl
+                        py-3
+                        pl-10
+                        pr-4
+                        focus:outline-none
+                        focus:border-[#8B0000]
+                      "
+                    />
+                  </div>
+                  {searchMode === "ai" && (
+                    <button
+                      onClick={handleAISearch}
+                      disabled={isAISearching || !search.trim()}
+                      className="
+                        bg-[#8B0000] hover:bg-[#6b0000] text-white px-4 py-3 rounded-xl font-medium transition-colors
+                        disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center min-w-[100px]
+                      "
+                    >
+                      {isAISearching ? (
+                        <span className="animate-pulse">Thinking...</span>
+                      ) : (
+                        "AI Search"
+                      )}
+                    </button>
+                  )}
+                </div>
+              </div>
 
               {/* MONTH */}
               <select

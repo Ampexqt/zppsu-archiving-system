@@ -47,6 +47,7 @@ model files {
   created_at    DateTime @default(now())
   status        String? @default("Active")
   is_deleted    Boolean @default(false)
+  embedding     Float[] @default([])
 
   user users? @relation(fields: [uploaded_by], references: [id])
 

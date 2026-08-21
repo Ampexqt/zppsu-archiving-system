@@ -6,6 +6,8 @@ const pdf = require("pdf-parse");
 const officeParser = require("officeparser");
 const { appendToExcel, getTemplateFileName } = require("../../utils/excelManager");
 const logsService = require("../logs/logs.service");
+const vectorService = require("./vector.service");
+const extractionService = require("./extraction.service");
 
 // MODERN DOCUMENT UPLOAD
 exports.uploadFile = async (req, res) => {
@@ -47,11 +49,41 @@ exports.uploadFile = async (req, res) => {
     } else if ([".docx", ".pptx", ".xlsx"].includes(fileExtension)) {
       try {
         console.log(`Parsing office document: ${req.file.path}`);
-        extractedText = await officeParser.parseOfficeAsync(req.file.path);
+        const parsedData = await officeParser.parseOffice(req.file.path);
+        extractedText = typeof parsedData?.toText === 'function' ? parsedData.toText() : String(parsedData);
       } catch (err) {
         console.error("Office Document Parsing Error:", err);
       }
+    } else if ([".jpg", ".jpeg", ".png"].includes(fileExtension)) {
+      try {
+        console.log("Image detected. Running OCR...");
+        const result = await Tesseract.recognize(req.file.path, "eng");
+        extractedText = result.data.text;
+      } catch (err) {
+        console.error("Image OCR Error:", err);
+      }
     }
+
+    // 🤖 AI LOCAL METADATA EXTRACTION
+    let finalSubject = subject;
+    let finalDocType = document_type;
+    let finalMemoDate = memo_date ? new Date(memo_date) : null;
+
+    if (extractedText && extractedText.length > 10) {
+      console.log("Running local AI extraction on document...");
+      const aiData = await extractionService.extractMetadata(extractedText);
+      if (aiData) {
+        if (!finalSubject || finalSubject === "N/A" || finalSubject === "null") finalSubject = aiData.subject || finalSubject;
+        if (!finalDocType || finalDocType === "Document" || finalDocType === "null") finalDocType = aiData.document_type || finalDocType;
+        if (!finalMemoDate) finalMemoDate = aiData.memo_date || null;
+        console.log("AI Metadata extracted:", { finalSubject, finalDocType, finalMemoDate });
+      }
+    }
+
+    // GENERATE VECTOR EMBEDDING
+    console.log("Generating semantic embedding for the document...");
+    const embedding = await vectorService.generateEmbedding(extractedText);
+    console.log(`Embedding generated with ${embedding.length} dimensions.`);
 
     // GENERATE DOCUMENT ID
     const currentYear = new Date().getFullYear();
@@ -74,7 +106,7 @@ exports.uploadFile = async (req, res) => {
       Collections: "COL",
     };
 
-    const prefix = prefixMap[document_type] || "DOC";
+    const prefix = prefixMap[finalDocType] || "DOC";
     const documentId = `${prefix}-${currentYear}-${sequence}`;
 
     // SAVE DATABASE
@@ -84,19 +116,21 @@ exports.uploadFile = async (req, res) => {
         title: title || req.file.originalname,
         category,
         file_box_id: file_box_id ? Number(file_box_id) : null,
-        access_code,
-        subject,
-        document_type,
+        access_code: access_code || "N/A",
+        subject: finalSubject || "N/A",
+        document_type: finalDocType || "Document",
         file_type: fileExtension.replace(".", "").toUpperCase(),
-        memo_date: memo_date ? new Date(memo_date) : null,
+        memo_date: finalMemoDate,
         received_date: received_date ? new Date(received_date) : null,
         file_name: req.file.filename,
-        file_path: req.file.path,
+        file_path: `uploads/${req.file.filename}`,
         uploaded_by: req.user.id,
         ocr_text: extractedText,
+        embedding: embedding.length > 0 ? embedding : [],
         status: "Active",
         is_deleted: false,
         is_generated: false,
+        category: category || "Uncategorized",
       },
     });
 
@@ -203,6 +237,55 @@ exports.generateDocument = async (req, res) => {
   }
 };
 
+// SEMANTIC SEARCH FILES
+exports.searchFiles = async (req, res) => {
+  try {
+    const { query } = req.query;
+    if (!query) {
+      return res.status(400).json({ message: "Search query is required" });
+    }
+
+    console.log(`Searching for: "${query}"`);
+    // 1. Convert user's text query into a vector
+    const queryEmbedding = await vectorService.generateEmbedding(query);
+    if (!queryEmbedding || queryEmbedding.length === 0) {
+      return res.status(500).json({ message: "Failed to process search query" });
+    }
+
+    // 2. Get all files with embeddings from DB
+    // Optimization: If you have thousands of files, you might want to filter this by active/not-deleted first.
+    const allFiles = await prisma.files.findMany({
+      where: { 
+        is_deleted: false,
+      },
+      include: {
+        user: { select: { name: true, email: true } },
+        file_box: { include: { cabinet: true } },
+      }
+    });
+
+    // 3. Calculate similarity score for each file
+    const scoredFiles = allFiles
+      .filter(file => file.embedding && file.embedding.length > 0)
+      .map(file => {
+        const score = vectorService.cosineSimilarity(queryEmbedding, file.embedding);
+        return {
+          ...file,
+          similarityScore: score,
+        };
+      })
+      // 4. Sort by highest similarity
+      .sort((a, b) => b.similarityScore - a.similarityScore);
+
+    // Filter out completely irrelevant ones (e.g. score < 0.2) or just take top 10
+    const topResults = scoredFiles.filter(file => file.similarityScore > 0.2).slice(0, 10);
+
+    return res.json(topResults);
+  } catch (error) {
+    console.error("Semantic search error:", error);
+    return res.status(500).json({ message: "Failed to search documents" });
+  }
+};
 
 // GET FILES
 exports.getAllFiles = async (req, res) => {

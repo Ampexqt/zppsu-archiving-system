@@ -92,8 +92,32 @@ const deleteCategory =
     }
   };
 
+// UPDATE CATEGORY
+const updateCategory = async (req, res) => {
+  try {
+    const { name } = req.body;
+    const category = await prisma.categories.update({
+      where: {
+        id: Number(req.params.id),
+      },
+      data: {
+        name,
+      },
+    });
+    res.status(200).json({
+      message: "Category updated successfully",
+      category,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to update category",
+    });
+  }
+};
+
 module.exports = {
   createCategory,
   getCategories,
   deleteCategory,
+  updateCategory,
 };

@@ -23,4 +23,10 @@ router.delete(
   categoryController.deleteCategory
 );
 
+// UPDATE CATEGORY
+router.put(
+  "/:id",
+  categoryController.updateCategory
+);
+
 module.exports = router;

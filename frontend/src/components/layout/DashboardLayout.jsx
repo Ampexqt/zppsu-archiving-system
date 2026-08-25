@@ -12,7 +12,10 @@ import {
   Menu,
   ChevronLeft,
   ChevronRight,
-  X
+  X,
+  User,
+  Shield,
+  ShieldCheck
 } from "lucide-react";
 import logo from "../../assets/logo.jpg";
 import { useState } from "react";
@@ -23,8 +26,8 @@ function DashboardLayout({ children }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
 
-  const user = JSON.parse(localStorage.getItem("user"));
-  const role = user?.role;  
+  const user = JSON.parse(localStorage.getItem("user")) || {};
+  const role = user?.role || "Staff";  
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -45,65 +48,78 @@ function DashboardLayout({ children }) {
     ] : []),
   ];
 
+  const currentTitle = navItems.find((item) => item.path === location.pathname)?.name || "Dashboard";
+
   return (
-    <div className="flex min-h-screen bg-[#FDFBF7] transition-all duration-300 font-sans selection:bg-[#FFD700] selection:text-[#800000]">
+    <div className="flex min-h-screen bg-[#FDFBF7] text-[#1F2937] transition-all duration-300 font-sans selection:bg-[#FFD700] selection:text-[#800000]">
       
       {/* MOBILE OVERLAY */}
       {isMobileMenuOpen && (
         <div 
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden transition-opacity"
           onClick={() => setIsMobileMenuOpen(false)}
+          aria-hidden="true"
         />
       )}
 
       {/* SIDEBAR */}
       <aside
+        aria-label="Sidebar Navigation"
         className={`
-          fixed top-0 left-0 h-[100dvh] bg-[#800000] text-white flex flex-col justify-between z-50 transition-transform duration-300 shadow-2xl lg:shadow-none lg:transition-all
+          fixed top-0 left-0 h-[100dvh] bg-[#800000] text-white flex flex-col justify-between z-50 transition-all duration-300 shadow-2xl lg:shadow-none
           ${isCollapsed ? "lg:w-[80px]" : "w-[280px] lg:w-[260px]"}
           ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
         `}
       >
+        {/* COLLAPSE TOGGLE BUTTON (DESKTOP) */}
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="hidden lg:flex absolute -right-4 top-8 z-50 w-8 h-8 bg-[#FFD700] border-2 border-[#800000] rounded-full items-center justify-center text-[#800000] hover:bg-yellow-400 shadow-md cursor-pointer transition-transform hover:scale-110"
+          aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          className="hidden lg:flex absolute -right-3.5 top-7 z-50 w-7 h-7 bg-[#FFD700] border-2 border-[#800000] rounded-full items-center justify-center text-[#800000] hover:bg-yellow-400 shadow-md cursor-pointer transition-transform hover:scale-110 active:scale-95"
         >
-          {isCollapsed ? <ChevronRight className="w-5 h-5 ml-0.5" /> : <ChevronLeft className="w-5 h-5 mr-0.5" />}
+          {isCollapsed ? <ChevronRight className="w-4 h-4 ml-0.5" /> : <ChevronLeft className="w-4 h-4 mr-0.5" />}
         </button>
-        <div className="absolute inset-0 bg-[radial-gradient(#ffffff22_1px,transparent_1px)] [background-size:24px_24px] opacity-10 pointer-events-none"></div>
-        <div className="absolute top-0 left-0 w-64 h-64 bg-gradient-to-br from-[#FFD700]/10 to-transparent rounded-full blur-3xl -translate-y-1/2 -translate-x-1/2 pointer-events-none"></div>
-        
+
+        {/* SIDEBAR HEADER / BRAND */}
         <div className="relative z-10 flex-1 overflow-y-auto overflow-x-hidden">
-          {/* LOGO */}
-          <div className={`p-6 flex items-center justify-between border-b border-white/10 relative ${isCollapsed ? "lg:justify-center lg:px-0" : "gap-3"}`}>
-            <div className={`flex items-center gap-3 ${isCollapsed ? "lg:hidden" : ""}`}>
-              <div className="w-10 h-10 rounded-full overflow-hidden border border-white/20 bg-white shrink-0">
+          <div className={`p-5 flex items-center justify-between border-b border-white/10 ${isCollapsed ? "lg:justify-center lg:px-2" : "gap-3"}`}>
+            <div className={`flex items-center gap-3 cursor-pointer ${isCollapsed ? "lg:hidden" : ""}`} onClick={() => navigate("/dashboard")}>
+              <div className="w-10 h-10 rounded-full overflow-hidden border border-white/20 bg-white shrink-0 shadow-sm">
                 <img src={logo} alt="ZPPSU Logo" className="w-full h-full object-cover" />
               </div>
-              <div className="whitespace-nowrap transition-opacity duration-300">
-                <h2 className="text-xl font-extrabold tracking-tight">ZPPSU</h2>
-                <p className="text-[10px] text-white/70 uppercase tracking-widest font-bold">Guidance Office</p>
+              <div className="whitespace-nowrap overflow-hidden">
+                <h2 className="text-lg font-bold tracking-tight text-white leading-tight">ZPPSU</h2>
+                <p className="text-[10px] text-white/70 uppercase tracking-widest font-semibold">Guidance Office</p>
               </div>
             </div>
+
             {/* Desktop collapsed icon */}
             {isCollapsed && (
-              <div className="hidden lg:flex w-10 h-10 rounded-full overflow-hidden border border-white/20 bg-white shrink-0 mx-auto">
+              <div 
+                className="hidden lg:flex w-10 h-10 rounded-full overflow-hidden border border-white/20 bg-white shrink-0 mx-auto cursor-pointer shadow-sm"
+                onClick={() => navigate("/dashboard")}
+                title="ZPPSU Guidance Office"
+              >
                 <img src={logo} alt="ZPPSU Logo" className="w-full h-full object-cover" />
               </div>
             )}
+
             {/* Mobile close button */}
             <button 
               onClick={() => setIsMobileMenuOpen(false)}
-              className="lg:hidden p-1 hover:bg-white/10 rounded-md transition-colors text-white/70 hover:text-white"
+              aria-label="Close mobile menu"
+              className="lg:hidden p-1.5 hover:bg-white/10 rounded-lg transition-colors text-white/80 hover:text-white"
             >
-              <X className="w-6 h-6" />
+              <X className="w-5 h-5" />
             </button>
           </div>
 
-          {/* NAVIGATION */}
-          <nav className="mt-6 flex flex-col gap-1.5 px-3">
+          {/* NAVIGATION LINKS */}
+          <nav className="mt-5 flex flex-col gap-1 px-3" aria-label="Main Menu">
             {!isCollapsed && (
-              <p className="px-4 text-xs font-bold uppercase tracking-wider text-white/50 mb-2 whitespace-nowrap">Main Menu</p>
+              <p className="px-3 text-[11px] font-bold uppercase tracking-wider text-white/50 mb-1">
+                Main Menu
+              </p>
             )}
             {navItems.map((item) => {
               const isActive = location.pathname === item.path;
@@ -114,28 +130,29 @@ function DashboardLayout({ children }) {
                   to={item.path}
                   title={isCollapsed ? item.name : ""}
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className={`flex items-center gap-3 text-sm py-3 px-3 rounded-xl font-medium transition-all duration-200 ${
+                  className={`flex items-center gap-3 text-sm py-2.5 px-3 rounded-xl font-medium transition-all duration-200 ${
                     isCollapsed ? "justify-center" : ""
                   } ${
                     isActive
-                      ? "bg-white text-[#800000] shadow-md shadow-black/10 scale-[1.02]"
+                      ? "bg-white text-[#800000] shadow-sm font-semibold"
                       : "text-white/80 hover:bg-white/10 hover:text-white"
                   }`}
                 >
-                  <Icon className={`w-5 h-5 shrink-0 ${isActive ? "text-[#800000]" : "text-white/70"}`} />
-                  <span className={`whitespace-nowrap ${isCollapsed ? "lg:hidden" : ""}`}>{item.name}</span>
+                  <Icon className={`w-4 h-4 shrink-0 stroke-[2] ${isActive ? "text-[#800000]" : "text-white/80"}`} />
+                  <span className={`whitespace-nowrap truncate ${isCollapsed ? "lg:hidden" : ""}`}>{item.name}</span>
                 </Link>
               );
             })}
           </nav>
         </div>
 
-        {/* USER PROFILE & LOGOUT */}
-        <div className="relative z-10 p-4 border-t border-white/10">
+        {/* SIDEBAR FOOTER / LOGOUT */}
+        <div className="relative z-10 p-3 border-t border-white/10">
           <button
             onClick={handleLogout}
             title={isCollapsed ? "Logout" : ""}
-            className={`w-full flex items-center justify-center gap-2 bg-white/10 text-white text-sm font-semibold py-2.5 rounded-xl hover:bg-[#660000] transition-colors border border-white/20 ${isCollapsed ? "px-0" : ""}`}
+            aria-label="Log out of system"
+            className={`w-full flex items-center justify-center gap-2 bg-white/10 text-white text-xs font-semibold py-2.5 rounded-xl hover:bg-[#660000] transition-all border border-white/10 ${isCollapsed ? "px-0" : "px-3"}`}
           >
             <LogOut className="w-4 h-4 shrink-0" />
             <span className={`${isCollapsed ? "lg:hidden" : ""}`}>Logout</span>
@@ -146,19 +163,36 @@ function DashboardLayout({ children }) {
       {/* MAIN CONTENT AREA */}
       <main className={`flex-1 flex flex-col min-w-0 min-h-screen transition-all duration-300 ${isCollapsed ? "lg:ml-[80px]" : "lg:ml-[260px]"}`}>
         {/* TOPBAR */}
-        <header className="sticky top-0 z-30 flex items-center justify-between bg-white/80 backdrop-blur-md border-b border-gray-100 px-6 py-4 shadow-sm">
-          <div className="flex items-center gap-4">
+        <header className="sticky top-0 z-30 flex items-center justify-between bg-white/90 backdrop-blur-md border-b border-gray-200 px-6 py-3.5 shadow-sm">
+          <div className="flex items-center gap-3">
             <button 
               className="lg:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
               onClick={() => setIsMobileMenuOpen(true)}
+              aria-label="Open sidebar menu"
             >
               <Menu className="w-5 h-5" />
             </button>
-            <h1 className="text-xl font-bold text-gray-800 tracking-tight hidden sm:block">
-              {navItems.find(item => item.path === location.pathname)?.name || "Dashboard"}
-            </h1>
+            <div>
+              <h1 className="text-lg font-bold text-gray-900 tracking-tight leading-none">
+                {currentTitle}
+              </h1>
+              <p className="text-xs text-gray-500 mt-0.5 hidden sm:block">
+                ZPPSU Guidance Records Management System
+              </p>
+            </div>
           </div>
           
+          {/* USER PROFILE INFO CHIP */}
+          <div className="flex items-center gap-3">
+            <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#FDFBF7] border border-gray-200 text-xs font-medium text-gray-700">
+              <ShieldCheck className="w-3.5 h-3.5 text-[#800000]" />
+              <span className="font-semibold text-gray-900">{user?.name || "User"}</span>
+              <span className="text-gray-300">|</span>
+              <span className="text-xs px-2 py-0.5 rounded-full font-bold bg-[#800000]/10 text-[#800000]">
+                {role}
+              </span>
+            </div>
+          </div>
         </header>
 
         {/* PAGE CONTENT */}

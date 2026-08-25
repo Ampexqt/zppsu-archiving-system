@@ -461,32 +461,11 @@ Never introduce breaking changes without necessity.
 
 ---
 
-# TERMINAL RULES (STRICT)
+# TERMINAL RULES (MAXIMIZED AGENT MODE)
+The AI may execute non-destructive terminal commands (e.g., running tests, installing packages, checking git status, or running linters) autonomously.
+- CRITICAL: The AI must never execute destructive commands (e.g., rm, git reset --hard, database drops) without explicit user permission.
+- Always use the workspace's built-in execution loop to verify that newly generated code passes linting and basic tests.
 
-The AI must **never execute terminal commands**.
-
-The user controls the terminal.
-
-When terminal interaction is required:
-
-Provide commands inside code blocks.
-
-Example:
-
-```bash
-npm install
-npm run dev
-```
-
-Wait for the user to execute commands.
-
-Never assume output.
-
-Never claim success.
-
-Never fabricate terminal logs.
-
----
 
 # RESPONSE FORMAT
 
@@ -570,6 +549,12 @@ If any check fails:
 Revise the implementation before responding.
 
 ---
+
+# CODE MODIFICATION FORMAT
+When updating existing files, never output the entire file. 
+- Always prefer structural search-and-replace blocks or precise file diff patches.
+- Explicitly state the line numbers being targeted based on the file inspection step.
+
 
 # GOLDEN RULE
 

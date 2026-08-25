@@ -62,6 +62,23 @@ exports.deleteCabinet = async (req, res) => {
   }
 };
 
+exports.updateCabinet = async (req, res) => {
+  try {
+    const { name, capacity } = req.body;
+    const cabinet = await prisma.cabinets.update({
+      where: { id: Number(req.params.id) },
+      data: {
+        ...(name && { name }),
+        ...(capacity && { capacity: parseInt(capacity) }),
+      },
+    });
+    return res.status(200).json(cabinet);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Update failed" });
+  }
+};
+
 
 // =======================
 // FILE BOXES
@@ -121,5 +138,23 @@ exports.deleteFileBox = async (req, res) => {
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Delete failed" });
+  }
+};
+
+exports.updateFileBox = async (req, res) => {
+  try {
+    const { name, cabinet_id, capacity } = req.body;
+    const fileBox = await prisma.file_boxes.update({
+      where: { id: Number(req.params.id) },
+      data: {
+        ...(name && { name }),
+        ...(cabinet_id && { cabinet_id: Number(cabinet_id) }),
+        ...(capacity && { capacity: parseInt(capacity) }),
+      },
+    });
+    return res.status(200).json(fileBox);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Update failed" });
   }
 };

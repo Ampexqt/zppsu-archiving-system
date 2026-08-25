@@ -1,1495 +1,229 @@
-import React, {
-    useState,
-    useEffect
-  } from "react";
-
-  import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-
+import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { FilePlus, UploadCloud, CalendarIcon, Check, ChevronsUpDown } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { 
+  FilePlus, 
+  UploadCloud, 
+  CalendarIcon, 
+  Check, 
+  ChevronsUpDown, 
+  Archive, 
+  Box, 
+  FolderTree, 
+  Loader2,
+  FileText,
+  ShieldCheck,
+  ChevronLeft,
+  ChevronRight
+} from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 
-    const documentCategories = {
-  Administrative: [
-  "BOARD RESOLUTIONS",
-  "CHED COMMUNICATIONS 2024",
-  "CHED Memorandum Orders 2024",
-  "CSC Circulars",
-  "CSC Communications 2024",
-  "DOST Communications",
-  "Incoming Communications Outside ZC Perimeter",
-  "Incoming Communications Within ZC",
-  "Memorandum",
-  "Minutes of Meetings",
-  "MOA/MOU Records",
-  "Notice of Salary Adjustment (NOSA)",
-  "SALN Records",
-  "Notice of Step Increment (NSI)",
-  "Outgoing Communications Outside ZC Perimeter",
-  "Request Letter Memorandum (RLM)",
-  "Special Orders",
-  "Trainings And Seminars",
-  "Various Records",
-  "VPAA Memoranda",
-  "VPAF Indorsements",
-  "VPAF Memorandum",
-  "Job Order Workers",
-  "Manuals of Operations",
-  "Contract of Service (Visiting Lecturers)"
-],
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { documentCategories, getFieldsForDocumentType } from "@/utils/documentConfigs";
 
-  Academic: [
-  "AACCUP Findings and Recommendations",
-  "ACCOMPLISHMENT REPORTS",
-  "ANNUAL REPORTS",
-  "ASSESSMENT RECORDS OF STUDENTS",
-  "Class Program",
-  "COPC",
-  "Data Analysis",
-  "HEMIS ",
-  "Individual Daily Program IDP",
-  "IPCR",
-  "Medical Records for Students",
-  "Offenses and Violations",
-  "Portfolio of Faculty",
-  "Report of Ratings",
-  "Student Admission Records",
-  "Students In/Off Campus Teaching",
-  "Students Prospectus",
-  "Students Thesis",
-  "Students Apprenticeship And Expo (APEX)",
-  "Teaching Load",
-  "Verification Request"
-],
+import { useToast } from "../context/ToastContext";
 
- Financial: [
-  "BUDGET PLAN",
-  "BUDGET PROPOSALS",
-  "BUDGETARY REQUIREMENTS",
-  "Checks Issued",
-  "COA Annual Reports 2024",
-  "COA Audit Observation 2024",
-  "COA Circulars",
-  "COA Communications 2024",
-  "COA NOTICE OF DISALLOWANCES 2024",
-  "COA NOTICE OF SUSPENSION 2024",
-  "Master List of Records for Collection",
-  "DBM Circulars",
-  "DBM Communications 2024",
-  "Disbursements",
-  "Purchase Requests",
-  "Fordeed of Donations",
-  "Free Higher Education Billing Details"
-],
-};
-
-  function Files() {
-
-    const [
-      category,
-      setCategory
-    ] = useState("");
-
-    const [
-      documentType,
-      setDocumentType
-    ] = useState("");
-
-    const [
-      formData,
-      setFormData
-    ] = useState({});
-
-    const [
-      generatedRecords,
-      setGeneratedRecords
-    ] = useState([]);
-
-    const [inventories, setInventories] =
-  useState([]);
-
-  const [
-    selectedInventory,
-    setSelectedInventory
-  ] = useState({});
-
-  const [
-    selectedFileBox,
-    setSelectedFileBox
-  ] = useState({});
-
+function Files() {
+  const toast = useToast();
+  const [category, setCategory] = useState("");
+  const [documentType, setDocumentType] = useState("");
+  const [formData, setFormData] = useState({});
+  const [generatedRecords, setGeneratedRecords] = useState([]);
+  const [inventories, setInventories] = useState([]);
+  const [selectedInventory, setSelectedInventory] = useState({});
+  const [selectedFileBox, setSelectedFileBox] = useState({});
+  
+  // File upload state
   const [legacyFile, setLegacyFile] = useState(null);
   const [uploadingLegacy, setUploadingLegacy] = useState(false);
   const [selectedUploadCabinet, setSelectedUploadCabinet] = useState("");
   const [selectedUploadFileBox, setSelectedUploadFileBox] = useState("");
-
+  
+  // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-    // DOCUMENT CONFIGS
-    const documentConfigs = {
+  const selectedFields = getFieldsForDocumentType(documentType);
 
-    "AACCUP Findings and Recommendations": {
-
-      fields: [
-
-        "access_code",
-
-        "program",
-
-        "file_location",
-
-      ],
-
-    },
-
-"ACCOMPLISHMENT REPORTS": {
-
-  fields: [
-
-    "access_code",
-
-    "subject",
-
-    "file_location",
-
-  ],
-
-},
-
-"ANNUAL REPORTS": {
-
-  fields: [
-
-    "access_code",
-
-    "subject",
-
-    "file_location",
-
-  ],
-
-},
-
-"ASSESSMENT RECORDS OF STUDENTS": {
-
-  fields: [
-
-    "access_code",
-
-    "student_name",
-
-    "file_location",
-
-  ],
-
-},  
-
-"BOARD RESOLUTIONS": {
-
-  fields: [
-
-    "access_code",
-
-    "subject",
-
-    "file_location",
-
-  ],
-
-},
-
-"BUDGET PLAN": {
-
-  fields: [
-
-    "access_code",
-
-    "year_and_proposed_budget",
-
-    "file_location",
-
-  ],
-
-},
-
-"BUDGET PROPOSALS": {
-
-  fields: [
-
-    "access_code",
-
-    "fiscal_year",
-
-    "file_location",
-
-  ],
-
-},
-
-"BUDGETARY REQUIREMENTS": {
-
-  fields: [
-
-    "access_code",
-
-    "fiscal_year",
-
-    "file_location",
-
-  ],
-
-},
-
- "Checks Issued": {
-
-    fields: [
-
-      "access_code",
-
-      "payee",
-
-      "amount",
-
-      "file_location",
-
-    ],
-
-  },
-
-  "CHED COMMUNICATIONS 2024": {
-
-  fields: [
-
-    "date",
-
-    "access_code",
-
-    "subject",
-
-    "action_taken",
-
-    "file_location",
-
-  ],
-
-},
-
-"CHED Memorandum Orders 2024": {
-
-  fields: [
-
-    "date",
-
-    "access_code",
-
-    "subject",
-
-    "action_taken",
-
-    "file_location",
-
-  ],
-
-},
-
-"Class Program": {
-
-  fields: [
-
-    "access_code",
-
-    "name_of_faculty",
-
-    "academic_year",
-
-    "file_location",
-
-  ],
-
-},
-
-"COA Annual Reports 2024": {
-
-  fields: [
-
-    "date",
-
-    "access_code",
-
-    "subject",
-
-    "action_taken",
-
-    "file_location",
-
-  ],
-
-},
-
-"COA Audit Observation 2024": {
-
-  fields: [
-
-    "date",
-
-    "access_code",
-
-    "subject",
-
-    "action_taken",
-
-    "file_location",
-
-  ],
-
-},  
-
-"COA Circulars": {
-
-  fields: [
-
-    "date",
-
-    "access_code",
-
-    "subject",
-
-    "file_location",
-
-  ],
-
-},
-
-"COA Communications 2024": {
-
-  fields: [
-
-    "date",
-
-    "access_code",
-
-    "subject",
-
-    "action_taken",
-
-    "file_location",
-
-  ],
-
-},
-
-"COA NOTICE OF DISALLOWANCES 2024": {
-
-  fields: [
-
-    "date",
-
-    "access_code",
-
-    "subject",
-
-    "action_taken",
-
-    "file_location",
-
-  ],
-
-},
-
-"COA NOTICE OF SUSPENSION 2024": {
-
-  fields: [
-
-    "date",
-
-    "access_code",
-
-    "subject",
-
-    "action_taken",
-
-    "file_location",
-
-  ],
-
-},
-
-"Master List of Records for Collection": {
-
-  fields: [
-
-    "access_code",
-
-    "receivables_from",
-
-    "amount",
-
-    "file_location",
-
-  ],
-
-},
-
-"Contract of Service (Visiting Lecturers)": {
-
-  fields: [
-
-    "access_code",
-
-    "name",
-
-    "semester_year",
-
-    "file_location",
-
-  ],
-
-},
-
-"COPC": {
-
-  fields: [
-
-    "access_code",
-
-    "program",
-
-    "file_location",
-
-  ],
-
-},
-
-"CSC Circulars": {
-
-  fields: [
-
-    "date",
-
-    "access_code",
-
-    "subject",
-
-    "file_location",
-
-  ],
-
-},
-
-"CSC Communications 2024": {
-
-  fields: [
-
-    "date",
-
-    "access_code",
-
-    "subject",
-
-    "action_taken",
-
-    "file_location",
-
-  ],
-
-},
-
-"Data Analysis": {
-
-  fields: [
-
-    "access_code",
-
-    "subject",
-
-    "file_location",
-
-  ],
-
-},
-
-
-"DBM Circulars": {
-
-  fields: [
-
-    "date",
-
-    "access_code",
-
-    "subject",
-
-    "action_taken",
-
-    "zppsu_memo_number",
-
-    "file_location",
-
-  ],
-
-},
-
-"DBM Communications 2024": {
-
-  fields: [
-
-    "date",
-
-    "access_code",
-
-    "subject",
-
-    "tracking_details",
-
-    "file_location",
-
-  ],
-
-},
-
-"Disbursements": {
-
-  fields: [
-
-    "access_code",
-
-    "particulars",
-
-    "amount",
-
-    "file_location",
-
-  ],
-
-},
-
-"DOST Communications": {
-
-  fields: [
-
-    "date",
-
-    "access_code",
-
-    "subject",
-
-    "action_taken",
-
-    "file_location",
-
-  ],
-
-},
-
-"HEMIS ": {
-
-  fields: [
-
-    "access_code",
-
-    "semester_school_year",
-
-    "tracking_details",
-
-    "file_location",
-
-  ],
-
-},
-
-"Individual Daily Program IDP": {
-
-  fields: [
-
-    "access_code",
-
-    "name_of_faculty",
-
-    "semester_year",
-
-    "file_location",
-
-  ],
-
-},
-
-"Incoming Communications Outside ZC Perimeter": {
-
-  fields: [
-
-    "date",
-
-    "access_code",
-
-    "agency",
-
-    "subject",
-
-    "action_taken",
-
-    "file_location",
-
-  ],
-
-},
-
-"Incoming Communications Within ZC": {
-
-  fields: [
-
-    "date",
-
-    "access_code",
-
-    "subject",
-
-    "action_taken",
-
-    "file_location",
-
-  ],
-
-},
-
-"IPCR": {
-
-  fields: [
-
-    "access_code",
-
-    "name_of_faculty",
-
-    "semester_year",
-
-    "file_location",
-
-  ],
-
-},
-
-"Job Order Workers": {
-
-  fields: [
-
-    "access_code",
-
-    "name",
-
-    "period",
-
-    "file_location",
-
-  ],
-
-},
-
-"Manuals of Operations": {
-
-  fields: [
-
-    "access_code",
-
-    "subject",
-
-    "file_location",
-
-  ],
-
-},
-
-"Medical Records for Students": {
-
-  fields: [
-
-    "access_code",
-
-    "name",
-
-    "file_location",
-
-  ],
-
-},
-
- "Memorandum": {
-
-    fields: [
-
-      "date",
-
-      "access_code",
-
-      "zppsu_memo_number",
-
-      "subject",
-
-      "personnel",
-
-      "file_location",
-
-    ],
-
-  },
-
-  "Minutes of Meetings": {
-
-  fields: [
-
-    "access_code",
-
-    "agenda_and_date",
-
-    "file_location",
-
-  ],
-
-},
-
-"MOA/MOU Records": {
-
-  fields: [
-
-    "access_code",
-
-    "agency",
-
-    "subject",
-
-    "file_location",
-
-  ],
-
-},
-
-"Notice of Salary Adjustment (NOSA)": {
-
-  fields: [
-
-    "access_code",
-
-    "personnel_name",
-
-    "year",
-
-    "file_location",
-
-  ],
-
-},
-
-"SALN Records": {
-
-  fields: [
-
-    "access_code",
-
-    "personnel_name",
-
-    "year",
-
-    "file_location",
-
-  ],
-
-},
-
-"Notice of Step Increment (NSI)": {
-
-  fields: [
-
-    "access_code",
-
-    "personnel_name",
-
-    "year",
-
-    "file_location",
-
-  ],
-
-},
-
-"Offenses and Violations": {
-
-  fields: [
-
-    "access_code",
-
-    "student_name",
-
-    "school_year_semester",
-
-    "offenses",
-
-    "file_location",
-
-  ],
-
-},
-
-"Outgoing Communications Outside ZC Perimeter": {
-
-  fields: [
-
-    "date",
-
-    "access_code",
-
-    "concerned_agency",
-
-    "subject",
-
-    "tracking_details",
-
-    "file_location",
-
-  ],
-
-},
-
-"Portfolio of Faculty": {
-
-  fields: [
-
-    "access_code",
-
-    "faculty_name",
-
-    "file_location",
-
-  ],
-
-},
-
-"Purchase Requests": {
-
-  fields: [
-
-    "date",
-
-    "access_code",
-
-    "items",
-
-    "amount",
-
-    "file_location",
-
-  ],
-
-},
-
-"Report of Ratings": {
-
-  fields: [
-
-    "access_code",
-
-    "semester_school_year_course_year",
-
-    "file_location",
-
-  ],
-
-},
-
-"Request Letter Memorandum (RLM)": {
-
-  fields: [
-
-    "date",
-
-    "access_code",
-
-    "subject",
-
-    "action_taken",
-
-    "file_location",
-
-  ],
-
-},
-
-"Special Orders": {
-
-  fields: [
-
-    "date",
-
-    "access_code",
-
-    "subject",
-
-    "personnel",
-
-    "file_location",
-
-  ],
-
-},
-
-"Student Admission Records": {
-
-  fields: [
-
-    "access_code",
-
-    "student_name",
-
-    "semester_year",
-
-    "file_location",
-
-  ],
-
-},
-
-"Students In/Off Campus Teaching": {
-
-  fields: [
-
-    "access_code",
-
-    "student_name",
-
-    "assigned_school",
-
-    "file_location",
-
-  ],
-
-},
-
-"Students Prospectus": {
-
-  fields: [
-
-    "access_code",
-
-    "course_and_year",
-
-    "file_location",
-
-  ],
-
-},
-
- "Students Thesis": {
-
-      fields: [
-
-        "access_code",
-
-        "student_name",
-
-        "title_of_thesis",
-
-        "file_location",
-
-      ],
-
-    },
-
-    "Students Apprenticeship And Expo (APEX)": {
-
-  fields: [
-
-    "access_code",
-
-    "student_name",
-
-    "course_and_year",
-
-    "file_location",
-
-  ],
-
-},
-
-"Teaching Load": {
-
-  fields: [
-
-    "access_code",
-
-    "faculty_name",
-
-    "academic_year",
-
-    "file_location",
-
-  ],
-
-},
-
-"Trainings And Seminars": {
-
-  fields: [
-
-    "date",
-
-    "access_code",
-
-    "subject",
-
-    "personnel",
-
-    "zppsu_memo_number",
-
-    "file_location",
-
-  ],
-
-},
-
-"Various Records": {
-
-  fields: [
-
-    "access_code",
-
-    "subject",
-
-    "file_location",
-
-  ],
-
-},
-
-"Verification Request": {
-
-  fields: [
-
-    "date",
-
-    "access_code",
-
-    "requesting_party",
-
-    "student_name",
-
-    "action_taken",
-
-    "file_location",
-
-  ],
-
-},
-
-"VPAA Memoranda": {
-
-  fields: [
-
-    "date",
-
-    "access_code",
-
-    "subject",
-
-    "personnel",
-
-    "file_location",
-
-  ],
-
-},
-
-"VPAF Indorsements": {
-
-  fields: [
-
-    "access_code",
-
-    "subject",
-
-    "concerned_personnel",
-
-    "file_location",
-
-  ],
-
-},
-
-"VPAF Memorandum": {
-
-  fields: [
-
-    "date",
-
-    "access_code",
-
-    "subject",
-
-    "personnel",
-
-    "file_location",
-
-  ],
-
-},
-
-"Fordeed of Donations": {
-
-  fields: [
-
-    "access_code",
-
-    "donor",
-
-    "title_of_donation",
-
-    "file_location",
-
-  ],
-
-},
-
-"Free Higher Education Billing Details": {
-
-  fields: [
-
-    "date",
-
-    "access_code",
-
-    "semester",
-
-    "action_taken",
-
-    "file_location",
-
-  ],
-
-},
-
-  };
-    // CURRENT FIELDS
-    const selectedFields =
-
-      documentConfigs[
-        documentType
-      ]?.fields || [];
-
-     const assignFileBox =
-async (
-  fileId,
-  fileBoxId
-) => {
-
-  try {
-
-    const token =
-      localStorage.getItem(
-        "token"
-      );
-
-    await axios.put(
-
-      `http://localhost:5000/api/files/assign/${fileId}`,
-
-      {
-        file_box_id:
-          fileBoxId
-      },
-
-      {
-        headers: {
-
-          Authorization:
-            `Bearer ${token}`
-
-        }
-      }
-
-    );
-
-    alert(
-      "Assigned successfully"
-    );
-
-    fetchFiles();
-
-    fetchInventories();
-
-  } catch (error) {
-
-    console.error(error);
-
-    alert(
-
-      error.response?.data?.message ||
-
-      "Assignment failed"
-
-    );
-
-  }
-
-};   
-    
-      // FETCH FILES
-    const fetchFiles =
-      async () => {
-
-        try {
-
-          const token =
-  localStorage.getItem("token");
-
-const response =
-  await axios.get(
-    "http://localhost:5000/api/files",
-    {
-      headers: {
-        Authorization:
-          `Bearer ${token}`,
-      },
-    }
-  );
-
-          setGeneratedRecords(
-            response.data
-          );
-
-        } catch (error) {
-
-          console.error(error);
-
-        }
-      };
-
-      const fetchInventories =
-  async () => {
-
+  // FETCH RECORDS
+  const fetchFiles = async () => {
     try {
-
       const token = localStorage.getItem("token");
+      const response = await axios.get("http://localhost:5000/api/files", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setGeneratedRecords(response.data || []);
+    } catch (error) {
+      console.error("FETCH FILES ERROR:", error);
+    }
+  };
 
-      const response =
-        await axios.get(
-          "http://localhost:5000/api/inventory/cabinets",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+  // FETCH CABINETS & FILE BOXES
+  const fetchInventories = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.get("http://localhost:5000/api/inventory/cabinets", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setInventories(response.data || []);
+    } catch (error) {
+      console.error("FETCH INVENTORY ERROR:", error);
+    }
+  };
 
-      setInventories(
-        response.data
+  useEffect(() => {
+    fetchFiles();
+    fetchInventories();
+  }, []);
+
+  const handleChange = (field, value) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  // GENERATE RECORD ENTRY
+  const handleGenerate = async (e) => {
+    e.preventDefault();
+    try {
+      const token = localStorage.getItem("token");
+      await axios.post(
+        "http://localhost:5000/api/files/generate",
+        {
+          ...formData,
+          title: formData.subject || formData.student_name || formData.program || "Untitled Record",
+          category,
+          access_code: formData.access_code,
+          subject: formData.subject || formData.title_of_thesis || formData.program || "",
+          document_type: documentType,
+          memo_date: new Date(),
+          received_date: new Date(),
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
       );
 
+      toast.success("Document entry registered successfully!", "Record Filed");
+      setFormData({});
+      fetchFiles();
     } catch (error) {
-
-      console.error(error);
-
+      console.error("GENERATION ERROR:", error);
+      toast.error(error.response?.data?.message || "Generation failed", "Error");
     }
+  };
 
-};
-
-    // LOAD FILES
-   useEffect(() => {
-
-  fetchFiles();
-
-  fetchInventories();
-
-}, []);
-
-    // HANDLE INPUT
-    const handleChange =
-      (field, value) => {
-
-        setFormData({
-
-          ...formData,
-
-          [field]: value,
-
-        });
-      };
-
-    // GENERATE DOCUMENT
-    const handleGenerate =
-      async (e) => {
-
-        e.preventDefault();
-
-        try {
-
-          const token =
-  localStorage.getItem("token");
-
-await axios.post(
-
-  "http://localhost:5000/api/files/generate",
-
-  {
-
-    ...formData,
-
-    title:
-
-      formData.subject ||
-
-      formData.student_name ||
-
-      formData.program ||
-
-      "Untitled",
-
-    category,
-
-    access_code:
-      formData.access_code,
-
-    subject:
-
-      formData.subject ||
-
-      formData.title_of_thesis ||
-
-      formData.program ||
-
-      "",
-
-    document_type:
-      documentType,
-
-    memo_date:
-      new Date(),
-
-    received_date:
-      new Date(),
-
-  },
-
-  {
-
-    headers: {
-
-      Authorization:
-        `Bearer ${token}`,
-
-    },
-
-  }
-
-);
-
-          alert(
-          "Document generated successfully!"
-        );
-
-        
-        // CLEAR INPUTS ONLY
-        const clearedData = {};
-
-        selectedFields.forEach((field) => {
-          clearedData[field] = "";
-        });
-
-        setFormData(clearedData);
-
-        // REFRESH TABLE
-        fetchFiles();
-        } catch (error) {
-
-          console.error(error);
-
-          alert(
-            "Generation failed"
-          );
-        }
-      };
-
+  // UPLOAD FILE & ATTACH STORAGE
   const handleLegacyUpload = async () => {
     if (!legacyFile) {
-      alert("Please select a file.");
+      toast.warning("Please select a valid document file.", "File Required");
       return;
     }
     try {
       setUploadingLegacy(true);
       const token = localStorage.getItem("token");
-      const formData = new FormData();
-      formData.append("file", legacyFile);
+      const uploadData = new FormData();
+      uploadData.append("file", legacyFile);
       if (selectedUploadFileBox) {
-        formData.append("file_box_id", selectedUploadFileBox);
+        uploadData.append("file_box_id", selectedUploadFileBox);
       }
-      const response = await axios.post(
-        "http://localhost:5000/api/files/upload",
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+      await axios.post("http://localhost:5000/api/files/upload", uploadData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
       setLegacyFile(null);
       setSelectedUploadCabinet("");
       setSelectedUploadFileBox("");
       fetchFiles();
       fetchInventories();
-      alert("Document uploaded successfully!");
+      toast.success("Document uploaded and indexed successfully!", "Document Uploaded");
     } catch (error) {
-      console.error(error);
-      alert("Legacy upload failed.");
+      console.error("UPLOAD ERROR:", error);
+      toast.error("Upload failed. Please check file format and try again.", "Upload Error");
     } finally {
       setUploadingLegacy(false);
     }
   };
 
-    return (
-      <div className="w-full">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold">
-            Files Management
+  // ASSIGN PHYSICAL STORAGE LOCATION
+  const assignFileBox = async (fileId, fileBoxId) => {
+    try {
+      const token = localStorage.getItem("token");
+      await axios.put(
+        `http://localhost:5000/api/files/assign/${fileId}`,
+        { file_box_id: fileBoxId },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      toast.success("Physical storage container assigned successfully!", "Location Assigned");
+      fetchFiles();
+      fetchInventories();
+    } catch (error) {
+      console.error("ASSIGN ERROR:", error);
+      toast.error(error.response?.data?.message || "Storage assignment failed", "Assignment Error");
+    }
+  };
+
+  const totalPages = Math.ceil(generatedRecords.length / itemsPerPage) || 1;
+  const paginatedRecords = generatedRecords.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  return (
+    <div className="space-y-6">
+      {/* PAGE HEADER */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-extrabold text-gray-900 tracking-tight">
+            Document Filing & Registration
           </h1>
-          <p className="text-gray-500 mt-2">
-            Smart automated document generation
+          <p className="text-xs text-gray-500 mt-1">
+            Register automated metadata records or upload scanned files directly into physical cabinets.
           </p>
         </div>
+      </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-8">
-          <Card className="flex flex-col shadow-sm">
-            <CardHeader className="bg-primary/5 border-b pb-4">
-              <CardTitle className="flex items-center gap-2 text-primary">
-                <FilePlus className="w-5 h-5" />
-                Generate Document
-              </CardTitle>
-              <CardDescription>Create automated official documents from templates.</CardDescription>
-            </CardHeader>
-            <CardContent className="flex-1 flex flex-col p-6">
-              <form
-                onSubmit={handleGenerate}
-                className="flex flex-col gap-4 flex-1"
-              >
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* CATEGORY */}
+      {/* TOP SECTION: 2-COLUMN GRID (CREATE ENTRY + UPLOAD FILE) */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        
+        {/* CARD 1: DOCUMENT METADATA GENERATOR */}
+        <Card className="border border-gray-200 shadow-xs bg-white rounded-xl flex flex-col">
+          <CardHeader className="border-b border-gray-100 pb-4">
+            <CardTitle className="text-base font-bold text-gray-900 flex items-center gap-2">
+              <div className="p-1.5 rounded-lg bg-[#800000]/10 text-[#800000]">
+                <FilePlus className="w-4 h-4" />
+              </div>
+              <span>Register Document Entry</span>
+            </CardTitle>
+            <CardDescription className="text-xs text-gray-500">
+              Categorize and record official document metadata in the central registry.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="p-5 flex-1 flex flex-col justify-between">
+            <form onSubmit={handleGenerate} className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {/* CATEGORY SELECT */}
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-gray-700 uppercase">Category</label>
                   <Popover modal={true}>
                     <PopoverTrigger
-                      type="button"
-                      className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="flex h-10 w-full items-center justify-between rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-[#800000]/20 focus:border-[#800000]"
                     >
-                      <span className="truncate">{category || "Select Category"}</span>
-                      <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
+                      <span className="truncate">{category || "Select Classification"}</span>
+                      <ChevronsUpDown className="h-3.5 w-3.5 opacity-50 shrink-0" />
                     </PopoverTrigger>
-                    <PopoverContent className="max-h-[300px] overflow-y-auto p-0" style={{ width: "var(--anchor-width)" }} align="start">
+                    <PopoverContent className="p-0 w-56" align="start">
                       <Command>
                         <CommandList>
                           <CommandGroup>
-                            {["Administrative", "Academic", "Financial"].map((cat) => (
+                            {Object.keys(documentCategories).map((cat) => (
                               <CommandItem
                                 key={cat}
                                 value={cat}
@@ -1499,13 +233,9 @@ await axios.post(
                                   setFormData({});
                                   document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
                                 }}
+                                className="text-xs cursor-pointer"
                               >
-                                <Check
-                                  className={cn(
-                                    "mr-2 h-4 w-4",
-                                    category === cat ? "opacity-100" : "opacity-0"
-                                  )}
-                                />
+                                <Check className={cn("mr-2 h-3.5 w-3.5", category === cat ? "opacity-100 text-[#800000]" : "opacity-0")} />
                                 {cat}
                               </CommandItem>
                             ))}
@@ -1514,22 +244,24 @@ await axios.post(
                       </Command>
                     </PopoverContent>
                   </Popover>
+                </div>
 
-                  {/* DOCUMENT TYPE */}
+                {/* DOCUMENT TYPE SELECT */}
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-gray-700 uppercase">Document Type</label>
                   <Popover modal={true}>
                     <PopoverTrigger
-                      type="button"
                       disabled={!category}
-                      className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="flex h-10 w-full items-center justify-between rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-[#800000]/20 focus:border-[#800000] disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <span className="truncate">{documentType || "Select Document Type"}</span>
-                      <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
+                      <ChevronsUpDown className="h-3.5 w-3.5 opacity-50 shrink-0" />
                     </PopoverTrigger>
-                    <PopoverContent className="max-h-[300px] overflow-y-auto p-0" style={{ width: "var(--anchor-width)" }} align="start">
+                    <PopoverContent className="p-0 max-h-60 overflow-y-auto w-64" align="start">
                       <Command>
-                        <CommandInput placeholder="Search document type..." />
+                        <CommandInput placeholder="Filter types..." className="text-xs" />
                         <CommandList>
-                          <CommandEmpty>No document type found.</CommandEmpty>
+                          <CommandEmpty className="text-xs p-2 text-center text-gray-500">No type found.</CommandEmpty>
                           <CommandGroup>
                             {category && documentCategories[category]?.map((doc) => (
                               <CommandItem
@@ -1540,13 +272,9 @@ await axios.post(
                                   setFormData({});
                                   document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
                                 }}
+                                className="text-xs cursor-pointer"
                               >
-                                <Check
-                                  className={cn(
-                                    "mr-2 h-4 w-4",
-                                    documentType === doc ? "opacity-100" : "opacity-0"
-                                  )}
-                                />
+                                <Check className={cn("mr-2 h-3.5 w-3.5", documentType === doc ? "opacity-100 text-[#800000]" : "opacity-0")} />
                                 {doc}
                               </CommandItem>
                             ))}
@@ -1556,278 +284,274 @@ await axios.post(
                     </PopoverContent>
                   </Popover>
                 </div>
-
-                {/* DYNAMIC INPUTS */}
-                {selectedFields.length > 0 && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
-                    {selectedFields.map((field) => {
-                      if (field === "date") {
-                        return (
-                          <Popover modal={true} key={field}>
-                            <PopoverTrigger
-                              type="button"
-                              className={cn(
-                                "flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
-                                !formData[field] && "text-muted-foreground"
-                              )}
-                            >
-                              {formData[field] ? format(new Date(formData[field]), "PPP") : <span>Pick a date</span>}
-                              <CalendarIcon className="h-4 w-4 opacity-50" />
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start">
-                              <Calendar
-                                mode="single"
-                                selected={formData[field] ? new Date(formData[field]) : undefined}
-                                onSelect={(date) => handleChange(field, date ? format(date, "yyyy-MM-dd") : "")}
-                                initialFocus
-                                captionLayout="dropdown"
-                                fromYear={1990}
-                                toYear={new Date().getFullYear() + 5}
-                              />
-                            </PopoverContent>
-                          </Popover>
-                        );
-                      } else if (field === "action_taken") {
-                        const commonActions = ["Approved", "Pending", "Forwarded", "Archived", "For Revisions"];
-                        return (
-                          <Popover modal={true} key={field}>
-                            <PopoverTrigger
-                              type="button"
-                              className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                            >
-                              <span className="truncate">{formData[field] || "Select or type action..."}</span>
-                              <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
-                            </PopoverTrigger>
-                            <PopoverContent className="max-h-[300px] overflow-y-auto p-0" style={{ width: "var(--anchor-width)" }} align="start">
-                              <Command>
-                                <CommandInput 
-                                  placeholder="Type action..." 
-                                  value={formData[field] || ""} 
-                                  onValueChange={(val) => handleChange(field, val)} 
-                                />
-                                <CommandList>
-                                  <CommandEmpty>Press enter or click outside to save.</CommandEmpty>
-                                  <CommandGroup heading="Common Actions">
-                                    {commonActions.map((action) => (
-                                      <CommandItem
-                                        key={action}
-                                        value={action}
-                                        onSelect={(currentValue) => {
-                                          handleChange(field, action);
-                                        }}
-                                      >
-                                        <Check
-                                          className={cn(
-                                            "mr-2 h-4 w-4",
-                                            formData[field] === action ? "opacity-100" : "opacity-0"
-                                          )}
-                                        />
-                                        {action}
-                                      </CommandItem>
-                                    ))}
-                                  </CommandGroup>
-                                </CommandList>
-                              </Command>
-                            </PopoverContent>
-                          </Popover>
-                        );
-                      } else {
-                        return (
-                          <Input
-                            key={field}
-                            type="text"
-                            placeholder={field.replaceAll("_", " ").toUpperCase()}
-                            value={formData[field] || ""}
-                            onChange={(e) => handleChange(field, e.target.value)}
-                            className="bg-background"
-                          />
-                        );
-                      }
-                    })}
-                  </div>
-                )}
-
-                <div className="mt-auto pt-6">
-                  <button
-                    type="submit"
-                    className="flex items-center justify-center gap-2 bg-primary text-primary-foreground h-10 px-6 rounded-md font-medium hover:bg-primary/90 transition w-full"
-                  >
-                    <FilePlus className="w-4 h-4" />
-                    Generate Document
-                  </button>
-                </div>
-              </form>
-            </CardContent>
-          </Card>
-
-          <Card className="flex flex-col shadow-sm">
-            <CardHeader className="bg-primary/5 border-b pb-4">
-              <CardTitle className="flex items-center gap-2 text-primary">
-                <UploadCloud className="w-5 h-5" />
-                Smart Document Upload
-              </CardTitle>
-              <CardDescription>Upload files directly. OCR is automatically applied for image-based PDFs.</CardDescription>
-            </CardHeader>
-            <CardContent className="flex-1 flex flex-col justify-center p-6">
-              <div className="flex flex-col gap-6 items-center justify-center border-2 border-dashed border-gray-200 rounded-xl p-8 bg-gray-50/50 hover:bg-gray-50 transition-colors h-full">
-                <div className="flex flex-col items-center text-center gap-2">
-                  <UploadCloud className="w-10 h-10 text-gray-400" />
-                  <p className="text-sm font-medium text-gray-600">Choose a file to upload</p>
-                  <p className="text-xs text-gray-400">PDF, DOCX, PPTX, JPG, PNG up to 10MB</p>
-                </div>
-
-                <div className="w-full max-w-sm flex gap-2">
-                  <select
-                    value={selectedUploadCabinet}
-                    onChange={(e) => {
-                      setSelectedUploadCabinet(e.target.value);
-                      setSelectedUploadFileBox("");
-                    }}
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                  >
-                    <option value="">Select Cabinet</option>
-                    {inventories.map((inv) => (
-                      <option key={inv.id} value={inv.id}>
-                        {inv.name || inv.cabinet_name || `Cabinet ${inv.id}`}
-                      </option>
-                    ))}
-                  </select>
-                  <select
-                    value={selectedUploadFileBox}
-                    onChange={(e) => setSelectedUploadFileBox(e.target.value)}
-                    disabled={!selectedUploadCabinet}
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <option value="">Select File Box</option>
-                    {inventories.find(inv => String(inv.id) === String(selectedUploadCabinet))?.file_boxes?.map(box => (
-                      <option key={box.id} value={box.id}>{box.name}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <Input
-                  type="file"
-                  accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png"
-                  onChange={(e) => setLegacyFile(e.target.files[0] || null)}
-                  className="w-full max-w-sm cursor-pointer bg-white"
-                />
-                <button
-                  onClick={handleLegacyUpload}
-                  disabled={!legacyFile || uploadingLegacy}
-                  className="flex items-center justify-center gap-2 bg-primary text-primary-foreground h-10 px-8 rounded-md font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition w-full max-w-sm"
-                >
-                  <UploadCloud className="w-4 h-4" />
-                  {uploadingLegacy ? "Uploading..." : "Upload Document"}
-                </button>
               </div>
-            </CardContent>
-          </Card>
-        </div>
 
-      {/* GENERATED RECORDS */}
-      <Card className="overflow-hidden">
-        <Table className="w-full">
-          <TableHeader>
-            <TableRow>
-              <TableHead className="p-4">Document Type</TableHead>
-              <TableHead className="p-4">Access Code</TableHead>
-              <TableHead className="p-4">Subject</TableHead>
-              <TableHead className="p-4">Status</TableHead>
-              <TableHead className="p-4">Cabinet</TableHead>
-              <TableHead className="p-4">Action</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {generatedRecords.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((record) => (
-              <TableRow key={record.id} className="border-b">
-                <TableCell className="p-4">{record.document_type}</TableCell>
-                <TableCell className="p-4">{record.access_code}</TableCell>
-                <TableCell className="p-4">{record.subject}</TableCell>
-                <TableCell className="p-4">{record.status}</TableCell>
-                <TableCell className="p-4">
-                  <div className="flex gap-2">
-                    <select
-                      value={selectedInventory[record.id] || record.file_box?.cabinet?.id || ""}
-                      onChange={(e) => {
-                        setSelectedInventory({
-                          ...selectedInventory,
-                          [record.id]: e.target.value,
-                        });
-                        setSelectedFileBox({
-                          ...selectedFileBox,
-                          [record.id]: "",
-                        });
-                      }}
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                    >
-                      <option value="">Select Cabinet</option>
-                      {inventories.map((inv) => (
-                        <option key={inv.id} value={inv.id}>
-                          {inv.name || inv.cabinet_name || `Cabinet ${inv.id}`}
-                        </option>
-                      ))}
-                    </select>
+              {/* DYNAMIC FORM FIELDS */}
+              {selectedFields.length > 0 && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                  {selectedFields.map((field) => (
+                    <div key={field} className="space-y-1">
+                      <label className="text-[11px] font-bold text-gray-600 uppercase">
+                        {field.replaceAll("_", " ")}
+                      </label>
+                      <Input
+                        type="text"
+                        placeholder={`Enter ${field.replaceAll("_", " ")}`}
+                        value={formData[field] || ""}
+                        onChange={(e) => handleChange(field, e.target.value)}
+                        className="h-10 text-xs rounded-xl border-gray-200 bg-white"
+                        required={field === "access_code"}
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
 
-                    <select
-                      value={selectedFileBox[record.id] || record.file_box_id || ""}
-                      onChange={(e) =>
-                        setSelectedFileBox({
-                          ...selectedFileBox,
-                          [record.id]: e.target.value,
-                        })
-                      }
-                      disabled={!(selectedInventory[record.id] || record.file_box?.cabinet?.id)}
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50"
-                    >
-                      <option value="">Select File Box</option>
-                      {inventories.find(inv => String(inv.id) === String(selectedInventory[record.id] || record.file_box?.cabinet?.id))?.file_boxes?.map(box => (
-                        <option key={box.id} value={box.id}>{box.name}</option>
-                      ))}
-                    </select>
-                  </div>
-                </TableCell>
-                <TableCell className="p-4">
-                  <button
-                    onClick={() =>
-                      assignFileBox(
-                        record.id,
-                        selectedFileBox[record.id] || record.file_box_id
-                      )
-                    }
-                    disabled={!(selectedFileBox[record.id] || record.file_box_id)}
-                    className="bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90 transition text-sm font-medium disabled:opacity-50"
-                  >
-                    {record.file_box_id ? "Move" : "Assign"}
-                  </button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-        <div className="p-4 border-t flex items-center justify-between bg-gray-50/50">
-          <span className="text-sm text-gray-500 font-medium">
-            Showing {generatedRecords.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0} to {Math.min(currentPage * itemsPerPage, generatedRecords.length)} of {generatedRecords.length} entries
-          </span>
-          <div className="flex gap-2">
-            <button
-              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-              disabled={currentPage === 1}
-              className="px-4 py-2 border rounded-lg text-sm font-medium hover:bg-gray-100 disabled:opacity-50 transition bg-white"
-            >
-              Previous
-            </button>
-            <button
-              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, Math.ceil(generatedRecords.length / itemsPerPage)))}
-              disabled={currentPage === Math.ceil(generatedRecords.length / itemsPerPage) || Math.ceil(generatedRecords.length / itemsPerPage) === 0}
-              className="px-4 py-2 border rounded-lg text-sm font-medium hover:bg-gray-100 disabled:opacity-50 transition bg-white"
-            >
-              Next
-            </button>
+              <Button
+                type="submit"
+                disabled={!documentType}
+                className="w-full bg-[#800000] text-white hover:bg-[#660000] py-5 rounded-xl font-bold text-xs shadow-xs transition-all flex items-center justify-center gap-2 mt-4"
+              >
+                <FilePlus className="w-4 h-4" />
+                <span>Register Document Entry</span>
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+
+        {/* CARD 2: DIRECT SMART DOCUMENT UPLOAD */}
+        <Card className="border border-gray-200 shadow-xs bg-white rounded-xl flex flex-col">
+          <CardHeader className="border-b border-gray-100 pb-4">
+            <CardTitle className="text-base font-bold text-gray-900 flex items-center gap-2">
+              <div className="p-1.5 rounded-lg bg-[#800000]/10 text-[#800000]">
+                <UploadCloud className="w-4 h-4" />
+              </div>
+              <span>Upload Document & Assign Storage</span>
+            </CardTitle>
+            <CardDescription className="text-xs text-gray-500">
+              Upload PDF, DOCX, or PPTX. Automatic OCR extracts text from scanned records.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="p-5 flex-1 flex flex-col justify-center">
+            <div className="border-2 border-dashed border-gray-200 rounded-2xl p-6 bg-[#FDFBF7] flex flex-col items-center justify-center text-center space-y-4">
+              <div className="w-12 h-12 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-[#800000] shadow-xs">
+                <UploadCloud className="w-6 h-6 stroke-[2]" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-gray-900">Choose document to upload</p>
+                <p className="text-xs text-gray-500 mt-0.5">PDF, DOCX, PPTX, JPG up to 10MB</p>
+              </div>
+
+              {/* CABINET & FILE BOX DROPDOWNS */}
+              <div className="w-full max-w-sm grid grid-cols-1 sm:grid-cols-2 gap-2 text-left">
+                <select
+                  value={selectedUploadCabinet}
+                  onChange={(e) => {
+                    setSelectedUploadCabinet(e.target.value);
+                    setSelectedUploadFileBox("");
+                  }}
+                  className="h-9 w-full rounded-xl border border-gray-200 bg-white px-3 text-xs font-medium focus:ring-2 focus:ring-[#800000]/20"
+                >
+                  <option value="">Cabinet (Optional)</option>
+                  {inventories.map((inv) => (
+                    <option key={inv.id} value={inv.id}>
+                      {inv.name || inv.cabinet_name || `Cabinet ${inv.id}`}
+                    </option>
+                  ))}
+                </select>
+
+                <select
+                  value={selectedUploadFileBox}
+                  onChange={(e) => setSelectedUploadFileBox(e.target.value)}
+                  disabled={!selectedUploadCabinet}
+                  className="h-9 w-full rounded-xl border border-gray-200 bg-white px-3 text-xs font-medium focus:ring-2 focus:ring-[#800000]/20 disabled:opacity-50"
+                >
+                  <option value="">File Box (Optional)</option>
+                  {inventories.find((inv) => String(inv.id) === String(selectedUploadCabinet))?.file_boxes?.map((box) => (
+                    <option key={box.id} value={box.id}>{box.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <input
+                type="file"
+                accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png"
+                onChange={(e) => setLegacyFile(e.target.files[0] || null)}
+                className="w-full max-w-sm text-xs file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-[#800000] file:text-white hover:file:bg-[#660000] cursor-pointer"
+              />
+
+              <Button
+                onClick={handleLegacyUpload}
+                disabled={!legacyFile || uploadingLegacy}
+                className="w-full max-w-sm bg-[#800000] text-white hover:bg-[#660000] py-5 rounded-xl font-bold text-xs shadow-xs transition-all flex items-center justify-center gap-2"
+              >
+                {uploadingLegacy ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Processing & Indexing...</span>
+                  </>
+                ) : (
+                  <>
+                    <UploadCloud className="w-4 h-4" />
+                    <span>Upload & File Document</span>
+                  </>
+                )}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* PHYSICAL STORAGE ASSIGNMENT TABLE */}
+      <Card className="border border-gray-200 shadow-xs bg-white rounded-xl overflow-hidden">
+        <CardHeader className="border-b border-gray-100 pb-4 flex flex-row items-center justify-between">
+          <div>
+            <CardTitle className="text-base font-bold text-gray-900 flex items-center gap-2">
+              <Box className="w-4 h-4 text-[#800000]" />
+              <span>Physical Storage Assignments</span>
+            </CardTitle>
+            <CardDescription className="text-xs text-gray-500">
+              Assign or update physical cabinet and file box locations for registered records.
+            </CardDescription>
           </div>
-        </div>
+        </CardHeader>
+        <CardContent className="p-0">
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs text-left">
+              <thead className="text-[11px] text-gray-500 uppercase bg-[#FDFBF7] border-b border-gray-200">
+                <tr>
+                  <th className="px-5 py-3 font-bold">Document Type</th>
+                  <th className="px-5 py-3 font-bold">Access Code</th>
+                  <th className="px-5 py-3 font-bold">Subject / Title</th>
+                  <th className="px-5 py-3 font-bold">Status</th>
+                  <th className="px-5 py-3 font-bold">Physical Storage Location</th>
+                  <th className="px-5 py-3 font-bold text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {paginatedRecords.length > 0 ? (
+                  paginatedRecords.map((record) => {
+                    const currentCabId = selectedInventory[record.id] || record.file_box?.cabinet?.id || "";
+                    const currentBoxId = selectedFileBox[record.id] || record.file_box_id || "";
+
+                    return (
+                      <tr key={record.id} className="hover:bg-[#FDFBF7] transition-colors">
+                        <td className="px-5 py-3.5 font-bold text-[#800000]">{record.document_type}</td>
+                        <td className="px-5 py-3.5 font-mono text-gray-700">{record.access_code || "—"}</td>
+                        <td className="px-5 py-3.5 font-medium text-gray-900 max-w-xs truncate">
+                          {record.subject || record.title || "—"}
+                        </td>
+                        <td className="px-5 py-3.5">
+                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold inline-block
+                            ${record.status === "Active" ? "bg-emerald-50 text-emerald-700 border border-emerald-200" :
+                              record.status === "Archived" ? "bg-gray-100 text-gray-700 border border-gray-200" :
+                              "bg-amber-50 text-amber-700 border border-amber-200"}`}
+                          >
+                            {record.status || "Active"}
+                          </span>
+                        </td>
+                        <td className="px-5 py-3.5">
+                          <div className="flex gap-2 max-w-xs">
+                            <select
+                              value={currentCabId}
+                              onChange={(e) => {
+                                setSelectedInventory({
+                                  ...selectedInventory,
+                                  [record.id]: e.target.value,
+                                });
+                                setSelectedFileBox({
+                                  ...selectedFileBox,
+                                  [record.id]: "",
+                                });
+                              }}
+                              className="h-8 w-full rounded-lg border border-gray-200 bg-white px-2 text-xs font-medium focus:ring-1 focus:ring-[#800000]"
+                            >
+                              <option value="">Select Cabinet</option>
+                              {inventories.map((inv) => (
+                                <option key={inv.id} value={inv.id}>
+                                  {inv.name || inv.cabinet_name || `Cabinet ${inv.id}`}
+                                </option>
+                              ))}
+                            </select>
+
+                            <select
+                              value={currentBoxId}
+                              onChange={(e) =>
+                                setSelectedFileBox({
+                                  ...selectedFileBox,
+                                  [record.id]: e.target.value,
+                                })
+                              }
+                              disabled={!currentCabId}
+                              className="h-8 w-full rounded-lg border border-gray-200 bg-white px-2 text-xs font-medium focus:ring-1 focus:ring-[#800000] disabled:opacity-50"
+                            >
+                              <option value="">Select Box</option>
+                              {inventories.find((inv) => String(inv.id) === String(currentCabId))?.file_boxes?.map((box) => (
+                                <option key={box.id} value={box.id}>{box.name}</option>
+                              ))}
+                            </select>
+                          </div>
+                        </td>
+                        <td className="px-5 py-3.5 text-right">
+                          <Button
+                            size="sm"
+                            onClick={() => assignFileBox(record.id, currentBoxId)}
+                            disabled={!currentBoxId}
+                            className="bg-[#800000] text-white hover:bg-[#660000] h-8 px-3 rounded-lg text-xs font-bold shadow-xs disabled:opacity-40"
+                          >
+                            {record.file_box_id ? "Reassign" : "Assign"}
+                          </Button>
+                        </td>
+                      </tr>
+                    );
+                  })
+                ) : (
+                  <tr>
+                    <td colSpan="6" className="px-5 py-8 text-center text-gray-400 italic">
+                      No records awaiting physical filing
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* PAGINATION BAR */}
+          <div className="p-4 border-t border-gray-200 flex items-center justify-between bg-[#FDFBF7] text-xs text-gray-600">
+            <span>
+              Showing {generatedRecords.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0} to{" "}
+              {Math.min(currentPage * itemsPerPage, generatedRecords.length)} of {generatedRecords.length} records
+            </span>
+            <div className="flex items-center gap-1.5">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                className="h-8 px-3 text-xs bg-white"
+              >
+                <ChevronLeft className="w-3.5 h-3.5 mr-1" />
+                <span>Prev</span>
+              </Button>
+              <span className="px-2 font-bold text-gray-900">
+                {currentPage} / {totalPages}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                disabled={currentPage >= totalPages}
+                className="h-8 px-3 text-xs bg-white"
+              >
+                <span>Next</span>
+                <ChevronRight className="w-3.5 h-3.5 ml-1" />
+              </Button>
+            </div>
+          </div>
+        </CardContent>
       </Card>
     </div>
-    );
-  }
+  );
+}
 
-  export default Files;
+export default Files;

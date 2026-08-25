@@ -1,2546 +1,613 @@
-  import { useEffect, useState }
-  from "react";
-
-  import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-
+import { useEffect, useState, useRef } from "react";
 import axios from "axios";
-import { Eye, Download, Edit, RefreshCcw, Trash2, Search, Sparkles, Filter, FileText, CheckCircle, Archive, Clock } from "lucide-react";
-  import DashboardLayout from
-  "../components/layout/DashboardLayout";
-
-  import AccomplishmentReportTemplate
-  from "../components/templates/AccomplishmentReportTemplate";
-
-  import AaccupTemplate from "../components/templates/AaccupTemplate";
-
-  import AnnualReportTemplate
-  from "../components/templates/AnnualReportTemplate";
-
-
-  import StudentAccountTemplate
-  from "../components/templates/StudentAccountTemplate";
-
-  import BoardResolutionTemplate
-  from "../components/templates/BoardResolutionTemplate";
-
-  import BudgetPlanTemplate
-  from "../components/templates/BudgetPlanTemplate";
-
-  import BudgetProposalTemplate from "../components/templates/BudgetProposalTemplate";
-
-  import BudgetaryRequirementsTemplate from "../components/templates/BudgetaryRequirementsTemplate";
-
-  import ChecksIssuedTemplate from "../components/templates/ChecksIssuedTemplate";
-
-  import ChedCommunicationTemplate from "../components/templates/ChedCommunicationTemplate";
-
-  import ChedMemoOrderTemplate from "../components/templates/ChedMemoOrderTemplate";
-
-  import ClassProgramTemplate from "../components/templates/ClassProgramTemplate";
-
-  import CoaAnnualReportTemplate from "../components/templates/CoaAnnualReportTemplate";
-
-  import CoaAuditObservationTemplate from "../components/templates/CoaAuditObservationTemplate";
-
-  import CoaCircularTemplate from "../components/templates/CoaCircularTemplate";
-
-  import CoaCommunicationTemplate from "../components/templates/CoaCommunicationTemplate";
-
-  import CoaNoticeDisallowanceTemplate from "../components/templates/CoaNoticeDisallowanceTemplate";
-
-  import CoaNoticeSuspensionTemplate from "../components/templates/CoaNoticeSuspensionTemplate";
-
-  import MasterListOfRecordsForCollectionTemplate from "../components/templates/MasterListOfRecordsForCollectionTemplate";
-
-  import ContractOfServiceVisitingLecturersTemplate from "../components/templates/ContractOfServiceVisitingLecturersTemplate";
-
-  import CopcTemplate from "../components/templates/CopcTemplate";
-
-  import CscCirculars1Template from "../components/templates/CscCirculars1Template";
-
-  import CscCommunications2024Template from "../components/templates/CscCommunications2024Template";
-
-  import DataAnalysisTemplate from "../components/templates/DataAnalysisTemplate";
-
-  import DbmCircularsTemplate from "../components/templates/DbmCircularsTemplate";
-
-  import DbmCirculars1Template from "../components/templates/DbmCirculars1Template";
-
-  import DisbursementsTemplate from "../components/templates/DisbursementsTemplate";
-
-  import DostCommunications2024Template from "../components/templates/DostCommunications2024Template";
-
-  import HemisTemplate from "../components/templates/HemisTemplate";
-
-  import IdpTemplate from "../components/templates/IdpTemplate";
-
-  import IncomingCommunicationsOutsideZcPerimeterTemplate from "../components/templates/IncomingCommunicationsOutsideZcPerimeterTemplate";
-
-  import IncomingCommunicationsOutsideTemplate from "../components/templates/IncomingCommunicationsOutsideTemplate";
-
-  import IpcrTemplate from "../components/templates/IpcrTemplate";
-
-  import JobOrdersTemplate from "../components/templates/JobOrdersTemplate";
-
-  import ManualsTemplate from "../components/templates/ManualsTemplate";
-
-  import MedicalRecordsTemplate from "../components/templates/MedicalRecordsTemplate";
-
-  import MemoOtherMattersTemplate from "../components/templates/MemoOtherMattersTemplate";
-
-  import MemorandumOtherMattersTemplate from "../components/templates/MemorandumOtherMattersTemplate";
-
-  import MinutesOfMeetingsTemplate from "../components/templates/MinutesOfMeetingsTemplate";
-
-  import MoaTemplate from "../components/templates/MoaTemplate";
-
-  import NosaTemplate from "../components/templates/NosaTemplate";
-
-  import SalnTemplate from "../components/templates/SalnTemplate";
-
-  import NsiTemplate from "../components/templates/NsiTemplate";
-
-  import OffensesViolationsTemplate from "../components/templates/OffensesViolationsTemplate";
-
-  import OutgoingCommunicationsOutsideTemplate from "../components/templates/OutgoingCommunicationsOutsideTemplate";
-
-  import PortfolioOfFacultyTemplate from "../components/templates/PortfolioOfFacultyTemplate";
-
-  import PurchaseRequestsTemplate from "../components/templates/PurchaseRequestsTemplate";
-
-  import ReportOfRatingsTemplate from "../components/templates/ReportOfRatingsTemplate";
-
-  import RlmTemplate from "../components/templates/RlmTemplate";
-
-  import SpecialOrdersTemplate from "../components/templates/SpecialOrdersTemplate";
-
-  import StudentAdmissionRecordsTemplate from "../components/templates/StudentAdmissionRecordsTemplate";
-
-  import StudentsInOffCampusTeachingTemplate from "../components/templates/StudentsInOffCampusTeachingTemplate";
-
-  import StudentsProspectusTemplate from "../components/templates/StudentsProspectusTemplate";
-
-  import StudentsThesisTemplate from "../components/templates/StudentsThesisTemplate";
-
-  import StudentsAPEXTemplate from "../components/templates/StudentsAPEXTemplate";
-
-  import TeachingLoadTemplate from "../components/templates/TeachingLoadTemplate";
-
-  import TrainingsAndSeminarsTemplate from "../components/templates/TrainingsAndSeminarsTemplate";
-
-  import VariousRecordsTemplate from "../components/templates/VariousRecordsTemplate";
-
-  import VerificationRequestTemplate from "../components/templates/VerificationRequestTemplate";
-
-  import VPaaMemorandaTemplate from "../components/templates/VPaaMemorandaTemplate";
-
-  import VPAFIndorsementsTemplate from "../components/templates/VPAFIndorsementsTemplate";
-
-  import VPAFMemorandumTemplate from "../components/templates/VPAFMemorandumTemplate";
-
-  import VPREMemorandaTemplate from "../components/templates/VPREMemorandaTemplate";
-
-  import DeedOfDonationsTemplate from "../components/templates/DeedOfDonationsTemplate";
-
-  import FreeHigherEducationBillingTemplate from "../components/templates/FreeHigherEducationBillingTemplate";
-
-  function DocumentCenter() {
-
-    const [files, setFiles] =
-      useState([]);
-
-    const [search, setSearch] =
-      useState("");
-      
-    const [searchMode, setSearchMode] = useState("standard"); // "standard" or "ai"
-    const [debouncedSearch, setDebouncedSearch] = useState("");
-      
-    useEffect(() => {
-      if (searchMode === "standard") {
-        const handler = setTimeout(() => {
-          setDebouncedSearch(search);
-        }, 300);
-        return () => clearTimeout(handler);
-      } else {
-        setDebouncedSearch("");
-      }
-    }, [search, searchMode]);
-
-    const [isAISearching, setIsAISearching] = useState(false);
-    const [aiResults, setAiResults] = useState(null);
-      
-    const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage] = useState(10);
-
-
-    const [selectedYear,
-      setSelectedYear] =
-        useState("");
-
-    const [selectedMonth,
-      setSelectedMonth] =
-        useState("");
-
-        const [
-    selectedStatus,
-    setSelectedStatus
-  ] = useState("");
-
-  const [
-    selectedType,
-    setSelectedType
-  ] = useState("");
-
-  const [
-    showTrash,
-    setShowTrash
-  ] = useState(false);
-
-    const [viewingFile,
-      setViewingFile] =
-        useState(null);
-
-    const [editingFile,
-      setEditingFile] =
-        useState(null);
-
-    const [editSubject,
-      setEditSubject] =
-        useState("");
-
-    const [editDocumentType,
-      setEditDocumentType] =
-        useState("");
-
-        const [
-    editStatus,
-    setEditStatus
-  ] = useState("");
-
-    // FETCH FILES
-    const fetchFiles = async () => {
-
-      try {
-
-        const token =
-    localStorage.getItem("token");
-
-  const response =
-    await axios.get(
-      "http://localhost:5000/api/files",
-      {
-        headers: {
-          Authorization:
-            `Bearer ${token}`,
-        },
-      }
-    );
-
-   
-        setFiles(
-          response.data
-        );
-      } catch (error) {
-
-        console.error(error);
-      }
-    };
-
-    useEffect(() => {
-
-      fetchFiles();
-
-    }, []);
-
-    // AI SEMANTIC SEARCH
-    const handleAISearch = async () => {
-      if (!search.trim()) {
-        setAiResults(null);
-        return;
-      }
-      setIsAISearching(true);
-      try {
-        const token = localStorage.getItem("token");
-        const response = await axios.get(
-          `http://localhost:5000/api/files/search?query=${encodeURIComponent(search)}`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        setAiResults(response.data);
-      } catch (error) {
-        console.error("AI Search failed", error);
-      } finally {
-        setIsAISearching(false);
-      }
-    };
-
-    // CLEAR SEARCH
-    useEffect(() => {
-      if (search === "") {
-        setAiResults(null);
-      }
-    }, [search]);
-
-    useEffect(() => {
-      setCurrentPage(1);
-    }, [search, selectedYear, selectedMonth, selectedStatus, selectedType, showTrash]);
-
-    const trackAction = async (action, description) => {
-      try {
-        const token = localStorage.getItem("token");
-        await axios.post("http://localhost:5000/api/logs/track", {
-          action,
-          description
-        }, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-      } catch (error) {
-        console.error("Failed to track action:", error);
-      }
-    };
-
-    const handleViewFile = (file) => {
-      setViewingFile(file);
-      trackAction("VIEW", `Viewed ${file.document_type || 'File'} ${file.document_id}`);
-    };
+import { 
+  Eye, 
+  Download, 
+  Edit, 
+  Trash2, 
+  Search, 
+  Sparkles, 
+  Filter, 
+  FileText, 
+  Archive, 
+  Clock, 
+  RotateCcw,
+  Printer,
+  X,
+  ChevronLeft,
+  ChevronRight,
+  ShieldCheck,
+  CheckCircle2,
+  Box,
+  FileCheck
+} from "lucide-react";
+import DashboardLayout from "../components/layout/DashboardLayout";
+import DocumentTemplateRenderer from "../components/templates/DocumentTemplateRenderer";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+
+import { useToast } from "../context/ToastContext";
+import { useModal } from "../context/ModalContext";
+
+function DocumentCenter() {
+  const toast = useToast();
+  const modal = useModal();
+  const [files, setFiles] = useState([]);
+  const [search, setSearch] = useState("");
+  const [searchMode, setSearchMode] = useState("standard"); // "standard" or "ai"
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [isAISearching, setIsAISearching] = useState(false);
+  const [aiResults, setAiResults] = useState(null);
   
-  // DELETE FILE
-  const handleDelete =
-    async (id) => {
+  // Filters & State
+  const [selectedYear, setSelectedYear] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState("");
+  const [selectedType, setSelectedType] = useState("");
+  const [showTrash, setShowTrash] = useState(false);
+  
+  // Modals
+  const [viewingFile, setViewingFile] = useState(null);
+  const [editingFile, setEditingFile] = useState(null);
+  const [editSubject, setEditSubject] = useState("");
+  const [editDocumentType, setEditDocumentType] = useState("");
+  const [editStatus, setEditStatus] = useState("Active");
 
-      const confirmDelete =
-        window.confirm(
-          "Delete this document?"
-        );
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+  const printRef = useRef();
 
-      if (!confirmDelete)
-        return;
-      
-      try {
-
-        // UPDATE UI FIRST
-        setFiles((prevFiles) =>
-
-          prevFiles.map((file) =>
-
-            file.id === id
-
-            ?
-
-            {
-              ...file,
-              is_deleted: true,
-              status: "Deleted",
-            }
-
-            :
-
-            file
-
-          )
-
-        );
-
-        // THEN API
-        const token =
-    localStorage.getItem("token");
-
-
-  await axios.delete(
-    `http://localhost:5000/api/files/${id}`,
-    {
-      headers: {
-        Authorization:
-          `Bearer ${token}`,
-      },
+  useEffect(() => {
+    if (searchMode === "standard") {
+      const handler = setTimeout(() => setDebouncedSearch(search), 300);
+      return () => clearTimeout(handler);
+    } else {
+      setDebouncedSearch("");
     }
-  );
+  }, [search, searchMode]);
 
-      } catch (error) {
+  const fetchFiles = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.get("http://localhost:5000/api/files", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setFiles(response.data || []);
+    } catch (error) {
+      console.error("FETCH FILES ERROR:", error);
+    }
+  };
 
-        console.error(error);
+  useEffect(() => {
+    fetchFiles();
+  }, []);
 
-        alert(
-          "Delete failed"
-        );
-      }
-    };
-
-    const handlePermanentDelete = async (id) => {
-
-        console.log("PERMANENT DELETE CLICKED", id);
-
-    const confirmDelete =
-      window.confirm(
-        "Permanently delete this document?"
-      );
-
-    if (!confirmDelete)
+  const handleAISearch = async () => {
+    if (!search.trim()) {
+      setAiResults(null);
       return;
+    }
+    setIsAISearching(true);
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.get(
+        `http://localhost:5000/api/files/search?query=${encodeURIComponent(search)}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setAiResults(response.data || []);
+      toast.info(`Found ${response.data?.length || 0} AI matching records.`, "AI Semantic Search");
+    } catch (error) {
+      console.error("AI Search failed", error);
+      toast.error("Semantic search failed. Falling back to standard filters.", "AI Search");
+    } finally {
+      setIsAISearching(false);
+    }
+  };
+
+  useEffect(() => {
+    if (search === "") setAiResults(null);
+  }, [search]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, selectedYear, selectedStatus, selectedType, showTrash]);
+
+  // LOG ACTION
+  const trackAction = async (action, description) => {
+    try {
+      const token = localStorage.getItem("token");
+      await axios.post(
+        "http://localhost:5000/api/logs/track",
+        { action, description },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+    } catch (error) {
+      console.error("Failed to track action:", error);
+    }
+  };
+
+  const handleViewFile = (file) => {
+    setViewingFile(file);
+    trackAction("VIEW", `Viewed ${file.document_type || "File"} ${file.document_id}`);
+  };
+
+  const handleDelete = async (id) => {
+    const confirmed = await modal.confirm({
+      title: "Move to Trash",
+      message: "Are you sure you want to move this document to the trash bin? You can restore it later if needed.",
+      confirmText: "Move to Trash",
+      cancelText: "Cancel",
+      variant: "danger",
+    });
+    if (!confirmed) return;
 
     try {
-
-      const token =
-    localStorage.getItem("token");
-
-  await axios.delete(
-    `http://localhost:5000/api/files/permanent/${id}`,
-    {
-      headers: {
-        Authorization:
-          `Bearer ${token}`,
-      },
-    }
-  );
-      fetchFiles();
-
-    } catch (error) {
-
-      console.error(error);
-
-      alert(
-        "Permanent delete failed"
-      );
-
-    }
-
-  };
-
-      // QUICK STATUS UPDATE
-  const handleQuickStatus =
-    async (
-      id,
-      status
-    ) => {
-
-      try {
-
-      const token =
-    localStorage.getItem("token");
-
-  await axios.put(
-
-    `http://localhost:5000/api/files/${id}`,
-
-    {
-
-      status,
-
-      is_deleted:
-        status === "Deleted",
-
-    },
-
-    {
-
-      headers: {
-
-        Authorization:
-          `Bearer ${token}`,
-
-      },
-
-    }
-
-  );
-
-        fetchFiles();
-
-      } catch (error) {
-
-        console.error(error);
-
-        alert(
-          "Status update failed"
-        );
-      }
-    };
-
-      // UPDATE FILE
-      const handleUpdate =
-        async () => {
-
-          try {
-
-          const token =
-    localStorage.getItem("token");
-
-  await axios.put(
-    `http://localhost:5000/api/files/${editingFile.id}`,
-    {
-      subject: editSubject,
-      document_type: editDocumentType,
-      status: editStatus,
-    },
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
-
-            fetchFiles();
-
-            setEditingFile(
-              null
-            );
-
-          } catch (error) {
-
-            console.error(error);
-
-            alert(
-              "Update failed"
-            );
-          }
-        };
-
-
-  // DOCUMENT COUNTS
-  const totalDocuments =
-    files.filter(
-      (file) => !file.is_deleted
-    ).length;
-
-  const activeDocuments =
-    files.filter(
-      (file) =>
-        file.status === "Active" &&
-        !file.is_deleted
-    ).length;
-
-  const archivedDocuments =
-    files.filter(
-      (file) =>
-        file.status === "Archived" &&
-        !file.is_deleted
-    ).length;
-
-  const pendingDocuments =
-    files.filter(
-      (file) =>
-        file.status === "Pending" &&
-        !file.is_deleted
-    ).length;
-
-
-
-    // FILTER FILES
-    const baseFiles = aiResults !== null ? aiResults : files;
-    const filteredFiles =
-      baseFiles.filter((file) => {
-
-     let smartSearch = debouncedSearch
-  .toLowerCase()
-  .trim();
-
-  const ignoredWords = [
-  "show",
-  "find",
-  "display",
-  "search",
-  "document",
-  "documents",
-  "all",
-  "me",
-  "please",
-];
-
-ignoredWords.forEach((word) => {
-  smartSearch = smartSearch.replace(word, "");
-});
-
-smartSearch = smartSearch.trim();
-
-const fuzzyMatch = (text, query) => {
-  if (!text || !query) return false;
-
-  text = text.toLowerCase();
-  query = query.toLowerCase();
-
-  // Exact match
-  if (text.includes(query)) return true;
-
-  const words = text.split(/\s+/);
-
-  const levenshtein = (a, b) => {
-    const matrix = [];
-
-    for (let i = 0; i <= b.length; i++) {
-      matrix[i] = [i];
-    }
-
-    for (let j = 0; j <= a.length; j++) {
-      matrix[0][j] = j;
-    }
-
-    for (let i = 1; i <= b.length; i++) {
-      for (let j = 1; j <= a.length; j++) {
-        if (b.charAt(i - 1) === a.charAt(j - 1)) {
-          matrix[i][j] = matrix[i - 1][j - 1];
-        } else {
-          matrix[i][j] = Math.min(
-            matrix[i - 1][j - 1] + 1, // replace
-            matrix[i][j - 1] + 1,     // insert
-            matrix[i - 1][j] + 1      // delete
-          );
-        }
-      }
-    }
-
-    return matrix[b.length][a.length];
-  };
-
-  for (const word of words) {
-    if (levenshtein(word, query) <= 2) {
-      return true;
-    }
-  }
-
-  return false;
-};  
-
-  const matchesSearch =
-    aiResults !== null 
-    ? true // If AI results are present, skip fuzzy matching
-    : smartSearch === ""
-    ||
-
-    fuzzyMatch
-    (file.subject, smartSearch)
-
-    ||
-
-    fuzzyMatch
-    (file.document_type, smartSearch)
-
-    ||
-
-    fuzzyMatch
-    (file.document_id, smartSearch)
-
-    ||
-
-    fuzzyMatch
-    (file.category, smartSearch)
-
-    ||
-
-    fuzzyMatch
-    (file.status, smartSearch)
-
-    ||
-
-    file.access_code
-      ?.toLowerCase()
-      .includes(smartSearch)
-
-    ||
-
-    file.user?.email
-      ?.toLowerCase()
-      .includes(smartSearch)
-
-    ||
-
-    file.user?.name
-      ?.toLowerCase()
-      .includes(smartSearch)
-
-    ||
-
-    file.inventory?.cabinet_name
-  ?.toLowerCase()
-  .includes(smartSearch)
-
-    ||
-
-  file.inventory?.shelf
-  ?.toLowerCase()
-  .includes(smartSearch)
-  
-    ||
-    
-  file.ocr_text
-  ?.toLowerCase()
-  .includes(smartSearch);  
-
-        const matchesYear =
-
-          selectedYear === ""
-
-          ||
-
-          new Date(
-            file.memo_date
-          ).getFullYear()
-          .toString() ===
-          selectedYear;
-
-        const matchesMonth =
-
-          selectedMonth === ""
-
-          ||
-
-          new Date(
-            file.memo_date
-          ).getMonth()
-          .toString() ===
-          selectedMonth;
-
-          const matchesStatus =
-
-            selectedStatus === ""
-
-            ||
-
-            file.status ===
-            selectedStatus;
-
-          const matchesType =
-
-            selectedType === ""
-
-            ||
-
-            file.document_type ===
-            selectedType;
-
-    return (
-    matchesSearch &&
-    matchesYear &&
-    matchesMonth &&
-    matchesStatus &&
-    matchesType &&
-        (
-
-        showTrash
-
-  ?
-
-  file.is_deleted === true
-
-  :
-
-  !file.is_deleted
-        )
-
-      );
+      setFiles((prev) => prev.map((f) => (f.id === id ? { ...f, is_deleted: true, status: "Deleted" } : f)));
+      const token = localStorage.getItem("token");
+      await axios.delete(`http://localhost:5000/api/files/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
       });
+      toast.success("Document moved to trash successfully.", "Trashed");
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to move document to trash.", "Delete Error");
+    }
+  };
 
-      const searchResultCount =
-    filteredFiles.length;
+  const handlePermanentDelete = async (id) => {
+    const confirmed = await modal.confirm({
+      title: "Permanently Delete Document",
+      message: "This action cannot be undone. This document and its index metadata will be permanently deleted from the database and physical inventory record.",
+      confirmText: "Permanently Delete",
+      cancelText: "Cancel",
+      variant: "danger",
+    });
+    if (!confirmed) return;
 
-    const highlightText = (text) => {
-  if (!search.trim()) return text;
+    try {
+      const token = localStorage.getItem("token");
+      await axios.delete(`http://localhost:5000/api/files/permanent/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      toast.success("Document permanently eliminated.", "Deleted");
+      fetchFiles();
+    } catch (error) {
+      console.error(error);
+      toast.error("Permanent delete failed.", "Error");
+    }
+  };
 
-  const escapedSearch = search.replace(
-    /[.*+?^${}()|[\]\\]/g,
-    "\\$&"
-  );
+  const handleQuickStatus = async (id, status) => {
+    try {
+      const token = localStorage.getItem("token");
+      await axios.put(
+        `http://localhost:5000/api/files/${id}`,
+        { status, is_deleted: status === "Deleted" },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      toast.success(`Document status updated to ${status}.`, "Status Changed");
+      fetchFiles();
+    } catch (error) {
+      console.error(error);
+      toast.error("Status update failed.", "Update Error");
+    }
+  };
 
-  const regex = new RegExp(`(${escapedSearch})`, "gi");
+  const handleUpdate = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      await axios.put(
+        `http://localhost:5000/api/files/${editingFile.id}`,
+        { subject: editSubject, document_type: editDocumentType, status: editStatus },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      toast.success("Record details updated successfully.", "Saved");
+      fetchFiles();
+      setEditingFile(null);
+    } catch (error) {
+      console.error(error);
+      toast.error("Update failed. Please check form inputs.", "Error");
+    }
+  };
 
-  return String(text)
-    .split(regex)
-    .map((part, index) =>
-      regex.test(part) ? (
-        <mark
-          key={index}
-          className="bg-yellow-300 rounded px-1"
-        >
-          {part}
-        </mark>
-      ) : (
-        part
-      )
-    );
-};
+  // FILTERED LIST
+  const baseFiles = aiResults !== null ? aiResults : files;
+  const filteredFiles = baseFiles.filter((file) => {
+    const term = debouncedSearch.toLowerCase().trim();
+    const matchesSearch =
+      !term ||
+      file.document_id?.toLowerCase().includes(term) ||
+      file.subject?.toLowerCase().includes(term) ||
+      file.document_type?.toLowerCase().includes(term) ||
+      file.category?.toLowerCase().includes(term);
 
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = filteredFiles.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(filteredFiles.length / itemsPerPage);
+    const matchesTrash = showTrash ? file.is_deleted : !file.is_deleted;
+    const matchesStatus = !selectedStatus || file.status === selectedStatus;
+    const matchesType = !selectedType || file.document_type === selectedType;
+    const matchesYear = !selectedYear || (file.created_at && new Date(file.created_at).getFullYear().toString() === selectedYear);
 
-    return (
+    return matchesSearch && matchesTrash && matchesStatus && matchesType && matchesYear;
+  });
 
-      <DashboardLayout>
+  const totalDocuments = files.filter((f) => !f.is_deleted).length;
+  const activeDocuments = files.filter((f) => f.status === "Active" && !f.is_deleted).length;
+  const archivedDocuments = files.filter((f) => f.status === "Archived" && !f.is_deleted).length;
+  const pendingDocuments = files.filter((f) => f.status === "Pending" && !f.is_deleted).length;
 
-        {/* HEADER */}
-        <div className="mb-6">
+  const totalPages = Math.ceil(filteredFiles.length / itemsPerPage) || 1;
+  const paginatedFiles = filteredFiles.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
-          <h1 className="text-3xl font-bold">
-
-            Document Center
-
-          </h1>
-
-          <p className="text-gray-500 mt-1">
-
-            Smart document retrieval
-            and management
-
-          </p>
-
-        </div>
-
-
-    {/* MINI ANALYTICS */}
-  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-6">
-    <Card className="bg-white border border-gray-100 shadow-sm relative overflow-hidden group hover:shadow-md transition-shadow">
-      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-accent opacity-50"></div>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-bold text-muted-foreground uppercase tracking-wider">Total Documents</CardTitle>
-        <div className="p-2 rounded-xl bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors duration-300">
-          <FileText className="h-5 w-5" />
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="text-4xl font-extrabold text-gray-900 tracking-tight">{totalDocuments}</div>
-      </CardContent>
-    </Card>
-
-    <Card className="bg-white border border-gray-100 shadow-sm relative overflow-hidden group hover:shadow-md transition-shadow">
-      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-accent opacity-50"></div>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-bold text-muted-foreground uppercase tracking-wider">Active</CardTitle>
-        <div className="p-2 rounded-xl bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors duration-300">
-          <CheckCircle className="h-5 w-5" />
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="text-4xl font-extrabold text-gray-900 tracking-tight">{activeDocuments}</div>
-      </CardContent>
-    </Card>
-
-    <Card className="bg-white border border-gray-100 shadow-sm relative overflow-hidden group hover:shadow-md transition-shadow">
-      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-accent opacity-50"></div>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-bold text-muted-foreground uppercase tracking-wider">Archived</CardTitle>
-        <div className="p-2 rounded-xl bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors duration-300">
-          <Archive className="h-5 w-5" />
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="text-4xl font-extrabold text-gray-900 tracking-tight">{archivedDocuments}</div>
-      </CardContent>
-    </Card>
-
-    <Card className="bg-white border border-gray-100 shadow-sm relative overflow-hidden group hover:shadow-md transition-shadow">
-      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-accent opacity-50"></div>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-bold text-muted-foreground uppercase tracking-wider">Pending</CardTitle>
-        <div className="p-2 rounded-xl bg-accent/10 text-accent group-hover:bg-accent group-hover:text-accent-foreground transition-colors duration-300">
-          <Clock className="h-5 w-5" />
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="text-4xl font-extrabold text-gray-900 tracking-tight">{pendingDocuments}</div>
-      </CardContent>
-    </Card>
-  </div>
-
-
-
-        {/* DOCUMENT TABLE */}
-        <div
-          id="print-area"
-          className="
-            bg-white
-            rounded-2xl
-            shadow-md
-            p-4 sm:p-6
-          "
-        >
-          {/* TOP BAR */}
-        <div className="
-            flex
-            flex-col
-            md:flex-row
-            items-start
-            md:items-center
-            justify-between
-            gap-4
-            mb-6
-          ">
-
-            <h2 className="
-              text-xl
-              font-bold
-            ">
-
-              Documents
-
-            </h2>
-
-            {/* FILTERS */}
-          <div className="
-            flex
-            flex-col
-            sm:flex-row
-            flex-wrap
-            items-stretch
-            sm:items-center
-            gap-3
-            w-full
-            md:w-auto
-          ">
-
-              {/* SEARCH */}
-              <div className="flex flex-col gap-2 w-full md:w-[450px]">
-                {/* Search Mode Toggle */}
-                <div className="flex bg-gray-100 p-1 rounded-lg w-full max-w-[300px]">
-                  <button
-                    onClick={() => { setSearchMode("standard"); setAiResults(null); }}
-                    className={`flex-1 flex items-center justify-center gap-1.5 text-xs font-medium py-1.5 px-3 rounded-md transition-all ${
-                      searchMode === "standard" 
-                        ? "bg-white text-[#8B0000] shadow-sm" 
-                        : "text-gray-500 hover:text-gray-700"
-                    }`}
-                  >
-                    <Filter className="w-3.5 h-3.5" />
-                    Standard Filter
-                  </button>
-                  <button
-                    onClick={() => { setSearchMode("ai"); setAiResults(null); }}
-                    className={`flex-1 flex items-center justify-center gap-1.5 text-xs font-medium py-1.5 px-3 rounded-md transition-all ${
-                      searchMode === "ai" 
-                        ? "bg-white text-[#8B0000] shadow-sm" 
-                        : "text-gray-500 hover:text-gray-700"
-                    }`}
-                  >
-                    <Sparkles className="w-3.5 h-3.5" />
-                    Smart AI Search
-                  </button>
-                </div>
-
-                <div className="flex items-center gap-2 w-full">
-                  <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <input
-                      type="text"
-                      placeholder={searchMode === "ai" ? "Ask a question about your documents..." : "Search by title, subject, or ID..."}
-                      value={search}
-                      onChange={(e) => setSearch(e.target.value)}
-                      onKeyDown={(e) => e.key === 'Enter' && searchMode === "ai" && handleAISearch()}
-                      className="
-                        w-full
-                        border
-                        border-gray-300
-                        rounded-xl
-                        py-3
-                        pl-10
-                        pr-4
-                        focus:outline-none
-                        focus:border-[#8B0000]
-                      "
-                    />
+  return (
+    <DashboardLayout>
+      <div className="space-y-6">
+        {/* HEADER & SUMMARY METRICS */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[
+            { label: "Total Active Documents", count: totalDocuments, icon: FileText, color: "text-[#800000]" },
+            { label: "Active Guidance Files", count: activeDocuments, icon: CheckCircle2, color: "text-emerald-700" },
+            { label: "Archived in Vault", count: archivedDocuments, icon: Archive, color: "text-gray-700" },
+            { label: "Pending Categorization", count: pendingDocuments, icon: Clock, color: "text-amber-700" },
+          ].map((item, idx) => {
+            const Icon = item.icon;
+            return (
+              <Card key={idx} className="bg-white border border-gray-200 shadow-xs rounded-xl">
+                <CardContent className="p-4 flex items-center justify-between">
+                  <div>
+                    <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider block">
+                      {item.label}
+                    </span>
+                    <span className="text-2xl font-extrabold text-gray-900 mt-1 block">
+                      {item.count}
+                    </span>
                   </div>
-                  {searchMode === "ai" && (
-                    <button
-                      onClick={handleAISearch}
-                      disabled={isAISearching || !search.trim()}
-                      className="
-                        bg-[#8B0000] hover:bg-[#6b0000] text-white px-4 py-3 rounded-xl font-medium transition-colors
-                        disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center min-w-[100px]
-                      "
-                    >
-                      {isAISearching ? (
-                        <span className="animate-pulse">Thinking...</span>
-                      ) : (
-                        "AI Search"
-                      )}
-                    </button>
-                  )}
-                </div>
+                  <div className="p-2.5 rounded-xl bg-[#FDFBF7] border border-gray-100 text-[#800000]">
+                    <Icon className="w-5 h-5" />
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+
+        {/* SEARCH & FILTERS BAR */}
+        <Card className="border border-gray-200 shadow-xs bg-white rounded-xl">
+          <CardContent className="p-4 space-y-3">
+            <div className="flex flex-col md:flex-row gap-3 items-center justify-between">
+              {/* SEARCH INPUT */}
+              <div className="relative flex-1 w-full">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Input
+                  type="text"
+                  placeholder={searchMode === "ai" ? "Ask AI about records (e.g. 'Show 2024 Memorandum')..." : "Search document ID, subject, or type..."}
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && searchMode === "ai" && handleAISearch()}
+                  className="pl-10 pr-24 h-10 text-xs rounded-xl border-gray-200 bg-[#FDFBF7]"
+                />
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => {
+                    const newMode = searchMode === "standard" ? "ai" : "standard";
+                    setSearchMode(newMode);
+                    if (newMode === "ai" && search.trim()) handleAISearch();
+                  }}
+                  className={`absolute right-1.5 top-1/2 -translate-y-1/2 h-7 px-2.5 rounded-lg text-[11px] font-bold transition-all ${
+                    searchMode === "ai" ? "bg-[#FFD700] text-[#800000]" : "text-gray-500 hover:text-gray-900"
+                  }`}
+                >
+                  <Sparkles className="w-3.5 h-3.5 mr-1" />
+                  <span>{searchMode === "ai" ? "AI Search" : "Standard"}</span>
+                </Button>
               </div>
 
-              {/* MONTH */}
-              <select
-                value={selectedMonth}
-                onChange={(e) =>
-                  setSelectedMonth(
-                    e.target.value
-                  )
-                }
-                className="
-                  border
-                  border-gray-300
-                  rounded-xl
-                  p-3
-                  outline-none
-                  focus:border-[#8B0000]
-                "
-              >
+              {/* FILTER CONTROLS */}
+              <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
+                <select
+                  value={selectedStatus}
+                  onChange={(e) => setSelectedStatus(e.target.value)}
+                  className="h-10 rounded-xl border border-gray-200 bg-white px-3 text-xs font-medium focus:ring-2 focus:ring-[#800000]/20"
+                >
+                  <option value="">All Statuses</option>
+                  <option value="Active">Active</option>
+                  <option value="Archived">Archived</option>
+                  <option value="Pending">Pending</option>
+                </select>
 
-                <option value="">
-                  All Months
-                </option>
+                <select
+                  value={selectedYear}
+                  onChange={(e) => setSelectedYear(e.target.value)}
+                  className="h-10 rounded-xl border border-gray-200 bg-white px-3 text-xs font-medium focus:ring-2 focus:ring-[#800000]/20"
+                >
+                  <option value="">All Years</option>
+                  {[2026, 2025, 2024, 2023].map((y) => (
+                    <option key={y} value={y}>{y}</option>
+                  ))}
+                </select>
 
-                <option value="0">
-                  January
-                </option>
-
-                <option value="1">
-                  February
-                </option>
-
-                <option value="2">
-                  March
-                </option>
-
-                <option value="3">
-                  April
-                </option>
-
-                <option value="4">
-                  May
-                </option>
-
-                <option value="5">
-                  June
-                </option>
-
-                <option value="6">
-                  July
-                </option>
-
-                <option value="7">
-                  August
-                </option>
-
-                <option value="8">
-                  September
-                </option>
-
-                <option value="9">
-                  October
-                </option>
-
-                <option value="10">
-                  November
-                </option>
-
-                <option value="11">
-                  December
-                </option>
-
-              </select>
-
-              {/* YEAR */}
-              <select
-                value={selectedYear}
-                onChange={(e) =>
-                  setSelectedYear(
-                    e.target.value
-                  )
-                }
-                className="
-                  border
-                  border-gray-300
-                  rounded-xl
-                  p-3
-                  outline-none
-                  focus:border-[#8B0000]
-                "
-              >
-
-                <option value="">
-                  All Years
-                </option>
-
-                {
-                  Array.from(
-                    { length: 101 },
-                    (_, i) => 2100 - i
-                  ).map((year) => (
-
-                    <option
-                      key={year}
-                      value={year}
-                    >
-                      {year}
-                    </option>
-
-                  ))
-                }
-
-              </select>
-
-
-                  {/* TRASH TOGGLE */}
-                  <button
-
-                    onClick={() =>
-                      setShowTrash(
-                        !showTrash
-                      )
-                    }
-
-                    className={`
-                      px-5
-                      py-3
-                      rounded-xl
-                      text-sm font-medium
-                      transition
-
-                      ${
-                        showTrash
-                        ?
-                        "bg-primary text-primary-foreground hover:bg-primary/90"
-                        :
-                        "bg-primary/10 text-primary hover:bg-primary/20"
-                      }
-                    `}
-                  >
-
-                    {
-
-                      showTrash
-
-                      ?
-
-                      "Back to Documents"
-
-                      :
-
-                      "View Trash"
-
-                    }
-
-                  </button>
-
+                <Button
+                  variant={showTrash ? "destructive" : "outline"}
+                  onClick={() => setShowTrash(!showTrash)}
+                  className="h-10 px-3.5 rounded-xl text-xs font-bold"
+                >
+                  <Trash2 className="w-3.5 h-3.5 mr-1.5" />
+                  <span>{showTrash ? "Viewing Trash" : "Trash"}</span>
+                </Button>
               </div>
+            </div>
+          </CardContent>
+        </Card>
 
-                </div>
-
-              {
-                search && (
-                  <div className="flex justify-between items-center bg-primary/5 border border-primary/20 rounded-lg px-4 py-3 mb-4 mt-4">
-                    <div className="text-sm text-foreground flex items-center gap-2">
-                      <span className="font-semibold text-primary">Smart Search:</span>
-                      <span>Found <span className="font-bold">{searchResultCount}</span> result(s) for "<span className="font-medium">{search}</span>"</span>
-                    </div>
-                    {filteredFiles.length > 0 && (
-                      <div className="text-xs text-muted-foreground">
-                        Top match: <span className="font-medium text-foreground">{filteredFiles[0]?.document_id}</span>
-                      </div>
-                    )}
-                  </div>
-                )
-              }
-
-
-              {/* TABLE */}
+        {/* DOCUMENTS TABLE */}
+        <Card className="border border-gray-200 shadow-xs bg-white rounded-xl overflow-hidden">
+          <CardHeader className="border-b border-gray-100 py-3.5 px-6 flex flex-row items-center justify-between">
+            <div>
+              <CardTitle className="text-sm font-bold text-gray-900">
+                {showTrash ? "Deleted Records Archive" : "Official Documents Archive"}
+              </CardTitle>
+              <CardDescription className="text-xs text-gray-500">
+                {filteredFiles.length} records matching current filter criteria
+              </CardDescription>
+            </div>
+          </CardHeader>
+          <CardContent className="p-0">
             <div className="overflow-x-auto">
-        <Table className="w-full"> 
-                  <TableHeader>
-
-                <TableRow>
-
-                  <TableHead className="
-                    p-4
-                    text-left
-                  ">
-                    Document ID
-                  </TableHead>
-
-                  <TableHead className="
-                    p-4
-                    text-left
-                  ">
-                    Subject
-                  </TableHead>
-
-                  <TableHead className="
-                    p-4
-                    text-left
-                  ">
-                    Document Type
-                  </TableHead>
-
-                  <TableHead className="
-                    p-4
-                    text-left
-                  ">
-                    Month and Date
-                  </TableHead>
-
-                  <TableHead className="
-                    p-4
-                    text-left
-                  ">
-                    Status
-                  </TableHead>
-
-                  <TableHead className="
-                    p-4
-                    text-center
-                  ">
-                    Actions
-                  </TableHead>
-
-                </TableRow>
-
-              </TableHeader>
-
-              <TableBody>
-
-                {
-                  filteredFiles.length > 0
-
-                  ?(
-          
-                currentItems.map((file) => {
-
-                return (
-                  
-                  <TableRow
-                    key={file.id}
-                    className="
-                      border-b
-                      hover:bg-gray-50
-                    "
-                  >
-
-                      {/* DOCUMENT ID */}
-                      <TableCell className="p-4 font-semibold text-primary">
-                       {highlightText(file.document_id)}
-                      </TableCell>
-
-                      {/* SUBJECT */}
-                      <TableCell className="p-4">
-
-                        {highlightText(file.subject)}
-
-                      </TableCell>
-
-                      {/* DOC TYPE */}
-                      <TableCell className="p-4">
-
-                        {highlightText(file.document_type)}
-
-                      </TableCell>
-
-                      {/* DATE */}
-                      <TableCell className="p-4">
-
-                        {
-                          file.memo_date
-
-                          ?
-
-                          new Date(
-                            file.memo_date
-                          ).toLocaleDateString()
-
-                          :
-
-                          "No Date"
-                        }
-
-                      </TableCell>
-
-                      {/* STATUS */}
-                      <TableCell className="p-4">
-
-                        <span
-                          className={`
-                            px-4
-                            py-2
-                            rounded-full
-                            text-white
-                            text-sm
-                            ${
-                              file.status === "Active"
-                              ? "bg-primary"
-                              : file.status === "Archived"
-                              ? "bg-primary/60"
-                              : file.status === "Pending"
-                              ? "bg-accent text-accent-foreground"
-                              : "bg-secondary"
-                            }
-                          `}
-                        >
-                        {
-                          highlightText(file.status || "Active")
-                        }
-
-                        </span>
-
-                      </TableCell>
-
-                      {/* ACTIONS */}
-                      <TableCell className="
-                        p-4
-                      ">
-
-                      <div className="flex flex-wrap items-center gap-1 justify-center min-w-fit">
-
-                          {/* VIEW */}
-                          <button
-                            onClick={() => handleViewFile(file)}
-                            className="p-2.5 rounded-lg bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground transition flex items-center justify-center shadow-sm"
-                            title="View"
+              <table className="w-full text-xs text-left">
+                <thead className="text-[11px] text-gray-500 uppercase bg-[#FDFBF7] border-b border-gray-200">
+                  <tr>
+                    <th className="px-5 py-3.5 font-bold">Document ID</th>
+                    <th className="px-5 py-3.5 font-bold">Subject / Description</th>
+                    <th className="px-5 py-3.5 font-bold">Category & Type</th>
+                    <th className="px-5 py-3.5 font-bold">Physical Storage</th>
+                    <th className="px-5 py-3.5 font-bold">Status</th>
+                    <th className="px-5 py-3.5 font-bold text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {paginatedFiles.length > 0 ? (
+                    paginatedFiles.map((file) => (
+                      <tr key={file.id} className="hover:bg-[#FDFBF7] transition-colors">
+                        <td className="px-5 py-3.5 font-bold text-[#800000] whitespace-nowrap">
+                          {file.document_id || file.access_code || `DOC-${file.id}`}
+                        </td>
+                        <td className="px-5 py-3.5 font-medium text-gray-900 max-w-sm truncate">
+                          {file.subject || file.title || "—"}
+                        </td>
+                        <td className="px-5 py-3.5 whitespace-nowrap">
+                          <span className="font-semibold text-gray-800 block">{file.document_type || "General"}</span>
+                          <span className="text-[10px] text-gray-500">{file.category || "Uncategorized"}</span>
+                        </td>
+                        <td className="px-5 py-3.5 whitespace-nowrap text-gray-600">
+                          {file.file_box?.cabinet?.name ? (
+                            <span className="inline-flex items-center gap-1 font-medium">
+                              <Box className="w-3 h-3 text-[#800000]" />
+                              {file.file_box.cabinet.name} / {file.file_box.name}
+                            </span>
+                          ) : (
+                            <span className="text-gray-400 italic">Unassigned</span>
+                          )}
+                        </td>
+                        <td className="px-5 py-3.5 whitespace-nowrap">
+                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold inline-block
+                            ${file.status === "Active" ? "bg-emerald-50 text-emerald-700 border border-emerald-200" :
+                              file.status === "Archived" ? "bg-gray-100 text-gray-700 border border-gray-200" :
+                              file.status === "Deleted" ? "bg-red-50 text-red-700 border border-red-200" :
+                              "bg-amber-50 text-amber-700 border border-amber-200"}`}
                           >
-                            <Eye className="w-4 h-4" />
-                          </button>
-
-                        {!showTrash && (
-                          <>
-                            {/* DOWNLOAD */}
-                            <a
-                              href={`http://localhost:5000/uploads/${file.file_name}`}
-                              download
-                              onClick={() => trackAction("DOWNLOAD", `Downloaded ${file.document_type || 'File'} ${file.document_id}`)}
-                              className="p-2.5 rounded-lg bg-accent/20 text-yellow-700 hover:bg-accent hover:text-accent-foreground transition flex items-center justify-center shadow-sm"
-                              title="Download"
+                            {file.status || "Active"}
+                          </span>
+                        </td>
+                        <td className="px-5 py-3.5 text-right whitespace-nowrap">
+                          <div className="inline-flex items-center gap-1.5">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => handleViewFile(file)}
+                              className="h-7 w-7 p-0 text-gray-600 hover:text-[#800000] hover:bg-[#800000]/10"
+                              title="View Document"
                             >
-                              <Download className="w-4 h-4" />
-                            </a>
+                              <Eye className="w-3.5 h-3.5" />
+                            </Button>
 
-                            {/* EDIT */}
-                            <button
-                              onClick={() => {
-                                setEditingFile(file);
-                                setEditSubject(file.subject);
-                                setEditDocumentType(file.document_type);
-                                setEditStatus(file.status || "Active");
-                              }}
-                              className="p-2.5 rounded-lg bg-accent/20 text-yellow-700 hover:bg-accent hover:text-accent-foreground transition flex items-center justify-center shadow-sm"
-                              title="Edit"
-                            >
-                              <Edit className="w-4 h-4" />
-                            </button>
-                          </>
-                        )}
-
-                            {/* RESTORE */}
-                              {showTrash && (
-                                <button
-                                  onClick={() => handleQuickStatus(file.id, "Active")}
-                                  className="p-2.5 rounded-lg bg-green-100 text-green-700 hover:bg-green-600 hover:text-white transition flex items-center justify-center shadow-sm"
-                                  title="Restore"
+                            {!showTrash ? (
+                              <>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => {
+                                    setEditingFile(file);
+                                    setEditSubject(file.subject || file.title || "");
+                                    setEditDocumentType(file.document_type || "");
+                                    setEditStatus(file.status || "Active");
+                                  }}
+                                  className="h-7 w-7 p-0 text-gray-600 hover:text-blue-600 hover:bg-blue-50"
+                                  title="Edit Record"
                                 >
-                                  <RefreshCcw className="w-4 h-4" />
-                                </button>
-                              )}
-
-                            {/* DELETE */}
-                            <button
-                              onClick={() =>
-                                showTrash ? handlePermanentDelete(file.id) : handleDelete(file.id)
-                              }
-                              className="p-2.5 rounded-lg bg-destructive/10 text-destructive hover:bg-destructive hover:text-destructive-foreground transition flex items-center justify-center shadow-sm"
-                              title="Delete"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-
+                                  <Edit className="w-3.5 h-3.5" />
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => handleDelete(file.id)}
+                                  className="h-7 w-7 p-0 text-gray-600 hover:text-red-600 hover:bg-red-50"
+                                  title="Move to Trash"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </Button>
+                              </>
+                            ) : (
+                              <>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => handleQuickStatus(file.id, "Active")}
+                                  className="h-7 w-7 p-0 text-emerald-600 hover:bg-emerald-50"
+                                  title="Restore Document"
+                                >
+                                  <RotateCcw className="w-3.5 h-3.5" />
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => handlePermanentDelete(file.id)}
+                                  className="h-7 w-7 p-0 text-red-600 hover:bg-red-50"
+                                  title="Permanently Delete"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </Button>
+                              </>
+                            )}
                           </div>
-
-                        </TableCell>
-                        </TableRow>
-
-                        );
-
-                        })
-
-                        )
-
-                    :
-                <TableRow>
-
-                  <TableCell
-                    colSpan="6"
-                    className="
-                      text-center
-                      py-10
-                      text-gray-500
-                    "
-                  >
-
-                    No matching documents found
-
-                  </TableCell>
-
-                </TableRow>
-
-                }
-                  
-
-                </TableBody>
-
-              </Table>
-
-              {/* PAGINATION CONTROLS */}
-              {totalPages > 1 && (
-                <div className="flex flex-col sm:flex-row items-center justify-between px-4 py-4 border-t border-gray-100 bg-white gap-4">
-                  <div className="text-sm text-gray-500 text-center sm:text-left">
-                    Showing <span className="font-medium text-gray-900">{indexOfFirstItem + 1}</span> to <span className="font-medium text-gray-900">{Math.min(indexOfLastItem, filteredFiles.length)}</span> of <span className="font-medium text-gray-900">{filteredFiles.length}</span> results
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                      disabled={currentPage === 1}
-                      className="px-4 py-2 text-sm border rounded-lg disabled:opacity-50 hover:bg-gray-50 transition font-medium text-gray-700"
-                    >
-                      Previous
-                    </button>
-                    <div className="text-sm text-gray-600 font-medium px-2">
-                      Page {currentPage} of {totalPages}
-                    </div>
-                    <button
-                      onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                      disabled={currentPage === totalPages}
-                      className="px-4 py-2 text-sm border rounded-lg disabled:opacity-50 hover:bg-gray-50 transition font-medium text-gray-700"
-                    >
-                      Next
-                    </button>
-                  </div>
-                </div>
-              )}
-
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="6" className="px-5 py-8 text-center text-gray-400 italic">
+                        No documents found matching the search criteria
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
             </div>
 
-          </div>
+            {/* PAGINATION BAR */}
+            <div className="p-4 border-t border-gray-200 flex items-center justify-between bg-[#FDFBF7] text-xs text-gray-600">
+              <span>
+                Showing {filteredFiles.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0} to{" "}
+                {Math.min(currentPage * itemsPerPage, filteredFiles.length)} of {filteredFiles.length} entries
+              </span>
+              <div className="flex items-center gap-1.5">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                  className="h-8 px-3 text-xs bg-white"
+                >
+                  <ChevronLeft className="w-3.5 h-3.5 mr-1" />
+                  <span>Prev</span>
+                </Button>
+                <span className="px-2 font-bold text-gray-900">
+                  {currentPage} / {totalPages}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage >= totalPages}
+                  className="h-8 px-3 text-xs bg-white"
+                >
+                  <span>Next</span>
+                  <ChevronRight className="w-3.5 h-3.5 ml-1" />
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-        {/* VIEW MODAL */}
-        {
-          viewingFile && (
-
-            <div className="
-              fixed
-              inset-0
-              bg-black/40
-              flex
-              items-center
-              justify-center
-              z-50
-            ">
-
-              <div className="
-                bg-white
-                rounded-2xl
-                p-6
-                w-[900px]
-                max-h-[95vh]
-                overflow-y-auto
-              ">
-
-                <div className="
-                  flex
-                  items-center
-                  justify-between
-                  mb-6
-                ">
-
-                  <h2 className="
-                    text-2xl
-                    font-bold
-                  ">
-
-                    Document Details
-
-                  </h2>
-
-                  <button
-
-                    onClick={() =>
-                      setViewingFile(
-                        null
-                      )
-                    } 
-
-                    className="
-                      text-gray-500
-                      text-xl
-                    "
-                  >
-
-                    
-
-                  </button>
-
+        {/* VIEW / PREVIEW MODAL */}
+        {viewingFile && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+            <div className="bg-white w-full max-w-4xl max-h-[90vh] rounded-2xl shadow-xl border border-gray-200 flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+              <div className="p-4 px-6 border-b border-gray-200 flex items-center justify-between bg-[#FDFBF7]">
+                <div className="flex items-center gap-2.5">
+                  <FileCheck className="w-5 h-5 text-[#800000]" />
+                  <h3 className="font-bold text-gray-900 text-sm">
+                    Document Viewer — {viewingFile.document_id || viewingFile.access_code}
+                  </h3>
                 </div>
-
-                {/* DETAILS */}
-                <div className="
-                    grid
-                    rid-cols-1
-                    md:grid-cols-[1fr_1.8fr]
-                    gap-6
-                        "
-  >
-
-                  {/* LEFT SIDE */}
-                  <div className="
-                    space-y-4
-                  ">
-
-                    <div>
-
-                      <p className="
-                        text-gray-500
-                        text-sm
-                      ">
-
-                        Document ID
-
-                      </p>
-
-                      <p className="
-                        font-semibold
-                        text-[#8B0000]
-                      ">
-
-                        {
-                          viewingFile.document_id
-                        }
-
-                      </p>
-
-                    </div>
-
-                    <div>
-
-                      <p className="
-                        text-gray-500
-                        text-sm
-                      ">
-
-                        Subject
-
-                      </p>
-
-                      <p className="
-                        font-semibold
-                      ">
-
-                        {
-                          viewingFile.subject
-                        }
-
-                      </p>
-
-                    </div>
-
-                    <div>
-
-                      <p className="
-                        text-gray-500
-                        text-sm
-                      ">
-
-                        Document Type
-
-                      </p>
-
-                      <p className="
-                        font-semibold
-                      ">
-
-                        {
-                          viewingFile.document_type
-                        }
-
-                      </p>
-
-                    </div>
-
-                    <div>
-
-                      <p className="
-                        text-gray-500
-                        text-sm
-                      ">
-
-                        Status
-
-                      </p>
-
-                      <p className="
-                        font-semibold
-                      ">
-
-                        {
-                          viewingFile.status ||
-                          "Active"
-                        }
-
-                      </p>
-
-                    </div>
-
-                    {/* DYNAMIC DATA IS RENDERED IN THE TABLE TEMPLATE ON THE RIGHT */}
-
-                  </div>
-
-                  {/* FILE PREVIEW */}
-
-  {
-    viewingFile.document_type ===
-    "AACCUP Findings and Recommendations"
-
-    ? (
-
-      <AaccupTemplate
-        data={
-          viewingFile.dynamic_data || {}
-        }
-      />
-    )
-
-    : viewingFile.document_type
-      ?.toUpperCase() ===
-    "ACCOMPLISHMENT REPORTS"
-
-    ? (
-
-      <AccomplishmentReportTemplate
-        document={viewingFile}
-      />
-
-    )
-
-    : viewingFile.document_type
-      ?.toUpperCase() ===
-    "ANNUAL REPORTS"
-
-  ? (
-
-      <AnnualReportTemplate
-        document={viewingFile}
-      />
-
-  )
-
-  : viewingFile.document_type
-      ?.toUpperCase() ===
-    "ASSESSMENT RECORDS OF STUDENTS"
-
-  ? (
-
-      <StudentAccountTemplate
-        document={viewingFile}
-      />
-
-  )
-
-  : viewingFile.document_type
-      ?.toUpperCase() ===
-    "BOARD RESOLUTIONS"
-
-  ? (
-
-      <BoardResolutionTemplate
-        document={viewingFile}
-      />
-
-  )
-
-  : viewingFile.document_type
-      ?.toUpperCase() ===
-    "BUDGET PLAN"
-
-  ? (
-
-      <BudgetPlanTemplate
-        document={viewingFile}
-      />
-
-  )
-
-  : viewingFile.document_type
-      ?.toUpperCase() ===
-    "BUDGET PROPOSALS"
-
-  ? (
-
-      <BudgetProposalTemplate
-        data={viewingFile.dynamic_data || {}}
-      />
-
-  )
-
-  : viewingFile.document_type
-      ?.toUpperCase() ===
-    "BUDGETARY REQUIREMENTS"
-
-  ? (
-
-      <BudgetaryRequirementsTemplate
-        data={viewingFile.dynamic_data || {}}
-      />
-
-  )
-
-  : viewingFile.document_type
-      ?.toUpperCase() ===
-    "CHECKS ISSUED"
-
-  ? (
-
-      <ChecksIssuedTemplate
-        data={viewingFile.dynamic_data || {}}
-      />
-
-  )
-
-  : viewingFile.document_type
-      ?.toUpperCase() ===
-    "CHED COMMUNICATIONS 2024"
-
-  ? (
-
-      <ChedCommunicationTemplate
-        data={viewingFile.dynamic_data || {}}
-      />
-
-  )
-
-  : viewingFile.document_type
-      ?.toUpperCase()
-      .includes("CHED MEMORANDUM ORDERS 2024")
-
-  ? (
-
-      <ChedMemoOrderTemplate
-    data={{
-      ...viewingFile.dynamic_data,
-      subject: viewingFile.subject
-    }}
-  />
-  )
-
-  : viewingFile.document_type
-      ?.toUpperCase()
-      .includes("CLASS PROGRAM")
-
-  ? (
-
-      <ClassProgramTemplate
-        data={viewingFile.dynamic_data || {}}
-      />
-
-  )
-
-  : viewingFile.document_type
-      ?.toUpperCase()
-      .includes("COA ANNUAL")
-
-  ? (
-
-    <CoaAnnualReportTemplate
-    data={{
-      ...viewingFile.dynamic_data,
-      subject: viewingFile.subject
-    }}
-  />
-
-  )
-
-  : viewingFile.document_type
-      ?.toUpperCase()
-      .includes("COA AUDIT OBSERVATION 2024")
-
-  ? (
-
-      <CoaAuditObservationTemplate
-        data={{
-          ...viewingFile.dynamic_data,
-          subject: viewingFile.subject
-        }}
-      />
-
-  )
-
-  : viewingFile.document_type
-      ?.toUpperCase()
-      .includes("COA CIRCULAR")
-
-  ? (
-
-      <CoaCircularTemplate
-        data={{
-          ...viewingFile.dynamic_data,
-          subject: viewingFile.subject
-        }}
-      />
-
-  )
-
-  : viewingFile.document_type
-      ?.toUpperCase()
-      .includes("COA COMMUNICATION")
-
-  ? (
-
-      <CoaCommunicationTemplate
-        data={{
-          ...viewingFile.dynamic_data,
-          subject: viewingFile.subject
-        }}
-      />
-
-  )
-
-  : viewingFile.document_type
-      ?.toUpperCase()
-      .includes("COA NOTICE OF DISALLOWANCES")
-
-  ? (
-
-      <CoaNoticeDisallowanceTemplate
-        data={{
-          ...viewingFile.dynamic_data,
-          subject: viewingFile.subject
-        }}
-      />
-
-  )
-
-  : viewingFile.document_type
-      ?.toUpperCase()
-      .includes("COA NOTICE OF SUSPENSION")
-
-  ? (
-
-      <CoaNoticeSuspensionTemplate
-        data={{
-          ...viewingFile.dynamic_data,
-          subject: viewingFile.subject
-        }}
-      />
-
-  )
-
-  : viewingFile.document_type
-      ?.toUpperCase()
-      .includes("MASTER LIST OF RECORDS FOR COLLECTION")
-  ? (
-
-      <MasterListOfRecordsForCollectionTemplate
-        data={viewingFile.dynamic_data || {}}
-      />
-
-  )
-  : viewingFile.document_type
-      ?.toUpperCase()
-      .includes("CONTRACT OF SERVICE (VISITING LECTURERS)") ? (
-
-      <ContractOfServiceVisitingLecturersTemplate
-          data={viewingFile.dynamic_data || {}}
-      />
-
-  )
-
-  : viewingFile.document_type
-      ?.toUpperCase()
-      .includes("COPC") ? (
-
-      <CopcTemplate
-          data={viewingFile.dynamic_data || {}}
-      />
-
-  )
-
-  : viewingFile.document_type
-      ?.toUpperCase()
-      .includes("CSC CIRCULAR") ? (
-
-      <CscCirculars1Template
-          data={viewingFile.dynamic_data || {}}
-      />
-
-  )
-
-  : viewingFile.document_type
-  ?.toUpperCase()
-  .includes("CSC COMMUNICATIONS 2024") ? (
-
-  <CscCommunications2024Template
-      data={viewingFile.dynamic_data || {}}
-  />
-
-  )
-
-  : viewingFile.document_type
-  ?.toUpperCase()
-  .includes("DATA ANALYSIS") ? (
-
-  <DataAnalysisTemplate
-    data={viewingFile.dynamic_data || {}}
-  />
-
-  )
-
-  : viewingFile.document_type
-  ?.toUpperCase()
-  .includes("DBM CIRCULARS") ? (
-
-  <DbmCircularsTemplate
-    data={viewingFile.dynamic_data || {}}
-  />
-
-  )
-
-  : viewingFile.document_type
-  ?.toUpperCase()
-  .includes("DBM CIRCULARS1") ? (
-
-  <DbmCirculars1Template
-    data={viewingFile.dynamic_data || {}}
-  />
-
-  )
-
-  :viewingFile.document_type
-    ?.toUpperCase()
-    .includes("DISBURSE") ? (
-
-    <DisbursementsTemplate
-      data={viewingFile.dynamic_data || {}}
-    />
-
-  )
-  : viewingFile.document_type
-      ?.toUpperCase()
-      .includes("DOST COMMUNICATIONS") ? (
-
-    <DostCommunications2024Template
-      data={viewingFile.dynamic_data || {}}
-    />
-
-  )
-  : viewingFile.document_type
-      ?.toUpperCase()
-      .includes("HEMIS") ? (
-
-    <HemisTemplate
-      data={viewingFile.dynamic_data || {}}
-    />
-
-  )
-  : viewingFile.document_type
-      ?.toUpperCase()
-      .includes("IDP") ? (
-
-    <IdpTemplate
-      data={viewingFile.dynamic_data || {}}
-    />
-
-  )
-  : viewingFile.document_type
-      ?.toUpperCase()
-      .includes("INCOMING COMMUNICATIONS OUTSIDE ZC PERIMETER") ? (
-
-    <IncomingCommunicationsOutsideZcPerimeterTemplate
-      data={viewingFile.dynamic_data || {}}
-    />
-
-  )
-  : viewingFile.document_type
-      ?.toUpperCase()
-      .includes("OUTSIDE ZC PERIMETER") ? (
-
-    <IncomingCommunicationsOutsideTemplate
-      data={viewingFile.dynamic_data || {}}
-    />
-
-  )
-  : viewingFile.document_type
-      ?.toUpperCase()
-      .includes("IPCR") ? (
-
-    <IpcrTemplate
-      data={viewingFile.dynamic_data || {}}
-    />
-
-  )
-  : viewingFile.document_type
-      ?.toUpperCase()
-      .includes("JOB ORDER WORKERS") ? (
-
-    <JobOrdersTemplate
-      data={viewingFile.dynamic_data || {}}
-    />
-
-  )
-  : viewingFile.document_type
-      ?.toUpperCase()
-      .includes("MANUAL") ? (
-
-    <ManualsTemplate
-      data={viewingFile.dynamic_data || {}}
-    />
-
-  )
-  : viewingFile.document_type
-      ?.toUpperCase()
-      .includes("MEDICAL RECORD") ? (
-
-    <MedicalRecordsTemplate
-      data={viewingFile.dynamic_data || {}}
-    />
-
-  )
-  : viewingFile.document_type
-      ?.toUpperCase()
-      .includes("MEMO") ? (
-
-    <MemoOtherMattersTemplate
-      data={viewingFile.dynamic_data || {}}
-    />
-
-  )
-  : viewingFile.document_type
-      ?.toUpperCase()
-      .includes("MEMORANDUM") ? (
-
-    <MemorandumOtherMattersTemplate
-        data={viewingFile.dynamic_data || {}}
-    />
-
-  )
-  : viewingFile.document_type
-      ?.toUpperCase()
-      .includes("MINUTES OF MEETINGS") ? (
-
-    <MinutesOfMeetingsTemplate
-        data={viewingFile.dynamic_data || {}}
-    />
-
-  )
-  : viewingFile.document_type
-      ?.toUpperCase()
-      .includes("MOA") ? (
-
-    <MoaTemplate
-        data={viewingFile.dynamic_data || {}}
-    />
-
-  )
-  : viewingFile.document_type
-      ?.toUpperCase()
-      .includes("NOSA") ? (
-
-    <NosaTemplate
-        data={viewingFile.dynamic_data || {}}
-    />
-
-  )
-  : viewingFile.document_type
-      ?.toUpperCase()
-      .includes("SALN") ? (
-
-    <SalnTemplate
-        data={viewingFile.dynamic_data || {}}
-    />
-
-  )
-  : viewingFile.document_type
-      ?.toUpperCase()
-      .includes("STEP INCREMENT") ? (
-
-      <NsiTemplate
-          data={viewingFile.dynamic_data || {}}
-      />
-
-  )
-  : viewingFile.document_type
-      ?.toUpperCase()
-      .includes("OFFENSE") ? (
-
-      <OffensesViolationsTemplate
-          data={viewingFile.dynamic_data || {}}
-      />
-
-  )
-  : viewingFile.document_type
-      ?.toUpperCase()
-      .includes("OUTGOING COMMUNICATIONS OUTSIDE") ? (
-
-      <OutgoingCommunicationsOutsideTemplate
-          data={viewingFile.dynamic_data || {}}
-      />
-
-  )
-  : viewingFile.document_type
-      ?.toUpperCase()
-      .includes("PORTFOLIO OF FACULTY") ? (
-
-      <PortfolioOfFacultyTemplate
-          data={viewingFile.dynamic_data || {}}
-      />
-
-  )
-  : viewingFile.document_type
-      ?.toUpperCase()
-      .includes("PURCHASE REQUEST") ? (
-
-      <PurchaseRequestsTemplate
-          data={viewingFile.dynamic_data || {}}
-      />
-
-  )
-  : viewingFile.document_type
-      ?.toUpperCase()
-      .includes("REPORT OF RATINGS") ? (
-
-      <ReportOfRatingsTemplate
-          data={viewingFile.dynamic_data || {}}
-      />
-
-  )
-  : viewingFile.document_type
-      ?.toUpperCase()
-      .includes("RLM") ? (
-
-      <RlmTemplate
-          data={viewingFile.dynamic_data || {}}
-      />
-
-  )
-  : viewingFile.document_type
-      ?.toUpperCase()
-      .includes("SPECIAL ORDER") ? (
-
-      <SpecialOrdersTemplate
-          data={viewingFile.dynamic_data || {}}
-      />
-
-  )
-  : viewingFile.document_type
-      ?.toUpperCase()
-      .includes("STUDENT ADMISSION RECORD") ? (
-
-      <StudentAdmissionRecordsTemplate
-          data={viewingFile.dynamic_data || {}}
-      />
-
-  )
-  : viewingFile.document_type
-      ?.toUpperCase()
-      .includes("STUDENTS IN/OFF CAMPUS TEACHING") ? (
-
-      <StudentsInOffCampusTeachingTemplate
-          data={viewingFile.dynamic_data || {}}
-      />
-
-  )
-  : viewingFile.document_type
-      ?.toUpperCase()
-      .includes("STUDENTS PROSPECTUS") ? (
-
-      <StudentsProspectusTemplate
-          data={viewingFile.dynamic_data || {}}
-      />
-
-  )
-  : viewingFile.document_type
-      ?.toUpperCase()
-      .includes("STUDENTS THESIS") ? (
-
-      <StudentsThesisTemplate
-          data={viewingFile.dynamic_data || {}}
-      />
-
-  )
-  : viewingFile.document_type
-      ?.toUpperCase()
-      .includes("APPRENTICESHIP") ? (
-
-      <StudentsAPEXTemplate
-          data={viewingFile.dynamic_data || {}}
-      />
-
-  )
-  : viewingFile.document_type
-      ?.toUpperCase()
-      .includes("TEACHING LOAD") ? (
-
-      <TeachingLoadTemplate
-          data={viewingFile.dynamic_data || {}}
-      />
-
-  )
-  : viewingFile.document_type
-      ?.toUpperCase()
-      .includes("TRAININGS") ? (
-
-      <TrainingsAndSeminarsTemplate
-          data={viewingFile.dynamic_data || {}}
-      />
-
-  )
-  : viewingFile.document_type
-      ?.toUpperCase()
-      .includes("VARIOUS RECORDS") ? (
-
-      <VariousRecordsTemplate
-          data={viewingFile.dynamic_data || {}}
-      />
-
-  )
-  : viewingFile.document_type
-      ?.toUpperCase()
-      .includes("VERIFICATION REQUEST") ? (
-
-      <VerificationRequestTemplate
-          data={viewingFile.dynamic_data || {}}
-      />
-
-  )
-  : viewingFile.document_type
-      ?.toUpperCase()
-      .includes("VPAA MEMORANDA") ? (
-
-      <VPaaMemorandaTemplate
-          data={viewingFile.dynamic_data || {}}
-      />
-
-  )
-  : viewingFile.document_type
-      ?.toUpperCase()
-      .includes("VPAF INDORSEMENTS") ? (
-
-      <VPAFIndorsementsTemplate
-          data={viewingFile.dynamic_data || {}}
-      />
-
-  )
-  : viewingFile.document_type
-      ?.toUpperCase()
-      .includes("VPAF MEMORANDUM") ? (
-
-      <VPAFMemorandumTemplate
-          data={viewingFile.dynamic_data || {}}
-      />
-
-  )
-  : viewingFile.document_type
-      ?.toUpperCase()
-      .includes("VPRE MEMORANDA") ? (
-
-      <VPREMemorandaTemplate
-          data={viewingFile.dynamic_data || {}}
-      />
-
-  )
-  : viewingFile.document_type
-      ?.toUpperCase()
-      .includes("DEED OF DONATIONS") ? (
-
-      <DeedOfDonationsTemplate
-          data={viewingFile.dynamic_data || {}}
-      />
-
-  )
-  : viewingFile.document_type
-      ?.toUpperCase()
-      .includes("FREE HIGHER EDUCATION BILLING") ? (
-
-      <FreeHigherEducationBillingTemplate
-          data={viewingFile.dynamic_data || {}}
-      />
-
-  )
-
-
-
-    : viewingFile.file_name
-        ?.toLowerCase()
-        .endsWith(".pdf")
-
-    ? (
-
-      
-
-      <iframe
-        src={`http://localhost:5000/uploads/${viewingFile.file_name}`}
-        title="Document Preview"
-        className="
-          w-full
-          h-[600px]
-          border
-          rounded-2xl
-        "
-      />
-
-    )
-
-    : (
-
-      <div
-    className="
-      w-full
-      h-[600px]
-      border
-      rounded-2xl
-      flex
-      items-center
-      justify-center
-      text-center
-      p-6
-      text-gray-500
-    "
-  >
-
-        Preview not available
-        for this file type.
-
-      </div>
-
-    )
-  }
-
-                </div>
-
-                {/* ACTIONS */}
-                <div className="
-                  mt-8
-                  flex
-                  justify-end
-                  gap-3
-                ">
-
-                  <a
-                    href={`http://localhost:5000/uploads/${viewingFile.file_name}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="bg-primary text-primary-foreground hover:bg-primary/90 transition px-5 py-3 rounded-xl font-medium shadow-sm"
+                <div className="flex items-center gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => window.print()}
+                    className="h-8 text-xs font-semibold bg-white"
                   >
-                    Open File
-                  </a>
-
-                  <a
-                    href={`http://localhost:5000/uploads/${viewingFile.file_name}`}
-                    download
-                    className="bg-accent/20 text-yellow-700 hover:bg-accent hover:text-accent-foreground transition px-5 py-3 rounded-xl font-medium shadow-sm"
-                  >
-                    Download
-                  </a>
-
-                  <button
+                    <Printer className="w-3.5 h-3.5 mr-1.5" />
+                    <span>Print</span>
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
                     onClick={() => setViewingFile(null)}
-                    className="bg-gray-100 text-gray-700 border border-gray-200 hover:bg-gray-200 transition px-5 py-3 rounded-xl font-medium shadow-sm"
+                    className="h-8 w-8 p-0 text-gray-500 hover:text-gray-900"
                   >
-                    Close
-                  </button>
-
+                    <X className="w-4 h-4" />
+                  </Button>
                 </div>
-
               </div>
 
+              <div className="p-6 overflow-y-auto flex-1 space-y-6">
+                <DocumentTemplateRenderer document={viewingFile} />
+              </div>
             </div>
+          </div>
+        )}
 
-          )
-        }
+        {/* EDIT METADATA MODAL */}
+        {editingFile && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+            <div className="bg-white w-full max-w-md rounded-2xl shadow-xl border border-gray-200 p-6 space-y-4 animate-in fade-in zoom-in-95 duration-150">
+              <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+                <h3 className="font-bold text-gray-900 text-sm">Edit Record Information</h3>
+                <button onClick={() => setEditingFile(null)} className="text-gray-400 hover:text-gray-700">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
 
-        {/* EDIT MODAL */}
-        {
-          editingFile && (
-
-            <div className="
-              fixed
-              inset-0
-              bg-black/40
-              flex
-              items-center
-              justify-center
-              z-50
-            ">
-
-              <div className="
-                bg-white
-                rounded-2xl
-                p-6
-                w-[400px]
-              ">
-
-                <h2 className="
-                  text-2xl
-                  font-bold
-                  mb-6
-                ">
-
-                  Edit Document
-
-                </h2>
-
-                <div className="mb-4">
-
-                  <label className="
-                    block
-                    mb-2
-                    font-semibold
-                  ">
-
-                    Subject
-
-                  </label>
-
-                  <input
+              <div className="space-y-3 text-xs">
+                <div className="space-y-1">
+                  <label className="font-bold text-gray-700 uppercase">Subject / Description</label>
+                  <Input
                     type="text"
                     value={editSubject}
-                    onChange={(e) =>
-                      setEditSubject(
-                        e.target.value
-                      )
-                    }
-                    className="
-                      w-full
-                      border
-                      border-gray-300
-                      rounded-xl
-                      p-3
-                      outline-none
-                      focus:border-[#8B0000]
-                    "
+                    onChange={(e) => setEditSubject(e.target.value)}
+                    className="h-9 text-xs"
                   />
-
                 </div>
 
-                <div className="mb-6">
-
-                  <label className="
-                    block
-                    mb-2
-                    font-semibold
-                  ">
-
-                    Document Type
-
-                  </label>
-
-                  <input
+                <div className="space-y-1">
+                  <label className="font-bold text-gray-700 uppercase">Document Type</label>
+                  <Input
                     type="text"
                     value={editDocumentType}
                     disabled
-                    className="
-                      w-full
-                      border
-                      border-gray-300
-                      bg-gray-100
-                      text-gray-500
-                      cursor-not-allowed
-                      rounded-xl
-                      p-3
-                      outline-none
-                    "
+                    className="h-9 text-xs bg-gray-50 text-gray-500 cursor-not-allowed"
                   />
-
                 </div>
 
-                {/* STATUS */}
-                <div className="mb-6">
-
-                  <label className="
-                    block
-                    mb-2
-                    font-semibold
-                  ">
-
-                    Status
-
-                  </label>
-
+                <div className="space-y-1">
+                  <label className="font-bold text-gray-700 uppercase">Status</label>
                   <select
                     value={editStatus}
-                    onChange={(e) =>
-                      setEditStatus(
-                        e.target.value
-                      )
-                    }
-                    className="
-                      w-full
-                      border
-                      border-gray-300
-                      rounded-xl
-                      p-3
-                      outline-none
-                      focus:border-[#8B0000]
-                    "
+                    onChange={(e) => setEditStatus(e.target.value)}
+                    className="h-9 w-full rounded-xl border border-gray-200 bg-white px-3 text-xs font-medium focus:ring-2 focus:ring-[#800000]/20"
                   >
-
-                    <option value="Active">
-                      Active
-                    </option>
-
-                    <option value="Archived">
-                      Archived
-                    </option>
-
-                    <option value="Pending">
-                      Pending
-                    </option>
-
+                    <option value="Active">Active</option>
+                    <option value="Archived">Archived</option>
+                    <option value="Pending">Pending</option>
                   </select>
-
                 </div>
-                              
-                
-                <div className="
-                  flex
-                  justify-end
-                  gap-3
-                ">
-
-                  <button
-
-                    onClick={() =>
-                      setEditingFile(
-                        null
-                      )
-                    }
-
-                    className="
-                      border
-                      border-gray-300
-                      px-4
-                      py-2
-                      rounded-xl
-                    "
-                  >
-
-                    Cancel
-
-                  </button>
-
-                  <button
-
-                    onClick={
-                      handleUpdate
-                    }
-
-                    className="
-                      bg-[#8B0000]
-                      text-white
-                      px-4
-                      py-2
-                      rounded-xl
-                    "
-                  >
-
-                    Save
-
-                  </button>
-
-                </div>
-
               </div>
 
+              <div className="flex justify-end gap-2 pt-2 border-t border-gray-100">
+                <Button size="sm" variant="outline" onClick={() => setEditingFile(null)} className="h-8 text-xs font-semibold">
+                  Cancel
+                </Button>
+                <Button size="sm" onClick={handleUpdate} className="h-8 text-xs font-bold bg-[#800000] text-white hover:bg-[#660000]">
+                  Save Changes
+                </Button>
+              </div>
             </div>
+          </div>
+        )}
+      </div>
+    </DashboardLayout>
+  );
+}
 
-          )
-        }
-
-      </DashboardLayout>
-    );
-  }
-
-  export default DocumentCenter;
+export default DocumentCenter;

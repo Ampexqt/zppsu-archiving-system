@@ -213,25 +213,41 @@
         );
 
         res.json({
-
-          message:
-            "User promoted successfully",
-
+          message: "User promoted successfully",
         });
-
       } catch (error) {
-
         console.error(error);
-
-        res.status(500).json({
-
-          message:
-            error.message,
-
-        });
-
+        res.status(500).json({ message: error.message });
       }
+    }
+  );
 
+  // UPDATE USER
+  router.put(
+    "/:id",
+    authMiddleware,
+    async (req, res) => {
+      try {
+        if (req.user.role !== "Admin") {
+          return res.status(403).json({ message: "Access denied" });
+        }
+        const { name, email } = req.body;
+        const updatedUser = await prisma.users.update({
+          where: { id: Number(req.params.id) },
+          data: {
+            ...(name && { name }),
+            ...(email && { email }),
+          },
+        });
+        await logsService.createLog(
+          "UPDATE USER",
+          `${updatedUser.email} updated by Admin`
+        );
+        res.json({ message: "User updated successfully", user: updatedUser });
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: error.message });
+      }
     }
   );
 

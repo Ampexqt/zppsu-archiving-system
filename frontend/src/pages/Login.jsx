@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import logo from "../assets/logo.jpg";
 import { ShieldCheck, Mail, Lock, ArrowRight, Loader2, Eye, EyeOff } from "lucide-react";
+import { useToast } from "../context/ToastContext";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -11,6 +12,7 @@ function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const toast = useToast();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -24,10 +26,11 @@ function Login() {
       localStorage.setItem("token", response.data.token);
       localStorage.setItem("user", JSON.stringify(response.data.user));
 
+      toast.success("Welcome back! Authentication successful.", "Access Granted");
       navigate("/dashboard");
     } catch (error) {
       console.error(error);
-      alert("Login failed! Please check your credentials.");
+      toast.error(error.response?.data?.message || "Login failed! Please check your email and password.", "Authentication Failed");
     } finally {
       setIsLoading(false);
     }

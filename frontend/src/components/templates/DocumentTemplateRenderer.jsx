@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { Sparkles, Download, Copy, Check, FileText, ExternalLink } from "lucide-react";
+import { Sparkles, Download, Copy, Check, FileText, ExternalLink, FileSpreadsheet } from "lucide-react";
+import ExcelJS from "exceljs";
 import AccomplishmentReportTemplate from "./AccomplishmentReportTemplate";
 import AaccupTemplate from "./AaccupTemplate";
 import AnnualReportTemplate from "./AnnualReportTemplate";
@@ -160,54 +161,125 @@ function DocumentTemplateRenderer({ document }) {
     }
   };
 
+  const handleExportExcel = async () => {
+    const workbook = new ExcelJS.Workbook();
+    const sheet = workbook.addWorksheet("Masterlist");
+
+    const titleStr = `ZPPSU MASTERLIST OF RECORDS - ${(document.document_type || "DOCUMENT").toUpperCase()}`;
+
+    // Add Title
+    sheet.mergeCells("A1:E1");
+    const titleRow = sheet.getCell("A1");
+    titleRow.value = titleStr;
+    titleRow.font = { bold: true, size: 14 };
+    titleRow.alignment = { horizontal: "center", vertical: "middle" };
+
+    // Add Headers
+    const headerRow = sheet.addRow(["DATE", "ACCESS CODE", "SUBJECT", "STATUS", "FILE LOCATION"]);
+    headerRow.eachCell((cell) => {
+      cell.font = { bold: true };
+      cell.alignment = { horizontal: "center", vertical: "middle" };
+      cell.border = {
+        top: { style: "thin" },
+        left: { style: "thin" },
+        bottom: { style: "thin" },
+        right: { style: "thin" }
+      };
+    });
+
+    // Add Data
+    const dataRow = sheet.addRow([
+      new Date(document.created_at || Date.now()).toLocaleDateString(),
+      document.document_id || document.access_code || `DOC-${document.id}`,
+      document.subject || document.title || "—",
+      document.status || "Active",
+      document.file_box?.cabinet?.name ? `${document.file_box.cabinet.name} - ${document.file_box.name}` : "Unassigned"
+    ]);
+    dataRow.eachCell((cell) => {
+      cell.alignment = { horizontal: "center", vertical: "middle" };
+      cell.border = {
+        top: { style: "thin" },
+        left: { style: "thin" },
+        bottom: { style: "thin" },
+        right: { style: "thin" }
+      };
+    });
+
+    sheet.columns = [
+      { width: 15 },
+      { width: 20 },
+      { width: 35 },
+      { width: 15 },
+      { width: 25 },
+    ];
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${document.document_id || "Document"}.xlsx`;
+    link.click();
+    window.URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="space-y-6 font-sans">
-      {/* METADATA SUMMARY CARD */}
-      <div className="p-6 bg-[#FFFCF7] border border-[#E8E3E1] rounded-2xl shadow-xs space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#E8E3E1] pb-4">
-          <div>
-            <span className="text-xs uppercase tracking-widest text-[#6B1D2A] font-bold">
-              {document.category || "General Record"}
-            </span>
-            <h2 className="text-xl sm:text-2xl font-bold text-[#1D1A1B] mt-0.5">
-              {document.subject || document.title || "Document Details"}
-            </h2>
-            <p className="text-xs text-[#5F5A5C] font-mono mt-0.5">
-              ID: {document.document_id || document.access_code || `DOC-${document.id}`}
-            </p>
-          </div>
-          {fileUrl && (
-            <div className="flex items-center gap-2">
-              <a
-                href={fileUrl}
-                download
-                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#6B1D2A] text-xs font-bold text-[#FFFCF7] hover:bg-[#8B3545] transition-colors shadow-xs"
-              >
-                <Download className="w-3.5 h-3.5" />
-                <span>Download File</span>
-              </a>
-            </div>
-          )}
-        </div>
+      {/* METADATA SUMMARY TABLE */}
+      <div className="w-full max-w-[950px] mx-auto bg-white border border-black overflow-hidden">
+        <table className="w-full border-collapse border border-black text-sm text-black font-sans">
+          <tbody>
+            <tr>
+              <td colSpan="5" className="border border-black text-center font-bold text-lg p-3 bg-white uppercase">
+                ZPPSU MASTERLIST OF RECORDS - {document.document_type || "DOCUMENT"}
+              </td>
+            </tr>
+            <tr className="bg-white">
+              <td className="border border-black text-center font-bold p-2 w-[15%]">DATE</td>
+              <td className="border border-black text-center font-bold p-2 w-[20%]">ACCESS CODE</td>
+              <td className="border border-black text-center font-bold p-2 w-[30%]">SUBJECT</td>
+              <td className="border border-black text-center font-bold p-2 w-[15%]">STATUS</td>
+              <td className="border border-black text-center font-bold p-2 w-[20%]">FILE LOCATION</td>
+            </tr>
+            <tr className="bg-white">
+              <td className="border border-black text-center p-2">
+                {new Date(document.created_at || Date.now()).toLocaleDateString()}
+              </td>
+              <td className="border border-black text-center p-2">
+                {document.document_id || document.access_code || `DOC-${document.id}`}
+              </td>
+              <td className="border border-black text-center p-2">
+                {document.subject || document.title || "—"}
+              </td>
+              <td className="border border-black text-center p-2">
+                {document.status || "Active"}
+              </td>
+              <td className="border border-black text-center p-2">
+                {document.file_box?.cabinet?.name ? `${document.file_box.cabinet.name} - ${document.file_box.name}` : "Unassigned"}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
-          <div>
-            <span className="font-bold text-[#5F5A5C] uppercase text-[10px] tracking-wider">Document Type</span>
-            <p className="font-semibold text-[#1D1A1B] mt-0.5">{document.document_type || "Standard File"}</p>
-          </div>
-          <div>
-            <span className="font-bold text-[#5F5A5C] uppercase text-[10px] tracking-wider">Status</span>
-            <p className="font-semibold text-[#1D1A1B] mt-0.5">{document.status || "Active"}</p>
-          </div>
-          <div>
-            <span className="font-bold text-[#5F5A5C] uppercase text-[10px] tracking-wider">Storage Cabinet</span>
-            <p className="font-semibold text-[#1D1A1B] mt-0.5">{document.file_box?.cabinet?.name || "Unassigned"}</p>
-          </div>
-          <div>
-            <span className="font-bold text-[#5F5A5C] uppercase text-[10px] tracking-wider">File Box</span>
-            <p className="font-semibold text-[#1D1A1B] mt-0.5">{document.file_box?.name || "Unassigned"}</p>
-          </div>
-        </div>
+      <div className="flex justify-end gap-2 max-w-[950px] mx-auto">
+        <button
+          onClick={handleExportExcel}
+          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-[#E8E3E1] bg-[#FFFCF7] text-xs font-bold text-[#1D1A1B] hover:bg-[#F4E7EA] transition-colors shadow-xs cursor-pointer"
+        >
+          <FileSpreadsheet className="w-3.5 h-3.5 text-[#16A34A]" />
+          <span>Export to Excel</span>
+        </button>
+        {fileUrl && (
+          <a
+            href={fileUrl}
+            download
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#6B1D2A] text-xs font-bold text-[#FFFCF7] hover:bg-[#8B3545] transition-colors shadow-xs cursor-pointer"
+          >
+            <Download className="w-3.5 h-3.5" />
+            <span>Download PDF</span>
+          </a>
+        )}
       </div>
 
       {/* EMBEDDED DOCUMENT VIEWER */}

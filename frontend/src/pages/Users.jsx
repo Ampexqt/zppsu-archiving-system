@@ -227,172 +227,172 @@ const handleDemote =
 
 
   return (
-
     <DashboardLayout>
-
-      {/* HEADER */}
-      <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-4xl font-bold text-black dark:text-white">User Management</h1>
-          <p className="text-gray-500 dark:text-gray-300 mt-2 text-lg">Manage system users</p>
-        </div>
-        
-        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-          <DialogTrigger asChild>
-            <button className="flex items-center justify-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90 px-5 h-11 rounded-lg font-medium transition shadow-sm">
-              <Plus className="w-4 h-4" />
-              Create User
-            </button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px] p-6 bg-white border border-gray-100 rounded-2xl shadow-xl">
-            <DialogHeader className="mb-4">
-              <DialogTitle className="text-xl font-bold text-gray-900">Create New User</DialogTitle>
-              <DialogDescription className="text-gray-500 text-sm mt-1">
-                Add a new staff account to the system.
-              </DialogDescription>
-            </DialogHeader>
-            <form onSubmit={handleCreateUser} className="flex flex-col gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700">Full Name</label>
-                <Input
-                  type="text"
-                  name="name"
-                  placeholder="e.g. Jane Doe"
-                  value={formData.name}
-                  onChange={handleChange}
-                  required
-                  className="bg-gray-50/50 border-gray-200 focus-visible:ring-primary/20 h-11 px-4 rounded-xl text-base"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700">Email Address</label>
-                <Input
-                  type="email"
-                  name="email"
-                  placeholder="e.g. staff@zppsu.edu.ph"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                  className="bg-gray-50/50 border-gray-200 focus-visible:ring-primary/20 h-11 px-4 rounded-xl text-base"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700">Password</label>
-                <div className="relative">
-                  <Input
-                    type={showPassword ? "text" : "password"}
-                    name="password"
-                    placeholder="••••••••"
-                    value={formData.password}
-                    onChange={handleChange}
-                    required
-                    className="bg-gray-50/50 border-gray-200 focus-visible:ring-primary/20 h-11 px-4 pr-12 rounded-xl text-base"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
-                    aria-label={showPassword ? "Hide password" : "Show password"}
-                  >
-                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                  </button>
-                </div>
-              </div>
-              <button
-                type="submit"
-                className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90 h-11 rounded-xl font-semibold transition shadow-sm mt-2"
-              >
+      <div className="space-y-6 font-sans">
+        {/* HEADER */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-extrabold text-[#1D1A1B] tracking-tight">User Management</h1>
+            <p className="text-xs text-[#5F5A5C] mt-0.5">Manage system staff and administrator accounts</p>
+          </div>
+          
+          <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+            <DialogTrigger asChild>
+              <button className="flex items-center justify-center gap-2 bg-[#6B1D2A] text-[#FFFCF7] hover:bg-[#8B3545] px-4 h-9 rounded-xl font-bold text-xs transition shadow-xs cursor-pointer">
                 <Plus className="w-4 h-4" />
                 Create User
               </button>
-            </form>
-          </DialogContent>
-        </Dialog>
-      </div>
-
-      {/* USERS TABLE */}
-      <Card className="border border-gray-100 shadow-sm hover:shadow-md transition-shadow overflow-hidden rounded-2xl">
-        <div className="overflow-x-auto">
-          <Table className="w-full">
-            <TableHeader className="bg-gray-50/50">
-              <TableRow className="border-b border-gray-100">
-                <TableHead className="text-left font-semibold text-gray-600 p-5">Full Name</TableHead>
-                <TableHead className="text-left font-semibold text-gray-600 p-5">Email</TableHead>
-                <TableHead className="text-left font-semibold text-gray-600 p-5">Role</TableHead>
-                <TableHead className="text-left font-semibold text-gray-600 p-5">Created At</TableHead>
-                <TableHead className="text-left font-semibold text-gray-600 p-5">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {users.map((user) => (
-                <TableRow key={user.id} className="border-b border-gray-50 hover:bg-gray-50/80 transition-colors">
-                  {/* NAME */}
-                  <TableCell className="p-5">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold shadow-sm">
-                        {user.name ? user.name.charAt(0).toUpperCase() : "U"}
-                      </div>
-                      <span className="font-semibold text-gray-900">{user.name}</span>
-                    </div>
-                  </TableCell>
-
-                  {/* EMAIL */}
-                  <TableCell className="p-5 text-gray-600">
-                    {user.email}
-                  </TableCell>
-
-                  {/* ROLE */}
-                  <TableCell className="p-5">
-                    <span className={`px-3 py-1 rounded-full text-xs font-bold tracking-wide shadow-sm ${
-                      user.role === "Admin" ? "bg-amber-100 text-amber-700 border border-amber-200" : "bg-blue-100 text-blue-700 border border-blue-200"
-                    }`}>
-                      {user.role} 
-                    </span>
-                  </TableCell>
-
-                  {/* CREATED AT */}
-                  <TableCell className="p-5 text-gray-500 font-medium">
-                    {new Date(user.created_at).toLocaleDateString("en-US", { year: 'numeric', month: 'short', day: 'numeric' })}
-                  </TableCell>
-
-                  {/* ACTIONS */}
-                  <TableCell className="p-5">
-                    <div className="flex gap-2">
-                      {user.role === "User" && (
-                        <button
-                          onClick={() => handlePromote(user.id)}
-                          className="p-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all"
-                          title="Promote to Admin"
-                        >
-                          <ArrowUpToLine className="w-4 h-4" />
-                        </button>
-                      )}
-
-                      {user.role === "Admin" && currentUser?.id !== user.id && (
-                        <button
-                          onClick={() => handleDemote(user.id)}
-                          className="p-2 text-gray-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-all"
-                          title="Demote to User"
-                        >
-                          <ArrowDownToLine className="w-4 h-4" />
-                        </button>
-                      )}
-
-                      <button
-                        onClick={() => handleDelete(user.id)}
-                        className="p-2 text-gray-400 hover:text-destructive hover:bg-destructive/10 rounded-lg transition-all"
-                        title="Delete User"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px] p-6 bg-[#FFFCF7] border border-[#E8E3E1] rounded-2xl shadow-xl">
+              <DialogHeader className="mb-4">
+                <DialogTitle className="text-base font-bold text-[#1D1A1B]">Create New User</DialogTitle>
+                <DialogDescription className="text-[#5F5A5C] text-xs mt-1">
+                  Add a new staff account to the system.
+                </DialogDescription>
+              </DialogHeader>
+              <form onSubmit={handleCreateUser} className="flex flex-col gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-[#1D1A1B] uppercase">Full Name</label>
+                  <Input
+                    type="text"
+                    name="name"
+                    placeholder="e.g. Jane Doe"
+                    value={formData.name}
+                    onChange={handleChange}
+                    required
+                    className="border-[#E8E3E1] bg-[#FFFCF7] text-[#1D1A1B] h-10 px-3 rounded-xl text-xs"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-[#1D1A1B] uppercase">Email Address</label>
+                  <Input
+                    type="email"
+                    name="email"
+                    placeholder="e.g. staff@zppsu.edu.ph"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
+                    className="border-[#E8E3E1] bg-[#FFFCF7] text-[#1D1A1B] h-10 px-3 rounded-xl text-xs"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-[#1D1A1B] uppercase">Password</label>
+                  <div className="relative">
+                    <Input
+                      type={showPassword ? "text" : "password"}
+                      name="password"
+                      placeholder="••••••••"
+                      value={formData.password}
+                      onChange={handleChange}
+                      required
+                      className="border-[#E8E3E1] bg-[#FFFCF7] text-[#1D1A1B] h-10 px-3 pr-10 rounded-xl text-xs"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-[#5F5A5C] hover:text-[#1D1A1B] transition-colors"
+                      aria-label={showPassword ? "Hide password" : "Show password"}
+                    >
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
+                </div>
+                <button
+                  type="submit"
+                  className="w-full flex items-center justify-center gap-2 bg-[#6B1D2A] text-[#FFFCF7] hover:bg-[#8B3545] h-10 rounded-xl font-bold text-xs transition shadow-xs mt-2 cursor-pointer"
+                >
+                  <Plus className="w-4 h-4" />
+                  Create User
+                </button>
+              </form>
+            </DialogContent>
+          </Dialog>
         </div>
-      </Card>
+
+        {/* USERS TABLE */}
+        <Card className="border border-[#E8E3E1] shadow-xs overflow-hidden rounded-xl bg-[#FFFCF7]">
+          <div className="overflow-x-auto">
+            <Table className="w-full text-xs">
+              <TableHeader className="bg-[#F4E7EA] border-b border-[#E8E3E1]">
+                <TableRow className="border-b border-[#E8E3E1]">
+                  <TableHead className="text-left font-bold text-[#5F5A5C] p-4 text-xs uppercase">Full Name</TableHead>
+                  <TableHead className="text-left font-bold text-[#5F5A5C] p-4 text-xs uppercase">Email</TableHead>
+                  <TableHead className="text-left font-bold text-[#5F5A5C] p-4 text-xs uppercase">Role</TableHead>
+                  <TableHead className="text-left font-bold text-[#5F5A5C] p-4 text-xs uppercase">Created At</TableHead>
+                  <TableHead className="text-right font-bold text-[#5F5A5C] p-4 text-xs uppercase">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody className="divide-y divide-[#E8E3E1]">
+                {users.map((user) => (
+                  <TableRow key={user.id} className="border-b border-[#E8E3E1] hover:bg-[#F4E7EA]/40 transition-colors">
+                    {/* NAME */}
+                    <TableCell className="p-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-[#F4E7EA] text-[#6B1D2A] flex items-center justify-center font-bold text-xs shadow-xs">
+                          {user.name ? user.name.charAt(0).toUpperCase() : "U"}
+                        </div>
+                        <span className="font-semibold text-[#1D1A1B] text-xs">{user.name}</span>
+                      </div>
+                    </TableCell>
+
+                    {/* EMAIL */}
+                    <TableCell className="p-4 text-[#5F5A5C] text-xs">
+                      {user.email}
+                    </TableCell>
+
+                    {/* ROLE */}
+                    <TableCell className="p-4">
+                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wide ${
+                        user.role === "Admin" ? "bg-[#F2DFB0] text-[#A87818] border border-[#C99A2E]" : "bg-[#F4E7EA] text-[#6B1D2A] border border-[#E8E3E1]"
+                      }`}>
+                        {user.role} 
+                      </span>
+                    </TableCell>
+
+                    {/* CREATED AT */}
+                    <TableCell className="p-4 text-[#5F5A5C] text-xs">
+                      {new Date(user.created_at).toLocaleDateString("en-US", { year: 'numeric', month: 'short', day: 'numeric' })}
+                    </TableCell>
+
+                    {/* ACTIONS */}
+                    <TableCell className="p-4 text-right">
+                      <div className="flex justify-end gap-1.5">
+                        {user.role === "User" && (
+                          <button
+                            onClick={() => handlePromote(user.id)}
+                            className="p-1.5 text-[#5F5A5C] hover:text-[#6B1D2A] hover:bg-[#F4E7EA] rounded-lg transition-all cursor-pointer"
+                            title="Promote to Admin"
+                          >
+                            <ArrowUpToLine className="w-4 h-4" />
+                          </button>
+                        )}
+
+                        {user.role === "Admin" && currentUser?.id !== user.id && (
+                          <button
+                            onClick={() => handleDemote(user.id)}
+                            className="p-1.5 text-[#5F5A5C] hover:text-[#A87818] hover:bg-[#F2DFB0] rounded-lg transition-all cursor-pointer"
+                            title="Demote to User"
+                          >
+                            <ArrowDownToLine className="w-4 h-4" />
+                          </button>
+                        )}
+
+                        <button
+                          onClick={() => handleDelete(user.id)}
+                          className="p-1.5 text-[#5F5A5C] hover:text-[#4A0E1C] hover:bg-[#F4E7EA] rounded-lg transition-all cursor-pointer"
+                          title="Delete User"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </Card>
+      </div>
     </DashboardLayout>
   );
 }

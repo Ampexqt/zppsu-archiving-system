@@ -142,224 +142,32 @@ The maroon color acts as the primary institutional branding while golden accents
 
 ---
 
-# Color Palette
+# Color Palette (Mandatory 11-Color System)
 
-## Primary
+The system exclusively uses an 11-color palette designed for optimal contrast, academic prestige, and minimal eye strain:
 
-Deep Maroon
-
-HEX
-
-#800000
-
-Usage
-
-- Primary Buttons
-- Navigation
-- Active Sidebar
-- Headers
-- Links
-- Icons (Primary)
-
----
-
-## Primary Hover
-
-#660000
+| Role | Color Name | Hex | Primary Use Cases |
+| :--- | :--- | :--- | :--- |
+| **Maroon 900** | Deep Wine | `#4A0E1C` | Main hero banners, sidebar background, dark cards |
+| **Maroon 700** | Rich Maroon | `#6B1D2A` | Primary buttons, active states, key headings |
+| **Maroon 500** | Warm Maroon | `#8B3545` | Hover states, interactive accents |
+| **Maroon 100** | Soft Rose | `#F4E7EA` | Light status badges, active item backgrounds, header bands |
+| **Gold 700** | Antique Gold | `#A87818` | Strong gold accents, warning/pending text |
+| **Gold 500** | Warm Gold | `#C99A2E` | Primary accent, active toggles, brand highlights |
+| **Gold 200** | Soft Champagne | `#F2DFB0` | Subtle backgrounds, pending badges, table header highlights |
+| **White** | Warm White | `#FFFCF7` | Main page background, card surfaces, clean modals |
+| **Black** | Charcoal Ink | `#1D1A1B` | Main body text, primary headers, high contrast labels |
+| **Gray** | Slate Gray | `#5F5A5C` | Secondary text, muted labels, secondary icons |
+| **Light Gray** | Warm Gray | `#E8E3E1` | Borders, dividers, subtle table gridlines, disabled UI |
 
 ---
 
-## Primary Active
-
-#4D0000
-
----
-
-## Accent
-
-Golden Yellow
-
-HEX
-
-#FFD700
-
-Usage
-
-- Notifications
-- Highlights
-- Active Indicators
-- Warnings
-- Badges
-- Progress
-- Charts
-
----
-
-## Accent Hover
-
-#E6C200
-
----
-
-## Background
-
-Cream
-
-HEX
-
-#FDFBF7
-
-Purpose
-
-Reduce eye strain compared to pure white.
-
----
-
-## Secondary Background
-
-Beige
-
-HEX
-
-#F5F5DC
-
-Used for:
-
-- Sidebar background
-- Secondary panels
-- Empty states
-
----
-
-## Surface
-
-White
-
-HEX
-
-#FFFFFF
-
-Used for:
-
-- Cards
-- Tables
-- Forms
-- Modals
-- Archive previews
-
----
-
-## Border
-
-#E5E7EB
-
-Very subtle.
-
----
-
-## Divider
-
-#ECECEC
-
----
-
-## Text Primary
-
-#1F2937
-
----
-
-## Text Secondary
-
-#6B7280
-
----
-
-## Success
-
-#16A34A
-
----
-
-## Warning
-
-#D97706
-
----
-
-## Error
-
-#DC2626
-
----
-
-## Info
-
-#2563EB
-
----
-
-# Tailwind Role Mapping
-
-Primary
-
-```
-#800000
-```
-
-Primary Hover
-
-```
-#660000
-```
-
-Primary Active
-
-```
-#4D0000
-```
-
-Accent
-
-```
-#FFD700
-```
-
-Background
-
-```
-#FDFBF7
-```
-
-Surface
-
-```
-#FFFFFF
-```
-
-Muted
-
-```
-#F5F5DC
-```
-
-Border
-
-```
-#E5E7EB
-```
-
-Foreground
-
-```
-#1F2937
-```
-
-Muted Foreground
-
-```
-#6B7280
-```
+# Status Badge Mappings
+
+- **Active / Approved / Success:** `bg-[#F4E7EA] text-[#6B1D2A] border-[#E8E3E1]`
+- **Pending / In Review / Warning:** `bg-[#F2DFB0] text-[#A87818] border-[#C99A2E]`
+- **Archived / Secondary:** `bg-[#FFFCF7] text-[#5F5A5C] border-[#E8E3E1]`
+- **Deleted / Danger:** `bg-[#F4E7EA] text-[#4A0E1C] border-[#E8E3E1]`
 
 ---
 
@@ -526,27 +334,27 @@ Contains
 
 Background
 
-White
+Deep Wine (`#4A0E1C`)
 
 Active Item
 
-Maroon
+Rich Maroon (`#6B1D2A`) with Warm White (`#FFFCF7`) Text
 
-Inactive
+Inactive Item
 
-Gray
+Warm White (`#FFFCF7` / 80% opacity)
 
-Hover
+Hover State
 
-Light Beige
+Warm Maroon (`#8B3545`)
+
+Brand Accent / Toggles
+
+Warm Gold (`#C99A2E`)
 
 Icons
 
-Outlined
-
-Minimal
-
-Rounded
+Outlined, minimal, rounded (Lucide icons)
 
 ---
 
@@ -719,53 +527,51 @@ Large click targets
 ---
 
 # Buttons
+ 
+Primary Action
 
-Primary
+Solid Rich Maroon (`#6B1D2A`) with Warm White (`#FFFCF7`) text (Hover: Warm Maroon `#8B3545`)
 
-Solid Maroon
+Secondary Action
 
-Secondary
+Outline with Warm Gray (`#E8E3E1`) border and Charcoal Ink (`#1D1A1B`) text (Hover: Soft Rose `#F4E7EA`)
 
-Outline
+Ghost / Action Link
 
-Ghost
+Transparent background with Slate Gray (`#5F5A5C`) text (Hover: Rich Maroon `#6B1D2A` and Soft Rose `#F4E7EA`)
 
-Transparent
+Danger Action
 
-Danger
-
-Red
+Deep Wine (`#4A0E1C`) / Soft Rose (`#F4E7EA`) container with Deep Wine text (Hover: Warm Maroon `#8B3545`)
 
 Icon Buttons
 
-Square
-
-44px
-
+Square, 36px–44px, minimal padding, rounded-lg/xl
+ 
 ---
-
+ 
 # Status Badges
+ 
+Active / Approved / Verified
 
-Archived
+Soft Rose (`#F4E7EA`) background with Rich Maroon (`#6B1D2A`) text and Warm Gray (`#E8E3E1`) border
+ 
+Pending / In Review / Warning
 
-Maroon
+Soft Champagne (`#F2DFB0`) background with Antique Gold (`#A87818`) text and Warm Gold (`#C99A2E`) border
+ 
+Archived / Secondary / Neutral
 
-Pending
+Warm White (`#FFFCF7`) background with Slate Gray (`#5F5A5C`) text and Warm Gray (`#E8E3E1`) border
+ 
+Rejected / Deleted / High Priority
 
-Golden
-
-Approved
-
-Green
-
-Rejected
-
-Red
-
+Soft Rose (`#F4E7EA`) background with Deep Wine (`#4A0E1C`) text and Warm Gray (`#E8E3E1`) border
+ 
 Draft
 
-Gray
-
+Warm White (`#FFFCF7`) background with Slate Gray (`#5F5A5C`) text and Warm Gray (`#E8E3E1`) border
+ 
 ---
 
 # Search Experience

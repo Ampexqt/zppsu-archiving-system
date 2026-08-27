@@ -102,7 +102,8 @@ export default function CoaAnnualReportTemplate({ data }) {
               colSpan="5"
               style={{
                 border: "1px solid black",
-                backgroundColor: "yellow",
+                backgroundColor: "#F2DFB0",
+                color: "#1D1A1B",
                 fontWeight: "bold",
                 padding: "6px",
               }}

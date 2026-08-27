@@ -37,23 +37,23 @@ function Login() {
   };
 
   return (
-    <div className="min-h-screen w-full flex bg-white font-sans selection:bg-[#FFD700] selection:text-[#800000]">
+    <div className="min-h-screen w-full flex bg-[#FFFCF7] font-sans selection:bg-[#F2DFB0] selection:text-[#4A0E1C]">
       {/* LEFT PANEL - BRANDING */}
-      <div className="hidden lg:flex w-1/2 bg-[#800000] relative overflow-hidden flex-col justify-between p-12">
+      <div className="hidden lg:flex w-1/2 bg-[#4A0E1C] relative overflow-hidden flex-col justify-between p-12 text-[#FFFCF7]">
         <div className="absolute inset-0 bg-[radial-gradient(#ffffff22_1px,transparent_1px)] [background-size:24px_24px] opacity-20"></div>
-        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-[#FFD700]/20 to-transparent rounded-full blur-3xl translate-x-1/3 -translate-y-1/3 pointer-events-none"></div>
+        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-[#C99A2E]/20 to-transparent rounded-full blur-3xl translate-x-1/3 -translate-y-1/3 pointer-events-none"></div>
         <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-gradient-to-tr from-black/20 to-transparent rounded-full blur-3xl translate-y-1/3 -translate-x-1/4 pointer-events-none"></div>
         
         <div className="relative z-10">
-          <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-white/20 shadow-xl bg-white flex items-center justify-center cursor-pointer hover:scale-105 transition-transform" onClick={() => navigate("/")}>
+          <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-white/20 shadow-xl bg-[#FFFCF7] flex items-center justify-center cursor-pointer hover:scale-105 transition-transform" onClick={() => navigate("/")}>
             <img src={logo} alt="ZPPSU Logo" className="w-full h-full object-cover" />
           </div>
-          <h1 className="mt-8 text-4xl font-extrabold text-white tracking-tight leading-tight">
+          <h1 className="mt-8 text-4xl font-extrabold text-[#FFFCF7] tracking-tight leading-tight">
             ZPPSU Guidance Office <br />
-            <span className="text-white/80 font-semibold text-3xl">Digital Archiving System</span>
+            <span className="text-[#F2DFB0] font-semibold text-3xl">Digital Archiving System</span>
           </h1>
-          <div className="mt-6 inline-flex items-center rounded-full border border-white/20 bg-white/10 backdrop-blur-md px-4 py-2 text-sm font-medium text-white shadow-sm">
-            <ShieldCheck className="w-4 h-4 mr-2 text-[#FFD700]" />
+          <div className="mt-6 inline-flex items-center rounded-full border border-white/20 bg-white/10 backdrop-blur-md px-4 py-2 text-sm font-medium text-[#FFFCF7] shadow-sm">
+            <ShieldCheck className="w-4 h-4 mr-2 text-[#C99A2E]" />
             Authorized Personnel Only
           </div>
         </div>
@@ -69,26 +69,26 @@ function Login() {
       </div>
 
       {/* RIGHT PANEL - LOGIN FORM */}
-      <div className="w-full lg:w-1/2 flex flex-col justify-center p-6 sm:p-12 md:p-20 relative bg-[#FDFBF7] lg:bg-white overflow-y-auto">
+      <div className="w-full lg:w-1/2 flex flex-col justify-center p-6 sm:p-12 md:p-20 relative bg-[#FFFCF7] overflow-y-auto">
         {/* Mobile Logo Header */}
         <div className="absolute top-8 left-6 sm:left-12 lg:hidden flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full overflow-hidden border border-gray-200 shadow-sm cursor-pointer" onClick={() => navigate("/")}>
+          <div className="w-10 h-10 rounded-full overflow-hidden border border-[#E8E3E1] shadow-sm cursor-pointer bg-[#FFFCF7]" onClick={() => navigate("/")}>
             <img src={logo} alt="ZPPSU Logo" className="w-full h-full object-cover" />
           </div>
-          <span className="font-bold text-[#800000] tracking-tight">ZPPSU Guidance</span>
+          <span className="font-bold text-[#6B1D2A] tracking-tight">ZPPSU Guidance</span>
         </div>
 
         <div className="w-full max-w-md mx-auto mt-16 lg:mt-0">
           <div className="text-left mb-10">
-            <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 tracking-tight mb-3">Welcome back</h2>
-            <p className="text-gray-500 text-lg font-medium">Enter your credentials to securely access the system.</p>
+            <h2 className="text-3xl md:text-4xl font-extrabold text-[#1D1A1B] tracking-tight mb-3">Welcome back</h2>
+            <p className="text-[#5F5A5C] text-lg font-medium">Enter your credentials to securely access the system.</p>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-6">
             <div className="space-y-2">
-              <label className="text-sm font-bold text-gray-700 tracking-wide">Email Address</label>
+              <label className="text-sm font-bold text-[#1D1A1B] tracking-wide">Email Address</label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[#5F5A5C]">
                   <Mail className="h-5 w-5" />
                 </div>
                 <input
@@ -97,20 +97,20 @@ function Login() {
                   placeholder="admin@zppsu.edu.ph"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="block w-full pl-12 pr-4 py-3.5 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#800000]/20 focus:border-[#800000] transition-all bg-white hover:border-gray-300 text-base shadow-sm"
+                  className="block w-full pl-12 pr-4 py-3.5 border border-[#E8E3E1] rounded-xl text-[#1D1A1B] placeholder-[#5F5A5C]/60 focus:outline-none focus:ring-2 focus:ring-[#6B1D2A]/20 focus:border-[#6B1D2A] transition-all bg-[#FFFCF7] hover:border-[#5F5A5C] text-base shadow-xs"
                 />
               </div>
             </div>
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <label className="text-sm font-bold text-gray-700 tracking-wide">Password</label>
-                <a href="/forgot-password" className="text-sm font-bold text-[#800000] hover:text-[#660000] transition-colors">
+                <label className="text-sm font-bold text-[#1D1A1B] tracking-wide">Password</label>
+                <a href="/forgot-password" className="text-sm font-bold text-[#6B1D2A] hover:text-[#8B3545] transition-colors">
                   Forgot password?
                 </a>
               </div>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[#5F5A5C]">
                   <Lock className="h-5 w-5" />
                 </div>
                 <input
@@ -119,12 +119,12 @@ function Login() {
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full pl-12 pr-12 py-3.5 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#800000]/20 focus:border-[#800000] transition-all bg-white hover:border-gray-300 text-base shadow-sm"
+                  className="block w-full pl-12 pr-12 py-3.5 border border-[#E8E3E1] rounded-xl text-[#1D1A1B] placeholder-[#5F5A5C]/60 focus:outline-none focus:ring-2 focus:ring-[#6B1D2A]/20 focus:border-[#6B1D2A] transition-all bg-[#FFFCF7] hover:border-[#5F5A5C] text-base shadow-xs"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-[#5F5A5C] hover:text-[#1D1A1B] transition-colors"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? (
@@ -139,7 +139,7 @@ function Login() {
             <Button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-[#800000] text-white hover:bg-[#660000] py-6 rounded-xl font-bold text-lg shadow-[0_4px_14px_0_rgb(128,0,0,0.3)] hover:shadow-[0_6px_20px_rgba(128,0,0,0.2)] hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 mt-4"
+              className="w-full bg-[#6B1D2A] text-[#FFFCF7] hover:bg-[#8B3545] py-6 rounded-xl font-bold text-lg shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 mt-4"
             >
               {isLoading ? (
                 <>
@@ -156,9 +156,9 @@ function Login() {
           </form>
 
           <div className="mt-10 text-center">
-            <p className="text-gray-500 font-medium">
+            <p className="text-[#5F5A5C] font-medium">
               Don't have an account?{" "}
-              <a href="/register" className="text-[#800000] font-bold hover:underline underline-offset-4">
+              <a href="/register" className="text-[#6B1D2A] font-bold hover:underline underline-offset-4">
                 Request access
               </a>
             </p>

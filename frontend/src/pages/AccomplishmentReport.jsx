@@ -99,7 +99,7 @@ function AccomplishmentReport() {
       head: [["ACCESS CODE", "SUBJECT", "FILE LOCATION"]],
       body: tableData,
       theme: "grid",
-      headStyles: { fillColor: [128, 0, 0], textColor: [255, 255, 255], fontStyle: "bold", halign: "center" },
+      headStyles: { fillColor: [107, 29, 42], textColor: [255, 252, 247], fontStyle: "bold", halign: "center" },
       bodyStyles: { fontSize: 9 },
     });
 
@@ -108,14 +108,14 @@ function AccomplishmentReport() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
+      <div className="space-y-6 font-sans">
         {/* HEADER */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
-            <h1 className="text-2xl font-extrabold tracking-tight text-gray-900">
+            <h1 className="text-2xl font-extrabold tracking-tight text-[#1D1A1B]">
               Accomplishment Reports Registry
             </h1>
-            <p className="text-xs text-gray-500 mt-0.5">
+            <p className="text-xs text-[#5F5A5C] mt-0.5">
               Official masterlist generator and export archive for university reporting.
             </p>
           </div>
@@ -124,14 +124,14 @@ function AccomplishmentReport() {
             <Button 
               onClick={handlePrint}
               variant="outline"
-              className="h-9 px-4 rounded-xl border-gray-200 text-gray-700 font-bold text-xs hover:bg-gray-50 shadow-xs flex items-center gap-1.5"
+              className="h-9 px-4 rounded-xl border-[#E8E3E1] bg-[#FFFCF7] text-[#1D1A1B] font-bold text-xs hover:bg-[#F4E7EA] shadow-xs flex items-center gap-1.5 cursor-pointer"
             >
               <Printer className="w-3.5 h-3.5" />
               <span>Print Preview</span>
             </Button>
             <Button 
               onClick={handleExportPDF}
-              className="h-9 px-4 rounded-xl bg-[#800000] text-white hover:bg-[#660000] font-bold text-xs shadow-xs flex items-center gap-1.5"
+              className="h-9 px-4 rounded-xl bg-[#6B1D2A] text-[#FFFCF7] hover:bg-[#8B3545] font-bold text-xs shadow-xs flex items-center gap-1.5 cursor-pointer"
             >
               <Download className="w-3.5 h-3.5" />
               <span>Export PDF Masterlist</span>
@@ -140,13 +140,13 @@ function AccomplishmentReport() {
         </div>
 
         {/* SEARCH BAR */}
-        <Card className="border border-gray-200 shadow-xs bg-white rounded-xl">
+        <Card className="border border-[#E8E3E1] shadow-xs bg-[#FFFCF7] rounded-xl">
           <CardContent className="p-4">
             <div className="relative max-w-md">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#5F5A5C]" />
               <Input 
                 placeholder="Search masterlist by access code, subject, or location..." 
-                className="pl-10 h-10 text-xs bg-[#FDFBF7] border-gray-200 rounded-xl"
+                className="pl-10 h-10 text-xs bg-[#FFFCF7] border-[#E8E3E1] text-[#1D1A1B] rounded-xl focus-visible:ring-[#6B1D2A]"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -155,18 +155,18 @@ function AccomplishmentReport() {
         </Card>
 
         {/* PRINTABLE MASTERLIST TABLE */}
-        <Card className="border border-gray-200 shadow-xs overflow-hidden bg-white rounded-xl">
+        <Card className="border border-[#E8E3E1] shadow-xs overflow-hidden bg-[#FFFCF7] rounded-xl">
           <CardContent className="p-0 overflow-x-auto">
             <div ref={printRef} className="p-8 min-w-[700px]">
-              <div className="border border-gray-900 text-center font-extrabold text-base p-3 bg-[#FDFBF7] uppercase tracking-wide">
+              <div className="border border-[#1D1A1B] text-center font-extrabold text-base p-3 bg-[#F4E7EA] text-[#1D1A1B] uppercase tracking-wide">
                 Masterlist of Records for Accomplishment Reports
               </div>
               <table className="w-full border-collapse text-xs">
                 <thead>
-                  <tr className="bg-[#FDFBF7]">
-                    <th className="border border-gray-900 p-3 w-1/4 text-center font-bold uppercase">Access Code</th>
-                    <th className="border border-gray-900 p-3 w-1/2 text-center font-bold uppercase">Subject / Description</th>
-                    <th className="border border-gray-900 p-3 w-1/4 text-center font-bold uppercase">File Location</th>
+                  <tr className="bg-[#F4E7EA]">
+                    <th className="border border-[#1D1A1B] p-3 w-1/4 text-center font-bold uppercase text-[#1D1A1B]">Access Code</th>
+                    <th className="border border-[#1D1A1B] p-3 w-1/2 text-center font-bold uppercase text-[#1D1A1B]">Subject / Description</th>
+                    <th className="border border-[#1D1A1B] p-3 w-1/4 text-center font-bold uppercase text-[#1D1A1B]">File Location</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -174,14 +174,14 @@ function AccomplishmentReport() {
                     filteredReports.map((file) => {
                       const data = file.dynamic_data || {};
                       return (
-                        <tr key={file.id} className="hover:bg-gray-50/50">
-                          <td className="border border-gray-900 p-3 font-mono font-semibold text-center text-[#800000]">
+                        <tr key={file.id} className="hover:bg-[#F4E7EA]/40">
+                          <td className="border border-[#1D1A1B] p-3 font-mono font-bold text-center text-[#6B1D2A]">
                             {data.access_code || file.access_code || file.document_id}
                           </td>
-                          <td className="border border-gray-900 p-3 font-medium text-gray-900">
+                          <td className="border border-[#1D1A1B] p-3 font-medium text-[#1D1A1B]">
                             {data.subject || file.subject || file.title || "—"}
                           </td>
-                          <td className="border border-gray-900 p-3 text-gray-700">
+                          <td className="border border-[#1D1A1B] p-3 text-[#5F5A5C]">
                             {data.file_location || (file.file_box ? `${file.file_box.cabinet?.name || ''} - ${file.file_box.name}` : "—")}
                           </td>
                         </tr>
@@ -189,7 +189,7 @@ function AccomplishmentReport() {
                     })
                   ) : (
                     <tr>
-                      <td colSpan="3" className="border border-gray-900 p-8 text-center text-gray-400 italic">
+                      <td colSpan="3" className="border border-[#1D1A1B] p-8 text-center text-[#5F5A5C] italic">
                         No accomplishment records found matching search criteria.
                       </td>
                     </tr>

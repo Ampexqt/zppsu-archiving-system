@@ -65,27 +65,27 @@ export function ModalProvider({ children }) {
       case "danger":
         return {
           icon: AlertCircle,
-          iconBg: "bg-red-50 text-red-700 border-red-200",
-          confirmBtn: "bg-red-700 hover:bg-red-800 text-white",
+          iconBg: "bg-[#F4E7EA] text-[#4A0E1C] border-[#E8E3E1]",
+          confirmBtn: "bg-[#4A0E1C] hover:bg-[#6B1D2A] text-[#FFFCF7]",
         };
       case "warning":
         return {
           icon: AlertTriangle,
-          iconBg: "bg-amber-50 text-amber-700 border-amber-200",
-          confirmBtn: "bg-[#FFD700] hover:bg-[#E6C200] text-gray-900 font-bold",
+          iconBg: "bg-[#F2DFB0] text-[#A87818] border-[#C99A2E]",
+          confirmBtn: "bg-[#C99A2E] hover:bg-[#A87818] text-[#1D1A1B] font-bold",
         };
       case "success":
         return {
           icon: CheckCircle2,
-          iconBg: "bg-emerald-50 text-emerald-700 border-emerald-200",
-          confirmBtn: "bg-emerald-700 hover:bg-emerald-800 text-white",
+          iconBg: "bg-[#F4E7EA] text-[#6B1D2A] border-[#E8E3E1]",
+          confirmBtn: "bg-[#6B1D2A] hover:bg-[#8B3545] text-[#FFFCF7]",
         };
       case "primary":
       default:
         return {
           icon: Info,
-          iconBg: "bg-[#800000]/10 text-[#800000] border-[#800000]/20",
-          confirmBtn: "bg-[#800000] hover:bg-[#660000] text-white",
+          iconBg: "bg-[#F4E7EA] text-[#6B1D2A] border-[#E8E3E1]",
+          confirmBtn: "bg-[#6B1D2A] hover:bg-[#8B3545] text-[#FFFCF7]",
         };
     }
   };
@@ -99,10 +99,10 @@ export function ModalProvider({ children }) {
         <div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-[10000] bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150"
+          className="fixed inset-0 z-[10000] bg-[#1D1A1B]/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150"
         >
           <div
-            className="bg-white w-full max-w-md rounded-2xl shadow-2xl border border-gray-200 p-6 space-y-4 animate-in zoom-in-95 duration-150 relative"
+            className="bg-[#FFFCF7] w-full max-w-md rounded-2xl shadow-2xl border border-[#E8E3E1] p-6 space-y-4 animate-in zoom-in-95 duration-150 relative"
             onKeyDown={(e) => {
               if (e.key === "Escape") handleClose(false);
             }}
@@ -118,17 +118,17 @@ export function ModalProvider({ children }) {
                 );
               })()}
               <div className="flex-1 min-w-0">
-                <h3 className="text-base font-bold text-gray-900 tracking-tight">
+                <h3 className="text-base font-bold text-[#1D1A1B] tracking-tight">
                   {modalConfig.title}
                 </h3>
-                <p className="text-xs text-gray-600 font-medium leading-relaxed mt-1.5 break-words">
+                <p className="text-xs text-[#5F5A5C] font-medium leading-relaxed mt-1.5 break-words">
                   {modalConfig.message}
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => handleClose(false)}
-                className="text-gray-400 hover:text-gray-700 p-1 rounded-lg hover:bg-gray-100 transition-colors"
+                className="text-[#5F5A5C] hover:text-[#1D1A1B] p-1 rounded-lg hover:bg-[#F4E7EA] transition-colors"
                 aria-label="Close modal"
               >
                 <X className="w-4 h-4" />
@@ -136,14 +136,14 @@ export function ModalProvider({ children }) {
             </div>
 
             {/* ACTION BUTTONS */}
-            <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-gray-100">
+            <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-[#E8E3E1]">
               {modalConfig.type === "confirm" && (
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
                   onClick={() => handleClose(false)}
-                  className="h-9 px-4 rounded-xl text-xs font-semibold text-gray-700 bg-white border-gray-200"
+                  className="h-9 px-4 rounded-xl text-xs font-semibold text-[#1D1A1B] bg-[#FFFCF7] border-[#E8E3E1] hover:bg-[#F4E7EA]"
                 >
                   {modalConfig.cancelText}
                 </Button>

@@ -34,36 +34,36 @@ export function ToastProvider({ children }) {
     switch (type) {
       case "success":
         return {
-          border: "border-emerald-200",
-          bg: "bg-white",
-          iconColor: "text-emerald-700 bg-emerald-50",
+          border: "border-[#E8E3E1]",
+          bg: "bg-[#FFFCF7]",
+          iconColor: "text-[#6B1D2A] bg-[#F4E7EA]",
           icon: CheckCircle2,
-          barColor: "bg-emerald-600",
+          barColor: "bg-[#6B1D2A]",
         };
       case "error":
         return {
-          border: "border-red-200",
-          bg: "bg-white",
-          iconColor: "text-red-700 bg-red-50",
+          border: "border-[#E8E3E1]",
+          bg: "bg-[#FFFCF7]",
+          iconColor: "text-[#4A0E1C] bg-[#F4E7EA]",
           icon: AlertCircle,
-          barColor: "bg-[#800000]",
+          barColor: "bg-[#4A0E1C]",
         };
       case "warning":
         return {
-          border: "border-amber-200",
-          bg: "bg-white",
-          iconColor: "text-amber-700 bg-amber-50",
+          border: "border-[#C99A2E]",
+          bg: "bg-[#FFFCF7]",
+          iconColor: "text-[#A87818] bg-[#F2DFB0]",
           icon: AlertTriangle,
-          barColor: "bg-[#FFD700]",
+          barColor: "bg-[#C99A2E]",
         };
       case "info":
       default:
         return {
-          border: "border-gray-200",
-          bg: "bg-white",
-          iconColor: "text-[#800000] bg-[#800000]/10",
+          border: "border-[#E8E3E1]",
+          bg: "bg-[#FFFCF7]",
+          iconColor: "text-[#6B1D2A] bg-[#F4E7EA]",
           icon: Info,
-          barColor: "bg-[#800000]",
+          barColor: "bg-[#6B1D2A]",
         };
     }
   };
@@ -91,16 +91,16 @@ export function ToastProvider({ children }) {
               </div>
               <div className="flex-1 min-w-0 pr-2">
                 {t.title && (
-                  <h4 className="text-xs font-bold text-gray-900 tracking-tight">{t.title}</h4>
+                  <h4 className="text-xs font-bold text-[#1D1A1B] tracking-tight">{t.title}</h4>
                 )}
-                <p className="text-xs text-gray-600 font-medium leading-relaxed mt-0.5 break-words">
+                <p className="text-xs text-[#5F5A5C] font-medium leading-relaxed mt-0.5 break-words">
                   {t.message}
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => removeToast(t.id)}
-                className="shrink-0 p-1 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                className="shrink-0 p-1 text-[#5F5A5C] hover:text-[#1D1A1B] hover:bg-[#F4E7EA] rounded-lg transition-colors"
                 aria-label="Dismiss notification"
               >
                 <X className="w-3.5 h-3.5" />

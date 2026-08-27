@@ -243,10 +243,10 @@ function Inventory() {
         {/* HEADER */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-extrabold text-gray-900 tracking-tight">
+            <h1 className="text-2xl font-extrabold text-[#1D1A1B] tracking-tight">
               Physical Storage & Inventory
             </h1>
-            <p className="text-xs text-gray-500 mt-0.5">
+            <p className="text-xs text-[#5F5A5C] mt-0.5">
               Organize and monitor physical storage units, cabinet capacities, and file box distributions.
             </p>
           </div>
@@ -254,37 +254,37 @@ function Inventory() {
           <div className="flex items-center gap-2">
             {activeTab === "cabinets" ? (
               <Dialog open={isCabinetModalOpen} onOpenChange={setIsCabinetModalOpen}>
-                <DialogTrigger className="bg-[#800000] text-white hover:bg-[#660000] h-9 px-4 rounded-xl font-bold text-xs shadow-xs flex items-center gap-1.5">
+                <DialogTrigger className="bg-[#6B1D2A] text-[#FFFCF7] hover:bg-[#8B3545] h-9 px-4 rounded-xl font-bold text-xs shadow-xs flex items-center gap-1.5 cursor-pointer">
                   <Plus className="w-3.5 h-3.5" />
                   <span>New Cabinet</span>
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-md bg-white border border-gray-200 rounded-2xl p-6">
+                <DialogContent className="sm:max-w-md bg-[#FFFCF7] border border-[#E8E3E1] rounded-2xl p-6">
                   <DialogHeader className="mb-3">
-                    <DialogTitle className="text-base font-bold text-gray-900">Create Storage Cabinet</DialogTitle>
-                    <DialogDescription className="text-xs text-gray-500">Add a new physical filing cabinet to the inventory.</DialogDescription>
+                    <DialogTitle className="text-base font-bold text-[#1D1A1B]">Create Storage Cabinet</DialogTitle>
+                    <DialogDescription className="text-xs text-[#5F5A5C]">Add a new physical filing cabinet to the inventory.</DialogDescription>
                   </DialogHeader>
                   <div className="space-y-3 text-xs">
                     <div className="space-y-1">
-                      <label className="font-bold text-gray-700 uppercase">Cabinet Name</label>
+                      <label className="font-bold text-[#1D1A1B] uppercase">Cabinet Name</label>
                       <Input
                         type="text"
                         placeholder="e.g. Cabinet Alpha"
                         value={cabinetName}
                         onChange={(e) => setCabinetName(e.target.value)}
-                        className="h-10 text-xs rounded-xl"
+                        className="h-10 text-xs rounded-xl border-[#E8E3E1] bg-[#FFFCF7] text-[#1D1A1B]"
                       />
                     </div>
                     <div className="space-y-1">
-                      <label className="font-bold text-gray-700 uppercase">Capacity (File Box Limit)</label>
+                      <label className="font-bold text-[#1D1A1B] uppercase">Capacity (File Box Limit)</label>
                       <Input
                         type="number"
                         placeholder="e.g. 20"
                         value={cabinetCapacity}
                         onChange={(e) => setCabinetCapacity(e.target.value)}
-                        className="h-10 text-xs rounded-xl"
+                        className="h-10 text-xs rounded-xl border-[#E8E3E1] bg-[#FFFCF7] text-[#1D1A1B]"
                       />
                     </div>
-                    <Button onClick={handleCreateCabinet} className="w-full bg-[#800000] text-white hover:bg-[#660000] h-10 rounded-xl font-bold text-xs mt-2">
+                    <Button onClick={handleCreateCabinet} className="w-full bg-[#6B1D2A] text-[#FFFCF7] hover:bg-[#8B3545] h-10 rounded-xl font-bold text-xs mt-2 cursor-pointer">
                       Confirm Cabinet Creation
                     </Button>
                   </div>
@@ -292,32 +292,32 @@ function Inventory() {
               </Dialog>
             ) : (
               <Dialog open={isFileBoxModalOpen} onOpenChange={setIsFileBoxModalOpen}>
-                <DialogTrigger className="bg-[#800000] text-white hover:bg-[#660000] h-9 px-4 rounded-xl font-bold text-xs shadow-xs flex items-center gap-1.5">
+                <DialogTrigger className="bg-[#6B1D2A] text-[#FFFCF7] hover:bg-[#8B3545] h-9 px-4 rounded-xl font-bold text-xs shadow-xs flex items-center gap-1.5 cursor-pointer">
                   <Plus className="w-3.5 h-3.5" />
                   <span>New File Box</span>
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-md bg-white border border-gray-200 rounded-2xl p-6">
+                <DialogContent className="sm:max-w-md bg-[#FFFCF7] border border-[#E8E3E1] rounded-2xl p-6">
                   <DialogHeader className="mb-3">
-                    <DialogTitle className="text-base font-bold text-gray-900">Create File Box Container</DialogTitle>
-                    <DialogDescription className="text-xs text-gray-500">Add a file box and assign it to a parent cabinet.</DialogDescription>
+                    <DialogTitle className="text-base font-bold text-[#1D1A1B]">Create File Box Container</DialogTitle>
+                    <DialogDescription className="text-xs text-[#5F5A5C]">Add a file box and assign it to a parent cabinet.</DialogDescription>
                   </DialogHeader>
                   <div className="space-y-3 text-xs">
                     <div className="space-y-1">
-                      <label className="font-bold text-gray-700 uppercase">File Box Name / Code</label>
+                      <label className="font-bold text-[#1D1A1B] uppercase">File Box Name / Code</label>
                       <Input
                         type="text"
                         placeholder="e.g. BOX-2024-A"
                         value={fileBoxName}
                         onChange={(e) => setFileBoxName(e.target.value)}
-                        className="h-10 text-xs rounded-xl"
+                        className="h-10 text-xs rounded-xl border-[#E8E3E1] bg-[#FFFCF7] text-[#1D1A1B]"
                       />
                     </div>
                     <div className="space-y-1">
-                      <label className="font-bold text-gray-700 uppercase">Parent Cabinet</label>
+                      <label className="font-bold text-[#1D1A1B] uppercase">Parent Cabinet</label>
                       <select
                         value={selectedCabinetId}
                         onChange={(e) => setSelectedCabinetId(e.target.value)}
-                        className="h-10 w-full rounded-xl border border-gray-200 bg-white px-3 text-xs font-medium focus:ring-2 focus:ring-[#800000]/20"
+                        className="h-10 w-full rounded-xl border border-[#E8E3E1] bg-[#FFFCF7] px-3 text-xs font-medium text-[#1D1A1B] focus:ring-2 focus:ring-[#6B1D2A]/20"
                       >
                         <option value="">Select Target Cabinet</option>
                         {cabinets.map((cab) => (
@@ -326,16 +326,16 @@ function Inventory() {
                       </select>
                     </div>
                     <div className="space-y-1">
-                      <label className="font-bold text-gray-700 uppercase">Document Capacity</label>
+                      <label className="font-bold text-[#1D1A1B] uppercase">Document Capacity</label>
                       <Input
                         type="number"
                         placeholder="e.g. 100"
                         value={fileBoxCapacity}
                         onChange={(e) => setFileBoxCapacity(e.target.value)}
-                        className="h-10 text-xs rounded-xl"
+                        className="h-10 text-xs rounded-xl border-[#E8E3E1] bg-[#FFFCF7] text-[#1D1A1B]"
                       />
                     </div>
-                    <Button onClick={handleCreateFileBox} className="w-full bg-[#800000] text-white hover:bg-[#660000] h-10 rounded-xl font-bold text-xs mt-2">
+                    <Button onClick={handleCreateFileBox} className="w-full bg-[#6B1D2A] text-[#FFFCF7] hover:bg-[#8B3545] h-10 rounded-xl font-bold text-xs mt-2 cursor-pointer">
                       Confirm File Box Creation
                     </Button>
                   </div>
@@ -346,13 +346,13 @@ function Inventory() {
         </div>
 
         {/* TABS */}
-        <div className="flex gap-2 border-b border-gray-200 pb-px">
+        <div className="flex gap-2 border-b border-[#E8E3E1] pb-px">
           <button
             onClick={() => setActiveTab("cabinets")}
-            className={`flex items-center gap-2 px-4 py-2.5 text-xs font-bold transition-all border-b-2 -mb-px ${
+            className={`flex items-center gap-2 px-4 py-2.5 text-xs font-bold transition-all border-b-2 -mb-px cursor-pointer ${
               activeTab === "cabinets"
-                ? "border-[#800000] text-[#800000]"
-                : "border-transparent text-gray-500 hover:text-gray-900"
+                ? "border-[#6B1D2A] text-[#6B1D2A]"
+                : "border-transparent text-[#5F5A5C] hover:text-[#1D1A1B]"
             }`}
           >
             <Archive className="w-4 h-4" />
@@ -360,10 +360,10 @@ function Inventory() {
           </button>
           <button
             onClick={() => setActiveTab("fileBoxes")}
-            className={`flex items-center gap-2 px-4 py-2.5 text-xs font-bold transition-all border-b-2 -mb-px ${
+            className={`flex items-center gap-2 px-4 py-2.5 text-xs font-bold transition-all border-b-2 -mb-px cursor-pointer ${
               activeTab === "fileBoxes"
-                ? "border-[#800000] text-[#800000]"
-                : "border-transparent text-gray-500 hover:text-gray-900"
+                ? "border-[#6B1D2A] text-[#6B1D2A]"
+                : "border-transparent text-[#5F5A5C] hover:text-[#1D1A1B]"
             }`}
           >
             <Box className="w-4 h-4" />
@@ -373,10 +373,10 @@ function Inventory() {
 
         {/* CABINETS VIEW */}
         {activeTab === "cabinets" && (
-          <Card className="border border-gray-200 shadow-xs bg-white rounded-xl overflow-hidden">
+          <Card className="border border-[#E8E3E1] shadow-xs bg-[#FFFCF7] rounded-xl overflow-hidden">
             <CardContent className="p-0 overflow-x-auto">
               <table className="w-full text-xs text-left">
-                <thead className="text-[11px] text-gray-500 uppercase bg-[#FDFBF7] border-b border-gray-200">
+                <thead className="text-[11px] text-[#5F5A5C] uppercase bg-[#F4E7EA] border-b border-[#E8E3E1]">
                   <tr>
                     <th className="px-5 py-3.5 font-bold">Cabinet Name</th>
                     <th className="px-5 py-3.5 font-bold">Box Capacity</th>
@@ -386,7 +386,7 @@ function Inventory() {
                     <th className="px-5 py-3.5 font-bold text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100">
+                <tbody className="divide-y divide-[#E8E3E1]">
                   {currentCabinets.length > 0 ? (
                     currentCabinets.map((cab) => {
                       const used = cab.file_boxes?.length || 0;
@@ -394,18 +394,18 @@ function Inventory() {
                       const pct = Math.round((used / cap) * 100);
 
                       return (
-                        <tr key={cab.id} className="hover:bg-[#FDFBF7] transition-colors">
-                          <td className="px-5 py-3.5 font-bold text-gray-900">{cab.name}</td>
-                          <td className="px-5 py-3.5 text-gray-600">{cab.capacity} Boxes</td>
-                          <td className="px-5 py-3.5 text-gray-600">{used} Boxes Assigned</td>
+                        <tr key={cab.id} className="hover:bg-[#F4E7EA]/40 transition-colors">
+                          <td className="px-5 py-3.5 font-bold text-[#1D1A1B]">{cab.name}</td>
+                          <td className="px-5 py-3.5 text-[#5F5A5C]">{cab.capacity} Boxes</td>
+                          <td className="px-5 py-3.5 text-[#5F5A5C]">{used} Boxes Assigned</td>
                           <td className="px-5 py-3.5">
                             <div className="w-36 space-y-1">
-                              <Progress value={pct} className="h-2 bg-gray-100" />
-                              <span className="text-[10px] text-gray-500 block">{used} / {cab.capacity} ({pct}%)</span>
+                              <Progress value={pct} className="h-2 bg-[#E8E3E1]" />
+                              <span className="text-[10px] text-[#5F5A5C] block">{used} / {cab.capacity} ({pct}%)</span>
                             </div>
                           </td>
                           <td className="px-5 py-3.5">
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#F4E7EA] text-[#6B1D2A] border border-[#E8E3E1]">
                               {cab.status || "Active"}
                             </span>
                           </td>
@@ -414,7 +414,7 @@ function Inventory() {
                               size="sm"
                               variant="ghost"
                               onClick={() => openEditCabinet(cab)}
-                              className="h-7 w-7 p-0 text-gray-500 hover:text-blue-600 hover:bg-blue-50"
+                              className="h-7 w-7 p-0 text-[#5F5A5C] hover:text-[#6B1D2A] hover:bg-[#F4E7EA] cursor-pointer"
                               title="Edit Cabinet"
                             >
                               <Edit2 className="w-3.5 h-3.5" />
@@ -423,7 +423,7 @@ function Inventory() {
                               size="sm"
                               variant="ghost"
                               onClick={() => handleDeleteCabinet(cab.id)}
-                              className="h-7 w-7 p-0 text-gray-500 hover:text-red-600 hover:bg-red-50"
+                              className="h-7 w-7 p-0 text-[#5F5A5C] hover:text-[#4A0E1C] hover:bg-[#F4E7EA] cursor-pointer"
                               title="Delete Cabinet"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
@@ -434,20 +434,20 @@ function Inventory() {
                     })
                   ) : (
                     <tr>
-                      <td colSpan="6" className="px-5 py-8 text-center text-gray-400 italic">No physical cabinets configured yet.</td>
+                      <td colSpan="6" className="px-5 py-8 text-center text-[#5F5A5C] italic">No physical cabinets configured yet.</td>
                     </tr>
                   )}
                 </tbody>
               </table>
 
               {/* PAGINATION */}
-              <div className="p-4 border-t border-gray-200 flex items-center justify-between bg-[#FDFBF7] text-xs text-gray-600">
+              <div className="p-4 border-t border-[#E8E3E1] flex items-center justify-between bg-[#FFFCF7] text-xs text-[#5F5A5C]">
                 <span>Page {cabinetPage} of {totalCabinetPages}</span>
                 <div className="flex gap-1.5">
-                  <Button variant="outline" size="sm" onClick={() => setCabinetPage((p) => Math.max(p - 1, 1))} disabled={cabinetPage === 1} className="h-8 px-3 text-xs bg-white">
+                  <Button variant="outline" size="sm" onClick={() => setCabinetPage((p) => Math.max(p - 1, 1))} disabled={cabinetPage === 1} className="h-8 px-3 text-xs bg-[#FFFCF7] border-[#E8E3E1] text-[#1D1A1B] hover:bg-[#F4E7EA] cursor-pointer">
                     <ChevronLeft className="w-3.5 h-3.5 mr-1" /> Prev
                   </Button>
-                  <Button variant="outline" size="sm" onClick={() => setCabinetPage((p) => Math.min(p + 1, totalCabinetPages))} disabled={cabinetPage >= totalCabinetPages} className="h-8 px-3 text-xs bg-white">
+                  <Button variant="outline" size="sm" onClick={() => setCabinetPage((p) => Math.min(p + 1, totalCabinetPages))} disabled={cabinetPage >= totalCabinetPages} className="h-8 px-3 text-xs bg-[#FFFCF7] border-[#E8E3E1] text-[#1D1A1B] hover:bg-[#F4E7EA] cursor-pointer">
                     Next <ChevronRight className="w-3.5 h-3.5 ml-1" />
                   </Button>
                 </div>
@@ -458,10 +458,10 @@ function Inventory() {
 
         {/* FILE BOXES VIEW */}
         {activeTab === "fileBoxes" && (
-          <Card className="border border-gray-200 shadow-xs bg-white rounded-xl overflow-hidden">
+          <Card className="border border-[#E8E3E1] shadow-xs bg-[#FFFCF7] rounded-xl overflow-hidden">
             <CardContent className="p-0 overflow-x-auto">
               <table className="w-full text-xs text-left">
-                <thead className="text-[11px] text-gray-500 uppercase bg-[#FDFBF7] border-b border-gray-200">
+                <thead className="text-[11px] text-[#5F5A5C] uppercase bg-[#F4E7EA] border-b border-[#E8E3E1]">
                   <tr>
                     <th className="px-5 py-3.5 font-bold">File Box Code</th>
                     <th className="px-5 py-3.5 font-bold">Cabinet Assignment</th>
@@ -472,7 +472,7 @@ function Inventory() {
                     <th className="px-5 py-3.5 font-bold text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100">
+                <tbody className="divide-y divide-[#E8E3E1]">
                   {currentFileBoxes.length > 0 ? (
                     currentFileBoxes.map((box) => {
                       const used = box.used_space || 0;
@@ -480,19 +480,19 @@ function Inventory() {
                       const pct = Math.round((used / cap) * 100);
 
                       return (
-                        <tr key={box.id} className="hover:bg-[#FDFBF7] transition-colors">
-                          <td className="px-5 py-3.5 font-bold text-gray-900">{box.name}</td>
-                          <td className="px-5 py-3.5 text-gray-600">{box.cabinet?.name || "Unassigned"}</td>
-                          <td className="px-5 py-3.5 text-gray-600">{box.capacity} Docs</td>
-                          <td className="px-5 py-3.5 text-gray-600">{used} Files</td>
+                        <tr key={box.id} className="hover:bg-[#F4E7EA]/40 transition-colors">
+                          <td className="px-5 py-3.5 font-bold text-[#1D1A1B]">{box.name}</td>
+                          <td className="px-5 py-3.5 text-[#5F5A5C]">{box.cabinet?.name || "Unassigned"}</td>
+                          <td className="px-5 py-3.5 text-[#5F5A5C]">{box.capacity} Docs</td>
+                          <td className="px-5 py-3.5 text-[#5F5A5C]">{used} Files</td>
                           <td className="px-5 py-3.5">
                             <div className="w-36 space-y-1">
-                              <Progress value={pct} className="h-2 bg-gray-100" />
-                              <span className="text-[10px] text-gray-500 block">{used} / {box.capacity} ({pct}%)</span>
+                              <Progress value={pct} className="h-2 bg-[#E8E3E1]" />
+                              <span className="text-[10px] text-[#5F5A5C] block">{used} / {box.capacity} ({pct}%)</span>
                             </div>
                           </td>
                           <td className="px-5 py-3.5">
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#F4E7EA] text-[#6B1D2A] border border-[#E8E3E1]">
                               {box.status || "Active"}
                             </span>
                           </td>
@@ -502,16 +502,16 @@ function Inventory() {
                                 size="sm"
                                 variant="outline"
                                 onClick={() => handleViewFiles(box.name, box.files)}
-                                className="h-7 px-2.5 rounded-lg text-xs font-semibold"
+                                className="h-7 px-2.5 rounded-lg text-xs font-semibold bg-[#FFFCF7] border-[#E8E3E1] text-[#1D1A1B] hover:bg-[#F4E7EA] cursor-pointer"
                               >
-                                <FolderOpen className="w-3.5 h-3.5 mr-1 text-[#800000]" />
+                                <FolderOpen className="w-3.5 h-3.5 mr-1 text-[#6B1D2A]" />
                                 <span>Inspect ({box.files?.length || 0})</span>
                               </Button>
                               <Button
                                 size="sm"
                                 variant="ghost"
                                 onClick={() => openEditFileBox(box)}
-                                className="h-7 w-7 p-0 text-gray-500 hover:text-blue-600 hover:bg-blue-50"
+                                className="h-7 w-7 p-0 text-[#5F5A5C] hover:text-[#6B1D2A] hover:bg-[#F4E7EA] cursor-pointer"
                                 title="Edit File Box"
                               >
                                 <Edit2 className="w-3.5 h-3.5" />
@@ -520,7 +520,7 @@ function Inventory() {
                                 size="sm"
                                 variant="ghost"
                                 onClick={() => handleDeleteFileBox(box.id)}
-                                className="h-7 w-7 p-0 text-gray-500 hover:text-red-600 hover:bg-red-50"
+                                className="h-7 w-7 p-0 text-[#5F5A5C] hover:text-[#4A0E1C] hover:bg-[#F4E7EA] cursor-pointer"
                                 title="Delete File Box"
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
@@ -532,20 +532,20 @@ function Inventory() {
                     })
                   ) : (
                     <tr>
-                      <td colSpan="7" className="px-5 py-8 text-center text-gray-400 italic">No file boxes created yet.</td>
+                      <td colSpan="7" className="px-5 py-8 text-center text-[#5F5A5C] italic">No file boxes created yet.</td>
                     </tr>
                   )}
                 </tbody>
               </table>
 
               {/* PAGINATION */}
-              <div className="p-4 border-t border-gray-200 flex items-center justify-between bg-[#FDFBF7] text-xs text-gray-600">
+              <div className="p-4 border-t border-[#E8E3E1] flex items-center justify-between bg-[#FFFCF7] text-xs text-[#5F5A5C]">
                 <span>Page {fileBoxPage} of {totalFileBoxPages}</span>
                 <div className="flex gap-1.5">
-                  <Button variant="outline" size="sm" onClick={() => setFileBoxPage((p) => Math.max(p - 1, 1))} disabled={fileBoxPage === 1} className="h-8 px-3 text-xs bg-white">
+                  <Button variant="outline" size="sm" onClick={() => setFileBoxPage((p) => Math.max(p - 1, 1))} disabled={fileBoxPage === 1} className="h-8 px-3 text-xs bg-[#FFFCF7] border-[#E8E3E1] text-[#1D1A1B] hover:bg-[#F4E7EA] cursor-pointer">
                     <ChevronLeft className="w-3.5 h-3.5 mr-1" /> Prev
                   </Button>
-                  <Button variant="outline" size="sm" onClick={() => setFileBoxPage((p) => Math.min(p + 1, totalFileBoxPages))} disabled={fileBoxPage >= totalFileBoxPages} className="h-8 px-3 text-xs bg-white">
+                  <Button variant="outline" size="sm" onClick={() => setFileBoxPage((p) => Math.min(p + 1, totalFileBoxPages))} disabled={fileBoxPage >= totalFileBoxPages} className="h-8 px-3 text-xs bg-[#FFFCF7] border-[#E8E3E1] text-[#1D1A1B] hover:bg-[#F4E7EA] cursor-pointer">
                     Next <ChevronRight className="w-3.5 h-3.5 ml-1" />
                   </Button>
                 </div>
@@ -555,32 +555,31 @@ function Inventory() {
         )}
 
         {/* CONTAINER FILES MODAL */}
-        {/* CONTAINER FILES MODAL */}
         {isFilesModalOpen && (
           <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-            <div className="bg-white w-full max-w-2xl max-h-[80vh] rounded-2xl shadow-xl border border-gray-200 flex flex-col p-6 space-y-4">
-              <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+            <div className="bg-[#FFFCF7] w-full max-w-2xl max-h-[80vh] rounded-2xl shadow-xl border border-[#E8E3E1] flex flex-col p-6 space-y-4">
+              <div className="flex items-center justify-between border-b border-[#E8E3E1] pb-3">
                 <div>
-                  <h3 className="font-bold text-gray-900 text-sm">{selectedViewTitle} — Files List</h3>
-                  <p className="text-xs text-gray-500">{selectedFiles.length} records filed in this container</p>
+                  <h3 className="font-bold text-[#1D1A1B] text-sm">{selectedViewTitle} — Files List</h3>
+                  <p className="text-xs text-[#5F5A5C]">{selectedFiles.length} records filed in this container</p>
                 </div>
-                <Button size="sm" variant="ghost" onClick={() => setIsFilesModalOpen(false)} className="h-8 w-8 p-0">
+                <Button size="sm" variant="ghost" onClick={() => setIsFilesModalOpen(false)} className="h-8 w-8 p-0 text-[#5F5A5C] hover:text-[#1D1A1B] cursor-pointer">
                   <X className="w-4 h-4" />
                 </Button>
               </div>
 
               <div className="space-y-2 overflow-y-auto flex-1 pr-1">
                 {selectedFiles.map((file) => (
-                  <div key={file.id} className="border border-gray-200 rounded-xl p-3.5 flex justify-between items-center bg-[#FDFBF7]">
+                  <div key={file.id} className="border border-[#E8E3E1] rounded-xl p-3.5 flex justify-between items-center bg-[#FFFCF7]">
                     <div>
-                      <h4 className="font-bold text-xs text-gray-900">{file.subject || file.title || "Untitled"}</h4>
-                      <p className="text-[11px] text-gray-500 font-mono mt-0.5">{file.document_id || file.file_name}</p>
+                      <h4 className="font-bold text-xs text-[#1D1A1B]">{file.subject || file.title || "Untitled"}</h4>
+                      <p className="text-[11px] text-[#5F5A5C] font-mono mt-0.5">{file.document_id || file.file_name}</p>
                     </div>
-                    <Badge variant="outline" className="text-[10px] font-semibold">{file.document_type || "General"}</Badge>
+                    <Badge variant="outline" className="text-[10px] font-semibold border-[#E8E3E1] text-[#6B1D2A] bg-[#F4E7EA]">{file.document_type || "General"}</Badge>
                   </div>
                 ))}
                 {selectedFiles.length === 0 && (
-                  <div className="text-center py-10 text-gray-400">
+                  <div className="text-center py-10 text-[#5F5A5C]">
                     <FolderOpen className="w-8 h-8 mx-auto mb-2 opacity-40" />
                     <p className="text-xs">No records currently assigned to this box.</p>
                   </div>
@@ -592,35 +591,35 @@ function Inventory() {
 
         {/* EDIT CABINET MODAL */}
         <Dialog open={isEditCabinetModalOpen} onOpenChange={setIsEditCabinetModalOpen}>
-          <DialogContent className="sm:max-w-md bg-white border border-gray-200 rounded-2xl p-6">
+          <DialogContent className="sm:max-w-md bg-[#FFFCF7] border border-[#E8E3E1] rounded-2xl p-6">
             <DialogHeader className="mb-3">
-              <DialogTitle className="text-base font-bold text-gray-900">Edit Storage Cabinet</DialogTitle>
-              <DialogDescription className="text-xs text-gray-500">Update the physical filing cabinet details.</DialogDescription>
+              <DialogTitle className="text-base font-bold text-[#1D1A1B]">Edit Storage Cabinet</DialogTitle>
+              <DialogDescription className="text-xs text-[#5F5A5C]">Update the physical filing cabinet details.</DialogDescription>
             </DialogHeader>
             <div className="space-y-3 text-xs">
               <div className="space-y-1">
-                <label className="font-bold text-gray-700 uppercase">Cabinet Name</label>
+                <label className="font-bold text-[#1D1A1B] uppercase">Cabinet Name</label>
                 <Input
                   type="text"
                   placeholder="e.g. Cabinet Alpha"
                   value={cabinetName}
                   onChange={(e) => setCabinetName(e.target.value)}
-                  className="h-10 text-xs rounded-xl"
+                  className="h-10 text-xs rounded-xl border-[#E8E3E1] bg-[#FFFCF7] text-[#1D1A1B]"
                 />
               </div>
               <div className="space-y-1">
-                <label className="font-bold text-gray-700 uppercase">Capacity (File Box Limit)</label>
+                <label className="font-bold text-[#1D1A1B] uppercase">Capacity (File Box Limit)</label>
                 <Input
                   type="number"
                   placeholder="e.g. 20"
                   value={cabinetCapacity}
                   onChange={(e) => setCabinetCapacity(e.target.value)}
-                  className="h-10 text-xs rounded-xl"
+                  className="h-10 text-xs rounded-xl border-[#E8E3E1] bg-[#FFFCF7] text-[#1D1A1B]"
                 />
               </div>
               <div className="flex gap-2 mt-2">
-                <Button onClick={() => setIsEditCabinetModalOpen(false)} variant="outline" className="flex-1 h-10 rounded-xl font-bold text-xs text-gray-700">Cancel</Button>
-                <Button onClick={handleEditCabinet} className="flex-1 bg-[#800000] text-white hover:bg-[#660000] h-10 rounded-xl font-bold text-xs">Save Changes</Button>
+                <Button onClick={() => setIsEditCabinetModalOpen(false)} variant="outline" className="flex-1 h-10 rounded-xl font-bold text-xs bg-[#FFFCF7] border-[#E8E3E1] text-[#1D1A1B] hover:bg-[#F4E7EA] cursor-pointer">Cancel</Button>
+                <Button onClick={handleEditCabinet} className="flex-1 bg-[#6B1D2A] text-[#FFFCF7] hover:bg-[#8B3545] h-10 rounded-xl font-bold text-xs cursor-pointer">Save Changes</Button>
               </div>
             </div>
           </DialogContent>
@@ -628,28 +627,28 @@ function Inventory() {
 
         {/* EDIT FILE BOX MODAL */}
         <Dialog open={isEditFileBoxModalOpen} onOpenChange={setIsEditFileBoxModalOpen}>
-          <DialogContent className="sm:max-w-md bg-white border border-gray-200 rounded-2xl p-6">
+          <DialogContent className="sm:max-w-md bg-[#FFFCF7] border border-[#E8E3E1] rounded-2xl p-6">
             <DialogHeader className="mb-3">
-              <DialogTitle className="text-base font-bold text-gray-900">Edit File Box Container</DialogTitle>
-              <DialogDescription className="text-xs text-gray-500">Update file box details and assignment.</DialogDescription>
+              <DialogTitle className="text-base font-bold text-[#1D1A1B]">Edit File Box Container</DialogTitle>
+              <DialogDescription className="text-xs text-[#5F5A5C]">Update file box details and assignment.</DialogDescription>
             </DialogHeader>
             <div className="space-y-3 text-xs">
               <div className="space-y-1">
-                <label className="font-bold text-gray-700 uppercase">File Box Name / Code</label>
+                <label className="font-bold text-[#1D1A1B] uppercase">File Box Name / Code</label>
                 <Input
                   type="text"
                   placeholder="e.g. BOX-2024-A"
                   value={fileBoxName}
                   onChange={(e) => setFileBoxName(e.target.value)}
-                  className="h-10 text-xs rounded-xl"
+                  className="h-10 text-xs rounded-xl border-[#E8E3E1] bg-[#FFFCF7] text-[#1D1A1B]"
                 />
               </div>
               <div className="space-y-1">
-                <label className="font-bold text-gray-700 uppercase">Parent Cabinet</label>
+                <label className="font-bold text-[#1D1A1B] uppercase">Parent Cabinet</label>
                 <select
                   value={selectedCabinetId}
                   onChange={(e) => setSelectedCabinetId(e.target.value)}
-                  className="h-10 w-full rounded-xl border border-gray-200 bg-white px-3 text-xs font-medium focus:ring-2 focus:ring-[#800000]/20"
+                  className="h-10 w-full rounded-xl border border-[#E8E3E1] bg-[#FFFCF7] px-3 text-xs font-medium text-[#1D1A1B] focus:ring-2 focus:ring-[#6B1D2A]/20"
                 >
                   <option value="">Select Target Cabinet</option>
                   {cabinets.map((cab) => (
@@ -658,18 +657,18 @@ function Inventory() {
                 </select>
               </div>
               <div className="space-y-1">
-                <label className="font-bold text-gray-700 uppercase">Document Capacity</label>
+                <label className="font-bold text-[#1D1A1B] uppercase">Document Capacity</label>
                 <Input
                   type="number"
                   placeholder="e.g. 100"
                   value={fileBoxCapacity}
                   onChange={(e) => setFileBoxCapacity(e.target.value)}
-                  className="h-10 text-xs rounded-xl"
+                  className="h-10 text-xs rounded-xl border-[#E8E3E1] bg-[#FFFCF7] text-[#1D1A1B]"
                 />
               </div>
               <div className="flex gap-2 mt-2">
-                <Button onClick={() => setIsEditFileBoxModalOpen(false)} variant="outline" className="flex-1 h-10 rounded-xl font-bold text-xs text-gray-700">Cancel</Button>
-                <Button onClick={handleEditFileBox} className="flex-1 bg-[#800000] text-white hover:bg-[#660000] h-10 rounded-xl font-bold text-xs">Save Changes</Button>
+                <Button onClick={() => setIsEditFileBoxModalOpen(false)} variant="outline" className="flex-1 h-10 rounded-xl font-bold text-xs bg-[#FFFCF7] border-[#E8E3E1] text-[#1D1A1B] hover:bg-[#F4E7EA] cursor-pointer">Cancel</Button>
+                <Button onClick={handleEditFileBox} className="flex-1 bg-[#6B1D2A] text-[#FFFCF7] hover:bg-[#8B3545] h-10 rounded-xl font-bold text-xs cursor-pointer">Save Changes</Button>
               </div>
             </div>
           </DialogContent>

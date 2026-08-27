@@ -57,7 +57,8 @@ export default function ChedCommunicationTemplate({ data }) {
             <td
               colSpan="5"
               style={{
-                background: "yellow",
+                background: "#F2DFB0",
+                color: "#1D1A1B",
                 border: "1px solid black",
                 fontWeight: "bold",
                 padding: "6px",

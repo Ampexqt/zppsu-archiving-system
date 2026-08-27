@@ -8,7 +8,8 @@ const AaccupTemplate = ({ data }) => {
           font-bold
           text-xl
           mb-4
-          bg-yellow-300
+          bg-[#F4E7EA]
+          text-[#1D1A1B]
           p-2
         "
       >
@@ -21,7 +22,7 @@ const AaccupTemplate = ({ data }) => {
 
         <thead>
 
-          <tr className="bg-yellow-300">
+          <tr className="bg-[#F4E7EA] text-[#1D1A1B]">
 
             <th className="border border-black p-2">
               ACCESS CODE

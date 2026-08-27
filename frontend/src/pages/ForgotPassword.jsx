@@ -81,30 +81,30 @@ function ForgotPassword() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FDFBF7] flex items-center justify-center px-4 py-12 font-sans selection:bg-[#FFD700] selection:text-[#800000]">
-      <div className="bg-white w-full max-w-md rounded-2xl shadow-sm border border-gray-200 p-8">
+    <div className="min-h-screen bg-[#FFFCF7] flex items-center justify-center px-4 py-12 font-sans selection:bg-[#F2DFB0] selection:text-[#4A0E1C]">
+      <div className="bg-[#FFFCF7] w-full max-w-md rounded-2xl shadow-sm border border-[#E8E3E1] p-8">
         
         {/* HEADER */}
         <div className="text-center mb-8">
           <div 
-            className="w-12 h-12 rounded-full overflow-hidden border border-gray-200 shadow-xs mx-auto mb-4 cursor-pointer hover:scale-105 transition-transform"
+            className="w-12 h-12 rounded-full overflow-hidden border border-[#E8E3E1] shadow-xs mx-auto mb-4 cursor-pointer hover:scale-105 transition-transform bg-[#FFFCF7]"
             onClick={() => navigate("/")}
           >
             <img src={logo} alt="ZPPSU Logo" className="w-full h-full object-cover" />
           </div>
-          <h1 className="text-2xl font-extrabold text-gray-900 tracking-tight">
+          <h1 className="text-2xl font-extrabold text-[#1D1A1B] tracking-tight">
             Account Recovery
           </h1>
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="text-xs text-[#5F5A5C] mt-1">
             Follow the steps to securely reset your password
           </p>
         </div>
 
         {/* STEP PROGRESS INDICATOR */}
         <div className="flex items-center justify-between mb-8 px-2 relative">
-          <div className="absolute left-6 right-6 top-1/2 -translate-y-1/2 h-0.5 bg-gray-200 -z-0"></div>
+          <div className="absolute left-6 right-6 top-1/2 -translate-y-1/2 h-0.5 bg-[#E8E3E1] -z-0"></div>
           <div 
-            className="absolute left-6 top-1/2 -translate-y-1/2 h-0.5 bg-[#800000] -z-0 transition-all duration-300"
+            className="absolute left-6 top-1/2 -translate-y-1/2 h-0.5 bg-[#6B1D2A] -z-0 transition-all duration-300"
             style={{ width: `${((step - 1) / 2) * 80}%` }}
           ></div>
 
@@ -113,10 +113,10 @@ function ForgotPassword() {
               key={s}
               className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all z-10 ${
                 step > s
-                  ? "bg-[#800000] text-white"
+                  ? "bg-[#6B1D2A] text-[#FFFCF7]"
                   : step === s
-                  ? "bg-[#800000] text-white ring-4 ring-[#800000]/20"
-                  : "bg-white border-2 border-gray-300 text-gray-400"
+                  ? "bg-[#6B1D2A] text-[#FFFCF7] ring-4 ring-[#6B1D2A]/20"
+                  : "bg-[#FFFCF7] border-2 border-[#E8E3E1] text-[#5F5A5C]"
               }`}
             >
               {step > s ? <CheckCircle2 className="w-4 h-4" /> : s}
@@ -125,7 +125,7 @@ function ForgotPassword() {
         </div>
 
         {errorMessage && (
-          <div className="mb-6 p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-medium">
+          <div className="mb-6 p-3.5 rounded-xl bg-[#F4E7EA] border border-[#E8E3E1] text-[#4A0E1C] text-xs font-medium">
             {errorMessage}
           </div>
         )}
@@ -134,11 +134,11 @@ function ForgotPassword() {
         {step === 1 && (
           <form onSubmit={handleSendOTP} className="space-y-4">
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-gray-700 uppercase tracking-wider">
+              <label className="text-xs font-bold text-[#1D1A1B] uppercase tracking-wider">
                 Institutional Email
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#5F5A5C]">
                   <Mail className="h-4 w-4" />
                 </div>
                 <input
@@ -147,16 +147,16 @@ function ForgotPassword() {
                   placeholder="user@zppsu.edu.ph"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="block w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#800000]/20 focus:border-[#800000] transition-all bg-white hover:border-gray-300 text-sm shadow-xs"
+                  className="block w-full pl-10 pr-4 py-3 border border-[#E8E3E1] rounded-xl text-[#1D1A1B] placeholder-[#5F5A5C]/60 focus:outline-none focus:ring-2 focus:ring-[#6B1D2A]/20 focus:border-[#6B1D2A] transition-all bg-[#FFFCF7] hover:border-[#5F5A5C] text-sm shadow-xs"
                 />
               </div>
-              <p className="text-[11px] text-gray-500">A one-time verification code will be dispatched to this address.</p>
+              <p className="text-[11px] text-[#5F5A5C]">A one-time verification code will be dispatched to this address.</p>
             </div>
 
             <Button
               type="submit"
               disabled={isLoading || !email}
-              className="w-full bg-[#800000] text-white hover:bg-[#660000] py-5 rounded-xl font-bold text-sm shadow-xs hover:shadow-sm transition-all flex items-center justify-center gap-2 mt-2"
+              className="w-full bg-[#6B1D2A] text-[#FFFCF7] hover:bg-[#8B3545] py-5 rounded-xl font-bold text-sm shadow-xs hover:shadow-sm transition-all flex items-center justify-center gap-2 mt-2"
             >
               {isLoading ? (
                 <>
@@ -177,11 +177,11 @@ function ForgotPassword() {
         {step === 2 && (
           <form onSubmit={handleVerifyOTP} className="space-y-4">
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-gray-700 uppercase tracking-wider">
+              <label className="text-xs font-bold text-[#1D1A1B] uppercase tracking-wider">
                 Verification Code
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#5F5A5C]">
                   <KeyRound className="h-4 w-4" />
                 </div>
                 <input
@@ -190,10 +190,10 @@ function ForgotPassword() {
                   placeholder="Enter 6-digit code"
                   value={otp}
                   onChange={(e) => setOTP(e.target.value)}
-                  className="block w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#800000]/20 focus:border-[#800000] transition-all bg-white hover:border-gray-300 text-sm tracking-widest font-mono text-center shadow-xs"
+                  className="block w-full pl-10 pr-4 py-3 border border-[#E8E3E1] rounded-xl text-[#1D1A1B] placeholder-[#5F5A5C]/60 focus:outline-none focus:ring-2 focus:ring-[#6B1D2A]/20 focus:border-[#6B1D2A] transition-all bg-[#FFFCF7] hover:border-[#5F5A5C] text-sm tracking-widest font-mono text-center shadow-xs"
                 />
               </div>
-              <p className="text-[11px] text-gray-500">Check your inbox ({email}) for the code.</p>
+              <p className="text-[11px] text-[#5F5A5C]">Check your inbox ({email}) for the code.</p>
             </div>
 
             <div className="flex gap-2">
@@ -201,14 +201,14 @@ function ForgotPassword() {
                 type="button"
                 variant="outline"
                 onClick={() => setStep(1)}
-                className="w-1/3 py-5 rounded-xl text-xs font-semibold"
+                className="w-1/3 py-5 rounded-xl text-xs font-semibold bg-[#FFFCF7] border-[#E8E3E1] text-[#1D1A1B] hover:bg-[#F4E7EA]"
               >
                 Back
               </Button>
               <Button
                 type="submit"
                 disabled={isLoading || !otp}
-                className="w-2/3 bg-[#800000] text-white hover:bg-[#660000] py-5 rounded-xl font-bold text-sm shadow-xs transition-all flex items-center justify-center gap-2"
+                className="w-2/3 bg-[#6B1D2A] text-[#FFFCF7] hover:bg-[#8B3545] py-5 rounded-xl font-bold text-sm shadow-xs transition-all flex items-center justify-center gap-2"
               >
                 {isLoading ? (
                   <>
@@ -230,11 +230,11 @@ function ForgotPassword() {
         {step === 3 && (
           <form onSubmit={handleResetPassword} className="space-y-4">
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-gray-700 uppercase tracking-wider">
+              <label className="text-xs font-bold text-[#1D1A1B] uppercase tracking-wider">
                 New Password
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#5F5A5C]">
                   <Lock className="h-4 w-4" />
                 </div>
                 <input
@@ -243,7 +243,7 @@ function ForgotPassword() {
                   placeholder="Enter new password"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  className="block w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#800000]/20 focus:border-[#800000] transition-all bg-white hover:border-gray-300 text-sm shadow-xs"
+                  className="block w-full pl-10 pr-4 py-3 border border-[#E8E3E1] rounded-xl text-[#1D1A1B] placeholder-[#5F5A5C]/60 focus:outline-none focus:ring-2 focus:ring-[#6B1D2A]/20 focus:border-[#6B1D2A] transition-all bg-[#FFFCF7] hover:border-[#5F5A5C] text-sm shadow-xs"
                 />
               </div>
             </div>
@@ -251,7 +251,7 @@ function ForgotPassword() {
             <Button
               type="submit"
               disabled={isLoading || !newPassword}
-              className="w-full bg-[#800000] text-white hover:bg-[#660000] py-5 rounded-xl font-bold text-sm shadow-xs hover:shadow-sm transition-all flex items-center justify-center gap-2 mt-2"
+              className="w-full bg-[#6B1D2A] text-[#FFFCF7] hover:bg-[#8B3545] py-5 rounded-xl font-bold text-sm shadow-xs hover:shadow-sm transition-all flex items-center justify-center gap-2 mt-2"
             >
               {isLoading ? (
                 <>
@@ -269,10 +269,10 @@ function ForgotPassword() {
         )}
 
         {/* RETURN TO LOGIN */}
-        <div className="mt-8 pt-6 border-t border-gray-100 text-center">
+        <div className="mt-8 pt-6 border-t border-[#E8E3E1] text-center">
           <Link
             to="/login"
-            className="inline-flex items-center gap-1.5 text-xs font-bold text-[#800000] hover:underline underline-offset-4"
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-[#6B1D2A] hover:underline underline-offset-4"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             <span>Return to Login</span>

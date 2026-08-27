@@ -177,14 +177,14 @@ function Files() {
   const paginatedRecords = generatedRecords.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 font-sans">
       {/* PAGE HEADER */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold text-gray-900 tracking-tight">
+          <h1 className="text-2xl font-extrabold text-[#1D1A1B] tracking-tight">
             Document Filing & Registration
           </h1>
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="text-xs text-[#5F5A5C] mt-1">
             Register automated metadata records or upload scanned files directly into physical cabinets.
           </p>
         </div>
@@ -194,15 +194,15 @@ function Files() {
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         
         {/* CARD 1: DOCUMENT METADATA GENERATOR */}
-        <Card className="border border-gray-200 shadow-xs bg-white rounded-xl flex flex-col">
-          <CardHeader className="border-b border-gray-100 pb-4">
-            <CardTitle className="text-base font-bold text-gray-900 flex items-center gap-2">
-              <div className="p-1.5 rounded-lg bg-[#800000]/10 text-[#800000]">
+        <Card className="border border-[#E8E3E1] shadow-xs bg-[#FFFCF7] rounded-xl flex flex-col">
+          <CardHeader className="border-b border-[#E8E3E1] pb-4">
+            <CardTitle className="text-base font-bold text-[#1D1A1B] flex items-center gap-2">
+              <div className="p-1.5 rounded-lg bg-[#F4E7EA] text-[#6B1D2A]">
                 <FilePlus className="w-4 h-4" />
               </div>
               <span>Register Document Entry</span>
             </CardTitle>
-            <CardDescription className="text-xs text-gray-500">
+            <CardDescription className="text-xs text-[#5F5A5C]">
               Categorize and record official document metadata in the central registry.
             </CardDescription>
           </CardHeader>
@@ -211,15 +211,15 @@ function Files() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {/* CATEGORY SELECT */}
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-gray-700 uppercase">Category</label>
+                  <label className="text-xs font-bold text-[#1D1A1B] uppercase">Category</label>
                   <Popover modal={true}>
                     <PopoverTrigger
-                      className="flex h-10 w-full items-center justify-between rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-[#800000]/20 focus:border-[#800000]"
+                      className="flex h-10 w-full items-center justify-between rounded-xl border border-[#E8E3E1] bg-[#FFFCF7] px-3 py-2 text-xs font-medium text-[#1D1A1B] focus:ring-2 focus:ring-[#6B1D2A]/20 focus:border-[#6B1D2A]"
                     >
                       <span className="truncate">{category || "Select Classification"}</span>
-                      <ChevronsUpDown className="h-3.5 w-3.5 opacity-50 shrink-0" />
+                      <ChevronsUpDown className="h-3.5 w-3.5 opacity-50 shrink-0 text-[#5F5A5C]" />
                     </PopoverTrigger>
-                    <PopoverContent className="p-0 w-56" align="start">
+                    <PopoverContent className="p-0 w-56 bg-[#FFFCF7] border border-[#E8E3E1]" align="start">
                       <Command>
                         <CommandList>
                           <CommandGroup>
@@ -233,9 +233,9 @@ function Files() {
                                   setFormData({});
                                   document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
                                 }}
-                                className="text-xs cursor-pointer"
+                                className="text-xs cursor-pointer text-[#1D1A1B] hover:bg-[#F4E7EA]"
                               >
-                                <Check className={cn("mr-2 h-3.5 w-3.5", category === cat ? "opacity-100 text-[#800000]" : "opacity-0")} />
+                                <Check className={cn("mr-2 h-3.5 w-3.5", category === cat ? "opacity-100 text-[#6B1D2A]" : "opacity-0")} />
                                 {cat}
                               </CommandItem>
                             ))}
@@ -248,20 +248,20 @@ function Files() {
 
                 {/* DOCUMENT TYPE SELECT */}
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-gray-700 uppercase">Document Type</label>
+                  <label className="text-xs font-bold text-[#1D1A1B] uppercase">Document Type</label>
                   <Popover modal={true}>
                     <PopoverTrigger
                       disabled={!category}
-                      className="flex h-10 w-full items-center justify-between rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-[#800000]/20 focus:border-[#800000] disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex h-10 w-full items-center justify-between rounded-xl border border-[#E8E3E1] bg-[#FFFCF7] px-3 py-2 text-xs font-medium text-[#1D1A1B] focus:ring-2 focus:ring-[#6B1D2A]/20 focus:border-[#6B1D2A] disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <span className="truncate">{documentType || "Select Document Type"}</span>
-                      <ChevronsUpDown className="h-3.5 w-3.5 opacity-50 shrink-0" />
+                      <ChevronsUpDown className="h-3.5 w-3.5 opacity-50 shrink-0 text-[#5F5A5C]" />
                     </PopoverTrigger>
-                    <PopoverContent className="p-0 max-h-60 overflow-y-auto w-64" align="start">
+                    <PopoverContent className="p-0 max-h-60 overflow-y-auto w-64 bg-[#FFFCF7] border border-[#E8E3E1]" align="start">
                       <Command>
                         <CommandInput placeholder="Filter types..." className="text-xs" />
                         <CommandList>
-                          <CommandEmpty className="text-xs p-2 text-center text-gray-500">No type found.</CommandEmpty>
+                          <CommandEmpty className="text-xs p-2 text-center text-[#5F5A5C]">No type found.</CommandEmpty>
                           <CommandGroup>
                             {category && documentCategories[category]?.map((doc) => (
                               <CommandItem
@@ -272,9 +272,9 @@ function Files() {
                                   setFormData({});
                                   document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
                                 }}
-                                className="text-xs cursor-pointer"
+                                className="text-xs cursor-pointer text-[#1D1A1B] hover:bg-[#F4E7EA]"
                               >
-                                <Check className={cn("mr-2 h-3.5 w-3.5", documentType === doc ? "opacity-100 text-[#800000]" : "opacity-0")} />
+                                <Check className={cn("mr-2 h-3.5 w-3.5", documentType === doc ? "opacity-100 text-[#6B1D2A]" : "opacity-0")} />
                                 {doc}
                               </CommandItem>
                             ))}
@@ -291,7 +291,7 @@ function Files() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                   {selectedFields.map((field) => (
                     <div key={field} className="space-y-1">
-                      <label className="text-[11px] font-bold text-gray-600 uppercase">
+                      <label className="text-[11px] font-bold text-[#5F5A5C] uppercase">
                         {field.replaceAll("_", " ")}
                       </label>
                       <Input
@@ -299,7 +299,7 @@ function Files() {
                         placeholder={`Enter ${field.replaceAll("_", " ")}`}
                         value={formData[field] || ""}
                         onChange={(e) => handleChange(field, e.target.value)}
-                        className="h-10 text-xs rounded-xl border-gray-200 bg-white"
+                        className="h-10 text-xs rounded-xl border-[#E8E3E1] bg-[#FFFCF7] text-[#1D1A1B]"
                         required={field === "access_code"}
                       />
                     </div>
@@ -310,7 +310,7 @@ function Files() {
               <Button
                 type="submit"
                 disabled={!documentType}
-                className="w-full bg-[#800000] text-white hover:bg-[#660000] py-5 rounded-xl font-bold text-xs shadow-xs transition-all flex items-center justify-center gap-2 mt-4"
+                className="w-full bg-[#6B1D2A] text-[#FFFCF7] hover:bg-[#8B3545] py-5 rounded-xl font-bold text-xs shadow-xs transition-all flex items-center justify-center gap-2 mt-4 cursor-pointer"
               >
                 <FilePlus className="w-4 h-4" />
                 <span>Register Document Entry</span>
@@ -320,26 +320,26 @@ function Files() {
         </Card>
 
         {/* CARD 2: DIRECT SMART DOCUMENT UPLOAD */}
-        <Card className="border border-gray-200 shadow-xs bg-white rounded-xl flex flex-col">
-          <CardHeader className="border-b border-gray-100 pb-4">
-            <CardTitle className="text-base font-bold text-gray-900 flex items-center gap-2">
-              <div className="p-1.5 rounded-lg bg-[#800000]/10 text-[#800000]">
+        <Card className="border border-[#E8E3E1] shadow-xs bg-[#FFFCF7] rounded-xl flex flex-col">
+          <CardHeader className="border-b border-[#E8E3E1] pb-4">
+            <CardTitle className="text-base font-bold text-[#1D1A1B] flex items-center gap-2">
+              <div className="p-1.5 rounded-lg bg-[#F4E7EA] text-[#6B1D2A]">
                 <UploadCloud className="w-4 h-4" />
               </div>
               <span>Upload Document & Assign Storage</span>
             </CardTitle>
-            <CardDescription className="text-xs text-gray-500">
+            <CardDescription className="text-xs text-[#5F5A5C]">
               Upload PDF, DOCX, or PPTX. Automatic OCR extracts text from scanned records.
             </CardDescription>
           </CardHeader>
           <CardContent className="p-5 flex-1 flex flex-col justify-center">
-            <div className="border-2 border-dashed border-gray-200 rounded-2xl p-6 bg-[#FDFBF7] flex flex-col items-center justify-center text-center space-y-4">
-              <div className="w-12 h-12 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-[#800000] shadow-xs">
+            <div className="border-2 border-dashed border-[#E8E3E1] rounded-2xl p-6 bg-[#FFFCF7] flex flex-col items-center justify-center text-center space-y-4">
+              <div className="w-12 h-12 rounded-xl bg-[#F4E7EA] border border-[#E8E3E1] flex items-center justify-center text-[#6B1D2A] shadow-xs">
                 <UploadCloud className="w-6 h-6 stroke-[2]" />
               </div>
               <div>
-                <p className="text-sm font-bold text-gray-900">Choose document to upload</p>
-                <p className="text-xs text-gray-500 mt-0.5">PDF, DOCX, PPTX, JPG up to 10MB</p>
+                <p className="text-sm font-bold text-[#1D1A1B]">Choose document to upload</p>
+                <p className="text-xs text-[#5F5A5C] mt-0.5">PDF, DOCX, PPTX, JPG up to 10MB</p>
               </div>
 
               {/* CABINET & FILE BOX DROPDOWNS */}
@@ -350,7 +350,7 @@ function Files() {
                     setSelectedUploadCabinet(e.target.value);
                     setSelectedUploadFileBox("");
                   }}
-                  className="h-9 w-full rounded-xl border border-gray-200 bg-white px-3 text-xs font-medium focus:ring-2 focus:ring-[#800000]/20"
+                  className="h-9 w-full rounded-xl border border-[#E8E3E1] bg-[#FFFCF7] px-3 text-xs font-medium text-[#1D1A1B] focus:ring-2 focus:ring-[#6B1D2A]/20"
                 >
                   <option value="">Cabinet (Optional)</option>
                   {inventories.map((inv) => (
@@ -364,7 +364,7 @@ function Files() {
                   value={selectedUploadFileBox}
                   onChange={(e) => setSelectedUploadFileBox(e.target.value)}
                   disabled={!selectedUploadCabinet}
-                  className="h-9 w-full rounded-xl border border-gray-200 bg-white px-3 text-xs font-medium focus:ring-2 focus:ring-[#800000]/20 disabled:opacity-50"
+                  className="h-9 w-full rounded-xl border border-[#E8E3E1] bg-[#FFFCF7] px-3 text-xs font-medium text-[#1D1A1B] focus:ring-2 focus:ring-[#6B1D2A]/20 disabled:opacity-50"
                 >
                   <option value="">File Box (Optional)</option>
                   {inventories.find((inv) => String(inv.id) === String(selectedUploadCabinet))?.file_boxes?.map((box) => (
@@ -377,13 +377,13 @@ function Files() {
                 type="file"
                 accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png"
                 onChange={(e) => setLegacyFile(e.target.files[0] || null)}
-                className="w-full max-w-sm text-xs file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-[#800000] file:text-white hover:file:bg-[#660000] cursor-pointer"
+                className="w-full max-w-sm text-xs file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-[#6B1D2A] file:text-[#FFFCF7] hover:file:bg-[#8B3545] cursor-pointer"
               />
 
               <Button
                 onClick={handleLegacyUpload}
                 disabled={!legacyFile || uploadingLegacy}
-                className="w-full max-w-sm bg-[#800000] text-white hover:bg-[#660000] py-5 rounded-xl font-bold text-xs shadow-xs transition-all flex items-center justify-center gap-2"
+                className="w-full max-w-sm bg-[#6B1D2A] text-[#FFFCF7] hover:bg-[#8B3545] py-5 rounded-xl font-bold text-xs shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
                 {uploadingLegacy ? (
                   <>
@@ -403,14 +403,14 @@ function Files() {
       </div>
 
       {/* PHYSICAL STORAGE ASSIGNMENT TABLE */}
-      <Card className="border border-gray-200 shadow-xs bg-white rounded-xl overflow-hidden">
-        <CardHeader className="border-b border-gray-100 pb-4 flex flex-row items-center justify-between">
+      <Card className="border border-[#E8E3E1] shadow-xs bg-[#FFFCF7] rounded-xl overflow-hidden">
+        <CardHeader className="border-b border-[#E8E3E1] pb-4 flex flex-row items-center justify-between bg-[#FFFCF7]">
           <div>
-            <CardTitle className="text-base font-bold text-gray-900 flex items-center gap-2">
-              <Box className="w-4 h-4 text-[#800000]" />
+            <CardTitle className="text-base font-bold text-[#1D1A1B] flex items-center gap-2">
+              <Box className="w-4 h-4 text-[#6B1D2A]" />
               <span>Physical Storage Assignments</span>
             </CardTitle>
-            <CardDescription className="text-xs text-gray-500">
+            <CardDescription className="text-xs text-[#5F5A5C]">
               Assign or update physical cabinet and file box locations for registered records.
             </CardDescription>
           </div>
@@ -418,7 +418,7 @@ function Files() {
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <table className="w-full text-xs text-left">
-              <thead className="text-[11px] text-gray-500 uppercase bg-[#FDFBF7] border-b border-gray-200">
+              <thead className="text-[11px] text-[#5F5A5C] uppercase bg-[#F4E7EA] border-b border-[#E8E3E1]">
                 <tr>
                   <th className="px-5 py-3 font-bold">Document Type</th>
                   <th className="px-5 py-3 font-bold">Access Code</th>
@@ -428,24 +428,24 @@ function Files() {
                   <th className="px-5 py-3 font-bold text-right">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-[#E8E3E1]">
                 {paginatedRecords.length > 0 ? (
                   paginatedRecords.map((record) => {
                     const currentCabId = selectedInventory[record.id] || record.file_box?.cabinet?.id || "";
                     const currentBoxId = selectedFileBox[record.id] || record.file_box_id || "";
 
                     return (
-                      <tr key={record.id} className="hover:bg-[#FDFBF7] transition-colors">
-                        <td className="px-5 py-3.5 font-bold text-[#800000]">{record.document_type}</td>
-                        <td className="px-5 py-3.5 font-mono text-gray-700">{record.access_code || "—"}</td>
-                        <td className="px-5 py-3.5 font-medium text-gray-900 max-w-xs truncate">
+                      <tr key={record.id} className="hover:bg-[#F4E7EA]/40 transition-colors">
+                        <td className="px-5 py-3.5 font-bold text-[#6B1D2A]">{record.document_type}</td>
+                        <td className="px-5 py-3.5 font-mono text-[#1D1A1B]">{record.access_code || "—"}</td>
+                        <td className="px-5 py-3.5 font-medium text-[#1D1A1B] max-w-xs truncate">
                           {record.subject || record.title || "—"}
                         </td>
                         <td className="px-5 py-3.5">
                           <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold inline-block
-                            ${record.status === "Active" ? "bg-emerald-50 text-emerald-700 border border-emerald-200" :
-                              record.status === "Archived" ? "bg-gray-100 text-gray-700 border border-gray-200" :
-                              "bg-amber-50 text-amber-700 border border-amber-200"}`}
+                            ${record.status === "Active" ? "bg-[#F4E7EA] text-[#6B1D2A] border border-[#E8E3E1]" :
+                              record.status === "Archived" ? "bg-[#FFFCF7] text-[#5F5A5C] border border-[#E8E3E1]" :
+                              "bg-[#F2DFB0] text-[#A87818] border border-[#C99A2E]"}`}
                           >
                             {record.status || "Active"}
                           </span>
@@ -464,7 +464,7 @@ function Files() {
                                   [record.id]: "",
                                 });
                               }}
-                              className="h-8 w-full rounded-lg border border-gray-200 bg-white px-2 text-xs font-medium focus:ring-1 focus:ring-[#800000]"
+                              className="h-8 w-full rounded-lg border border-[#E8E3E1] bg-[#FFFCF7] px-2 text-xs font-medium text-[#1D1A1B] focus:ring-1 focus:ring-[#6B1D2A]"
                             >
                               <option value="">Select Cabinet</option>
                               {inventories.map((inv) => (
@@ -483,7 +483,7 @@ function Files() {
                                 })
                               }
                               disabled={!currentCabId}
-                              className="h-8 w-full rounded-lg border border-gray-200 bg-white px-2 text-xs font-medium focus:ring-1 focus:ring-[#800000] disabled:opacity-50"
+                              className="h-8 w-full rounded-lg border border-[#E8E3E1] bg-[#FFFCF7] px-2 text-xs font-medium text-[#1D1A1B] focus:ring-1 focus:ring-[#6B1D2A] disabled:opacity-50"
                             >
                               <option value="">Select Box</option>
                               {inventories.find((inv) => String(inv.id) === String(currentCabId))?.file_boxes?.map((box) => (
@@ -497,7 +497,7 @@ function Files() {
                             size="sm"
                             onClick={() => assignFileBox(record.id, currentBoxId)}
                             disabled={!currentBoxId}
-                            className="bg-[#800000] text-white hover:bg-[#660000] h-8 px-3 rounded-lg text-xs font-bold shadow-xs disabled:opacity-40"
+                            className="bg-[#6B1D2A] text-[#FFFCF7] hover:bg-[#8B3545] h-8 px-3 rounded-lg text-xs font-bold shadow-xs disabled:opacity-40 cursor-pointer"
                           >
                             {record.file_box_id ? "Reassign" : "Assign"}
                           </Button>
@@ -507,7 +507,7 @@ function Files() {
                   })
                 ) : (
                   <tr>
-                    <td colSpan="6" className="px-5 py-8 text-center text-gray-400 italic">
+                    <td colSpan="6" className="px-5 py-8 text-center text-[#5F5A5C] italic">
                       No records awaiting physical filing
                     </td>
                   </tr>
@@ -517,7 +517,7 @@ function Files() {
           </div>
 
           {/* PAGINATION BAR */}
-          <div className="p-4 border-t border-gray-200 flex items-center justify-between bg-[#FDFBF7] text-xs text-gray-600">
+          <div className="p-4 border-t border-[#E8E3E1] flex items-center justify-between bg-[#FFFCF7] text-xs text-[#5F5A5C]">
             <span>
               Showing {generatedRecords.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0} to{" "}
               {Math.min(currentPage * itemsPerPage, generatedRecords.length)} of {generatedRecords.length} records
@@ -528,12 +528,12 @@ function Files() {
                 size="sm"
                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
-                className="h-8 px-3 text-xs bg-white"
+                className="h-8 px-3 text-xs bg-[#FFFCF7] border-[#E8E3E1] text-[#1D1A1B] hover:bg-[#F4E7EA] cursor-pointer"
               >
                 <ChevronLeft className="w-3.5 h-3.5 mr-1" />
                 <span>Prev</span>
               </Button>
-              <span className="px-2 font-bold text-gray-900">
+              <span className="px-2 font-bold text-[#1D1A1B]">
                 {currentPage} / {totalPages}
               </span>
               <Button
@@ -541,7 +541,7 @@ function Files() {
                 size="sm"
                 onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                 disabled={currentPage >= totalPages}
-                className="h-8 px-3 text-xs bg-white"
+                className="h-8 px-3 text-xs bg-[#FFFCF7] border-[#E8E3E1] text-[#1D1A1B] hover:bg-[#F4E7EA] cursor-pointer"
               >
                 <span>Next</span>
                 <ChevronRight className="w-3.5 h-3.5 ml-1" />

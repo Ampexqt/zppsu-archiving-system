@@ -145,33 +145,33 @@ function DocumentTemplateRenderer({ document }) {
 
   // Clean fallback preview if specialized template not defined
   return (
-    <div className="p-8 bg-white border border-gray-200 rounded-xl space-y-4">
-      <div className="border-b border-gray-100 pb-4">
-        <span className="text-xs uppercase tracking-widest text-[#800000] font-bold">
+    <div className="p-8 bg-[#FFFCF7] border border-[#E8E3E1] rounded-xl space-y-4 font-sans">
+      <div className="border-b border-[#E8E3E1] pb-4">
+        <span className="text-xs uppercase tracking-widest text-[#6B1D2A] font-bold">
           {document.category || "General Record"}
         </span>
-        <h2 className="text-2xl font-bold text-gray-900 mt-1">
+        <h2 className="text-2xl font-bold text-[#1D1A1B] mt-1">
           {document.subject || document.title || "Document Details"}
         </h2>
-        <p className="text-xs text-gray-500 font-mono mt-0.5">ID: {document.document_id || document.access_code}</p>
+        <p className="text-xs text-[#5F5A5C] font-mono mt-0.5">ID: {document.document_id || document.access_code}</p>
       </div>
 
       <div className="grid grid-cols-2 gap-4 text-xs">
         <div>
-          <span className="font-bold text-gray-500 uppercase">Document Type:</span>
-          <p className="font-semibold text-gray-800 mt-0.5">{document.document_type || "Standard File"}</p>
+          <span className="font-bold text-[#5F5A5C] uppercase">Document Type:</span>
+          <p className="font-semibold text-[#1D1A1B] mt-0.5">{document.document_type || "Standard File"}</p>
         </div>
         <div>
-          <span className="font-bold text-gray-500 uppercase">Status:</span>
-          <p className="font-semibold text-gray-800 mt-0.5">{document.status || "Active"}</p>
+          <span className="font-bold text-[#5F5A5C] uppercase">Status:</span>
+          <p className="font-semibold text-[#1D1A1B] mt-0.5">{document.status || "Active"}</p>
         </div>
         <div>
-          <span className="font-bold text-gray-500 uppercase">Storage Cabinet:</span>
-          <p className="font-semibold text-gray-800 mt-0.5">{document.file_box?.cabinet?.name || "Unassigned"}</p>
+          <span className="font-bold text-[#5F5A5C] uppercase">Storage Cabinet:</span>
+          <p className="font-semibold text-[#1D1A1B] mt-0.5">{document.file_box?.cabinet?.name || "Unassigned"}</p>
         </div>
         <div>
-          <span className="font-bold text-gray-500 uppercase">File Box:</span>
-          <p className="font-semibold text-gray-800 mt-0.5">{document.file_box?.name || "Unassigned"}</p>
+          <span className="font-bold text-[#5F5A5C] uppercase">File Box:</span>
+          <p className="font-semibold text-[#1D1A1B] mt-0.5">{document.file_box?.name || "Unassigned"}</p>
         </div>
       </div>
     </div>

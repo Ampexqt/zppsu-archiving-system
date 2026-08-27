@@ -84,7 +84,8 @@ export default function CscCirculars1Template({ data }) {
               colSpan="4"
               style={{
                 border: "1px solid black",
-                background: "yellow",
+                background: "#F2DFB0",
+                color: "#1D1A1B",
                 fontWeight: "bold",
                 padding: "8px"
               }}

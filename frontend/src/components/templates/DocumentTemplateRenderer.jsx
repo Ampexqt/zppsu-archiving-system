@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState } from "react";
+import { Sparkles, Download, Copy, Check, FileText, ExternalLink } from "lucide-react";
 import AccomplishmentReportTemplate from "./AccomplishmentReportTemplate";
 import AaccupTemplate from "./AaccupTemplate";
 import AnnualReportTemplate from "./AnnualReportTemplate";
@@ -134,46 +135,157 @@ const templateMap = {
 };
 
 function DocumentTemplateRenderer({ document }) {
+  const [copied, setCopied] = useState(false);
   if (!document) return null;
 
   const docTypeKey = (document.document_type || "").toUpperCase().trim();
   const Component = templateMap[docTypeKey];
 
-  if (Component) {
+  if (Component && document.is_generated) {
     return <Component document={document} data={document.dynamic_data || document} />;
   }
 
-  // Clean fallback preview if specialized template not defined
+  const fileUrl = document.file_path 
+    ? (document.file_path.startsWith("http") ? document.file_path : `http://localhost:5000/${document.file_path}`)
+    : null;
+
+  const isPdf = document.file_name?.toLowerCase().endsWith(".pdf") || document.file_type === "PDF";
+  const isImage = /\.(jpg|jpeg|png|webp)$/i.test(document.file_name || "") || ["JPG", "JPEG", "PNG", "WEBP"].includes(document.file_type);
+
+  const handleCopyOcr = () => {
+    if (document.ocr_text) {
+      navigator.clipboard.writeText(document.ocr_text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
   return (
-    <div className="p-8 bg-[#FFFCF7] border border-[#E8E3E1] rounded-xl space-y-4 font-sans">
-      <div className="border-b border-[#E8E3E1] pb-4">
-        <span className="text-xs uppercase tracking-widest text-[#6B1D2A] font-bold">
-          {document.category || "General Record"}
-        </span>
-        <h2 className="text-2xl font-bold text-[#1D1A1B] mt-1">
-          {document.subject || document.title || "Document Details"}
-        </h2>
-        <p className="text-xs text-[#5F5A5C] font-mono mt-0.5">ID: {document.document_id || document.access_code}</p>
+    <div className="space-y-6 font-sans">
+      {/* METADATA SUMMARY CARD */}
+      <div className="p-6 bg-[#FFFCF7] border border-[#E8E3E1] rounded-2xl shadow-xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#E8E3E1] pb-4">
+          <div>
+            <span className="text-xs uppercase tracking-widest text-[#6B1D2A] font-bold">
+              {document.category || "General Record"}
+            </span>
+            <h2 className="text-xl sm:text-2xl font-bold text-[#1D1A1B] mt-0.5">
+              {document.subject || document.title || "Document Details"}
+            </h2>
+            <p className="text-xs text-[#5F5A5C] font-mono mt-0.5">
+              ID: {document.document_id || document.access_code || `DOC-${document.id}`}
+            </p>
+          </div>
+          {fileUrl && (
+            <div className="flex items-center gap-2">
+              <a
+                href={fileUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[#E8E3E1] bg-[#FFFCF7] text-xs font-semibold text-[#1D1A1B] hover:bg-[#F4E7EA] transition-colors"
+              >
+                <ExternalLink className="w-3.5 h-3.5 text-[#6B1D2A]" />
+                <span>Open in Tab</span>
+              </a>
+              <a
+                href={fileUrl}
+                download
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#6B1D2A] text-xs font-bold text-[#FFFCF7] hover:bg-[#8B3545] transition-colors"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Download File</span>
+              </a>
+            </div>
+          )}
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
+          <div>
+            <span className="font-bold text-[#5F5A5C] uppercase text-[10px] tracking-wider">Document Type</span>
+            <p className="font-semibold text-[#1D1A1B] mt-0.5">{document.document_type || "Standard File"}</p>
+          </div>
+          <div>
+            <span className="font-bold text-[#5F5A5C] uppercase text-[10px] tracking-wider">Status</span>
+            <p className="font-semibold text-[#1D1A1B] mt-0.5">{document.status || "Active"}</p>
+          </div>
+          <div>
+            <span className="font-bold text-[#5F5A5C] uppercase text-[10px] tracking-wider">Storage Cabinet</span>
+            <p className="font-semibold text-[#1D1A1B] mt-0.5">{document.file_box?.cabinet?.name || "Unassigned"}</p>
+          </div>
+          <div>
+            <span className="font-bold text-[#5F5A5C] uppercase text-[10px] tracking-wider">File Box</span>
+            <p className="font-semibold text-[#1D1A1B] mt-0.5">{document.file_box?.name || "Unassigned"}</p>
+          </div>
+        </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 text-xs">
-        <div>
-          <span className="font-bold text-[#5F5A5C] uppercase">Document Type:</span>
-          <p className="font-semibold text-[#1D1A1B] mt-0.5">{document.document_type || "Standard File"}</p>
+      {/* EMBEDDED DOCUMENT VIEWER */}
+      {fileUrl && (
+        <div className="p-4 bg-[#FFFCF7] border border-[#E8E3E1] rounded-2xl shadow-xs space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-wider text-[#1D1A1B]">Document Preview</span>
+            <span className="text-[11px] text-[#5F5A5C] font-mono">{document.file_name}</span>
+          </div>
+
+          {isPdf ? (
+            <iframe
+              src={fileUrl}
+              className="w-full h-[650px] rounded-xl border border-[#E8E3E1] bg-white shadow-inner"
+              title="Document PDF Preview"
+            />
+          ) : isImage ? (
+            <div className="flex justify-center p-4 bg-[#F4E7EA]/30 rounded-xl border border-[#E8E3E1]">
+              <img
+                src={fileUrl}
+                alt={document.title || "Document Image"}
+                className="max-h-[600px] w-auto rounded-lg object-contain shadow-xs"
+              />
+            </div>
+          ) : (
+            <div className="p-8 text-center bg-[#F4E7EA]/20 rounded-xl border border-[#E8E3E1] space-y-3">
+              <FileText className="w-10 h-10 text-[#6B1D2A] mx-auto" />
+              <p className="text-xs text-[#5F5A5C]">
+                Preview not directly supported in-browser for this file format ({document.file_type || "Document"}).
+              </p>
+              <a
+                href={fileUrl}
+                download
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#6B1D2A] text-xs font-bold text-[#FFFCF7] hover:bg-[#8B3545] transition-colors"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Download {document.file_name}</span>
+              </a>
+            </div>
+          )}
         </div>
-        <div>
-          <span className="font-bold text-[#5F5A5C] uppercase">Status:</span>
-          <p className="font-semibold text-[#1D1A1B] mt-0.5">{document.status || "Active"}</p>
+      )}
+
+      {/* OCR EXTRACTED TEXT TRANSCRIPT */}
+      {document.ocr_text && (
+        <div className="p-5 bg-[#FFFCF7] border border-[#E8E3E1] rounded-2xl shadow-xs space-y-3">
+          <div className="flex items-center justify-between border-b border-[#E8E3E1] pb-3">
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 rounded-lg bg-[#F2DFB0] border border-[#C99A2E] text-[#A87818]">
+                <Sparkles className="w-3.5 h-3.5" />
+              </div>
+              <div>
+                <h4 className="text-xs font-bold text-[#1D1A1B] uppercase tracking-wider">AI & OCR Extracted Content</h4>
+                <p className="text-[10px] text-[#5F5A5C]">Extracted textual content for semantic indexing</p>
+              </div>
+            </div>
+            <button
+              onClick={handleCopyOcr}
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-[#E8E3E1] bg-[#FFFCF7] text-[11px] font-semibold text-[#1D1A1B] hover:bg-[#F4E7EA] transition-colors cursor-pointer"
+            >
+              {copied ? <Check className="w-3 h-3 text-[#16A34A]" /> : <Copy className="w-3 h-3 text-[#5F5A5C]" />}
+              <span>{copied ? "Copied" : "Copy Text"}</span>
+            </button>
+          </div>
+          <div className="p-4 rounded-xl bg-[#F4E7EA]/40 border border-[#E8E3E1] text-[#1D1A1B] font-mono text-xs whitespace-pre-wrap max-h-72 overflow-y-auto leading-relaxed selection:bg-[#F2DFB0]">
+            {document.ocr_text}
+          </div>
         </div>
-        <div>
-          <span className="font-bold text-[#5F5A5C] uppercase">Storage Cabinet:</span>
-          <p className="font-semibold text-[#1D1A1B] mt-0.5">{document.file_box?.cabinet?.name || "Unassigned"}</p>
-        </div>
-        <div>
-          <span className="font-bold text-[#5F5A5C] uppercase">File Box:</span>
-          <p className="font-semibold text-[#1D1A1B] mt-0.5">{document.file_box?.name || "Unassigned"}</p>
-        </div>
-      </div>
+      )}
     </div>
   );
 }

@@ -380,8 +380,16 @@ function DocumentCenter() {
                           {file.subject || file.title || "—"}
                         </td>
                         <td className="px-5 py-3.5 whitespace-nowrap">
-                          <span className="font-semibold text-[#1D1A1B] block">{file.document_type || "General"}</span>
-                          <span className="text-[10px] text-[#5F5A5C]">{file.category || "Uncategorized"}</span>
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-semibold text-[#1D1A1B]">{file.document_type || "General"}</span>
+                            {file.ocr_text && (
+                              <span className="px-1.5 py-0.5 rounded text-[9px] font-extrabold bg-[#F2DFB0] text-[#A87818] border border-[#C99A2E] inline-flex items-center gap-0.5">
+                                <Sparkles className="w-2.5 h-2.5" />
+                                OCR
+                              </span>
+                            )}
+                          </div>
+                          <span className="text-[10px] text-[#5F5A5C] block">{file.category || "Uncategorized"}</span>
                         </td>
                         <td className="px-5 py-3.5 whitespace-nowrap text-[#5F5A5C]">
                           {file.file_box?.cabinet?.name ? (

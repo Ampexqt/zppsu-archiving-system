@@ -8,6 +8,7 @@ import {
   Users, 
   Activity, 
   FileText, 
+  FileBarChart,
   LogOut,
   Menu,
   ChevronLeft,

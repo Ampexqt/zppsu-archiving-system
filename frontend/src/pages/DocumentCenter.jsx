@@ -533,15 +533,17 @@ function DocumentCenter() {
                   </h3>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => window.print()}
-                    className="h-8 text-xs font-semibold bg-[#FFFCF7] border-[#E8E3E1] text-[#1D1A1B] hover:bg-[#F4E7EA] cursor-pointer"
-                  >
-                    <Printer className="w-3.5 h-3.5 mr-1.5" />
-                    <span>Print</span>
-                  </Button>
+                  {!viewingFile.ocr_text && viewingFile.is_generated && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => window.print()}
+                      className="h-8 text-xs font-semibold bg-[#FFFCF7] border-[#E8E3E1] text-[#1D1A1B] hover:bg-[#F4E7EA] cursor-pointer"
+                    >
+                      <Printer className="w-3.5 h-3.5 mr-1.5" />
+                      <span>Print</span>
+                    </Button>
+                  )}
                   <Button
                     size="sm"
                     variant="ghost"

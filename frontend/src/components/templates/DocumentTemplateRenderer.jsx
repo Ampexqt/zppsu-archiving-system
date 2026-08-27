@@ -180,17 +180,8 @@ function DocumentTemplateRenderer({ document }) {
             <div className="flex items-center gap-2">
               <a
                 href={fileUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[#E8E3E1] bg-[#FFFCF7] text-xs font-semibold text-[#1D1A1B] hover:bg-[#F4E7EA] transition-colors"
-              >
-                <ExternalLink className="w-3.5 h-3.5 text-[#6B1D2A]" />
-                <span>Open in Tab</span>
-              </a>
-              <a
-                href={fileUrl}
                 download
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#6B1D2A] text-xs font-bold text-[#FFFCF7] hover:bg-[#8B3545] transition-colors"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#6B1D2A] text-xs font-bold text-[#FFFCF7] hover:bg-[#8B3545] transition-colors shadow-xs"
               >
                 <Download className="w-3.5 h-3.5" />
                 <span>Download File</span>

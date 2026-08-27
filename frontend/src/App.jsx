@@ -68,7 +68,7 @@ function App() {
             <Route
               path="/inventory"
               element={
-                <ProtectedRoute adminOnly>
+                <ProtectedRoute>
                   <Inventory />
                 </ProtectedRoute>
               }
@@ -86,7 +86,7 @@ function App() {
             <Route
               path="/categories"
               element={
-                <ProtectedRoute adminOnly>
+                <ProtectedRoute>
                   <Categories />
                 </ProtectedRoute>
               }

@@ -315,7 +315,7 @@ function Dashboard() {
               {pieChartData.length > 0 ? (
                 <>
                   <div className="w-full h-52 min-h-[200px]">
-                    <ResponsiveContainer width="100%" height="100%" minHeight={200} debounce={50}>
+                    <ResponsiveContainer width="100%" height={200} minWidth={0} minHeight={0} debounce={50}>
                       <PieChart>
                         <Pie 
                           data={pieChartData} 
@@ -360,7 +360,7 @@ function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="w-full h-64 min-h-[240px]">
-                <ResponsiveContainer width="100%" height="100%" minHeight={240} debounce={50}>
+                <ResponsiveContainer width="100%" height={240} minWidth={0} minHeight={0} debounce={50}>
                   <BarChart data={statusData}>
                     <XAxis dataKey="name" stroke="#5F5A5C" fontSize={11} tickLine={false} axisLine={false} />
                     <YAxis stroke="#5F5A5C" fontSize={11} tickLine={false} axisLine={false} />
@@ -381,7 +381,7 @@ function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className="w-full h-64 min-h-[240px]">
-              <ResponsiveContainer width="100%" height="100%" minHeight={240} debounce={50}>
+              <ResponsiveContainer width="100%" height={240} minWidth={0} minHeight={0} debounce={50}>
                 <BarChart data={monthlyData}>
                   <XAxis dataKey="month" stroke="#5F5A5C" fontSize={11} tickLine={false} axisLine={false} />
                   <YAxis stroke="#5F5A5C" fontSize={11} tickLine={false} axisLine={false} />

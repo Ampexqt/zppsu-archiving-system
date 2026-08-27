@@ -311,28 +311,30 @@ function Dashboard() {
               <CardTitle className="text-base font-bold text-[#1D1A1B]">Documents by Category</CardTitle>
               <CardDescription className="text-xs text-[#5F5A5C]">Distribution across administrative and academic areas</CardDescription>
             </CardHeader>
-            <CardContent className="h-72 flex flex-col justify-center">
+            <CardContent className="flex flex-col justify-center">
               {pieChartData.length > 0 ? (
                 <>
-                  <ResponsiveContainer width="100%" height="80%" minWidth={1} minHeight={1}>
-                    <PieChart>
-                      <Pie 
-                        data={pieChartData} 
-                        cx="50%" 
-                        cy="50%" 
-                        innerRadius={60} 
-                        outerRadius={85} 
-                        paddingAngle={4} 
-                        dataKey="value" 
-                        nameKey="name"
-                      >
-                        {pieChartData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
-                        ))}
-                      </Pie>
-                      <Tooltip contentStyle={{ backgroundColor: '#FFFCF7', borderRadius: '8px', border: '1px solid #E8E3E1', color: '#1D1A1B', fontSize: '12px' }} />
-                    </PieChart>
-                  </ResponsiveContainer>
+                  <div className="w-full h-52 min-h-[200px]">
+                    <ResponsiveContainer width="100%" height="100%" minHeight={200} debounce={50}>
+                      <PieChart>
+                        <Pie 
+                          data={pieChartData} 
+                          cx="50%" 
+                          cy="50%" 
+                          innerRadius={60} 
+                          outerRadius={85} 
+                          paddingAngle={4} 
+                          dataKey="value" 
+                          nameKey="name"
+                        >
+                          {pieChartData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
+                          ))}
+                        </Pie>
+                        <Tooltip contentStyle={{ backgroundColor: '#FFFCF7', borderRadius: '8px', border: '1px solid #E8E3E1', color: '#1D1A1B', fontSize: '12px' }} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
                   <div className="flex flex-wrap justify-center gap-4 mt-2">
                     {pieChartData.map((entry, index) => (
                       <div key={entry.name} className="flex items-center gap-1.5 text-xs text-[#5F5A5C]">
@@ -343,7 +345,7 @@ function Dashboard() {
                   </div>
                 </>
               ) : (
-                <div className="flex flex-col items-center justify-center text-[#5F5A5C]">
+                <div className="flex flex-col items-center justify-center text-[#5F5A5C] h-52">
                   <span className="text-xs font-medium">No category distribution data</span>
                 </div>
               )}
@@ -356,15 +358,17 @@ function Dashboard() {
               <CardTitle className="text-base font-bold text-[#1D1A1B]">Record Status Distribution</CardTitle>
               <CardDescription className="text-xs text-[#5F5A5C]">Active vs archived vs pending items</CardDescription>
             </CardHeader>
-            <CardContent className="h-72">
-              <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
-                <BarChart data={statusData}>
-                  <XAxis dataKey="name" stroke="#5F5A5C" fontSize={11} tickLine={false} axisLine={false} />
-                  <YAxis stroke="#5F5A5C" fontSize={11} tickLine={false} axisLine={false} />
-                  <Tooltip cursor={{ fill: '#F4E7EA' }} contentStyle={{ backgroundColor: '#FFFCF7', borderRadius: '8px', border: '1px solid #E8E3E1', color: '#1D1A1B', fontSize: '12px' }} />
-                  <Bar dataKey="value" fill="#6B1D2A" radius={[6, 6, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
+            <CardContent>
+              <div className="w-full h-64 min-h-[240px]">
+                <ResponsiveContainer width="100%" height="100%" minHeight={240} debounce={50}>
+                  <BarChart data={statusData}>
+                    <XAxis dataKey="name" stroke="#5F5A5C" fontSize={11} tickLine={false} axisLine={false} />
+                    <YAxis stroke="#5F5A5C" fontSize={11} tickLine={false} axisLine={false} />
+                    <Tooltip cursor={{ fill: '#F4E7EA' }} contentStyle={{ backgroundColor: '#FFFCF7', borderRadius: '8px', border: '1px solid #E8E3E1', color: '#1D1A1B', fontSize: '12px' }} />
+                    <Bar dataKey="value" fill="#6B1D2A" radius={[6, 6, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -375,15 +379,17 @@ function Dashboard() {
             <CardTitle className="text-base font-bold text-[#1D1A1B]">Annual Upload Volume</CardTitle>
             <CardDescription className="text-xs text-[#5F5A5C]">Monthly archiving progression for the current year</CardDescription>
           </CardHeader>
-          <CardContent className="h-64">
-            <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
-              <BarChart data={monthlyData}>
-                <XAxis dataKey="month" stroke="#5F5A5C" fontSize={11} tickLine={false} axisLine={false} />
-                <YAxis stroke="#5F5A5C" fontSize={11} tickLine={false} axisLine={false} />
-                <Tooltip cursor={{ fill: '#F4E7EA' }} contentStyle={{ backgroundColor: '#FFFCF7', borderRadius: '8px', border: '1px solid #E8E3E1', color: '#1D1A1B', fontSize: '12px' }} />
-                <Bar dataKey="documents" fill="#6B1D2A" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+          <CardContent>
+            <div className="w-full h-64 min-h-[240px]">
+              <ResponsiveContainer width="100%" height="100%" minHeight={240} debounce={50}>
+                <BarChart data={monthlyData}>
+                  <XAxis dataKey="month" stroke="#5F5A5C" fontSize={11} tickLine={false} axisLine={false} />
+                  <YAxis stroke="#5F5A5C" fontSize={11} tickLine={false} axisLine={false} />
+                  <Tooltip cursor={{ fill: '#F4E7EA' }} contentStyle={{ backgroundColor: '#FFFCF7', borderRadius: '8px', border: '1px solid #E8E3E1', color: '#1D1A1B', fontSize: '12px' }} />
+                  <Bar dataKey="documents" fill="#6B1D2A" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </CardContent>
         </Card>
 

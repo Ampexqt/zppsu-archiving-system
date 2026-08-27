@@ -25,7 +25,10 @@ function Logs() {
 
   const fetchLogs = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/logs");
+      const token = localStorage.getItem("token");
+      const response = await axios.get("http://localhost:5000/api/logs", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       setLogs(response.data);
     } catch (error) {
       console.error(error);

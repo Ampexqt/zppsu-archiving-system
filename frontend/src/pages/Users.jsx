@@ -345,7 +345,7 @@ const handleDemote =
                       <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wide ${
                         user.role === "Admin" ? "bg-[#F2DFB0] text-[#A87818] border border-[#C99A2E]" : "bg-[#F4E7EA] text-[#6B1D2A] border border-[#E8E3E1]"
                       }`}>
-                        {user.role} 
+                        {user.role === "Admin" ? "Admin" : "Staff"} 
                       </span>
                     </TableCell>
 
@@ -357,7 +357,7 @@ const handleDemote =
                     {/* ACTIONS */}
                     <TableCell className="p-4 text-right">
                       <div className="flex justify-end gap-1.5">
-                        {user.role === "User" && (
+                        {user.role !== "Admin" && (
                           <button
                             onClick={() => handlePromote(user.id)}
                             className="p-1.5 text-[#5F5A5C] hover:text-[#6B1D2A] hover:bg-[#F4E7EA] rounded-lg transition-all cursor-pointer"

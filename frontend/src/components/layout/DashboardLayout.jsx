@@ -27,7 +27,8 @@ function DashboardLayout({ children }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const user = JSON.parse(localStorage.getItem("user")) || {};
-  const role = user?.role || "Staff";  
+  const isAdmin = user?.role === "Admin";
+  const displayRole = isAdmin ? "Admin" : "Staff";
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -39,12 +40,12 @@ function DashboardLayout({ children }) {
     { name: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
     { name: "Files", path: "/files", icon: FolderSearch },
     { name: "Document Center", path: "/document-center", icon: Archive },
-    ...(role === "Admin" ? [{ name: "Categories", path: "/categories", icon: Tags }] : []),
+    { name: "Categories", path: "/categories", icon: Tags },
     { name: "Inventory", path: "/inventory", icon: Box },
-    ...(role === "Admin" ? [
+    ...(isAdmin ? [
       { name: "Users", path: "/users", icon: Users },
-      { name: "Activity Logs", path: "/logs", icon: Activity },
-      { name: "Accomplishment Report", path: "/accomplishment-report", icon: FileText }
+      { name: "Audits & Trails", path: "/logs", icon: Activity },
+      { name: "Accomplishment Report", path: "/accomplishment-report", icon: FileBarChart },
     ] : []),
   ];
 
@@ -189,7 +190,7 @@ function DashboardLayout({ children }) {
               <span className="font-semibold text-[#1D1A1B]">{user?.name || "User"}</span>
               <span className="text-[#E8E3E1]">|</span>
               <span className="text-xs px-2 py-0.5 rounded-full font-bold bg-[#F4E7EA] text-[#6B1D2A] border border-[#E8E3E1]">
-                {role}
+                {displayRole}
               </span>
             </div>
           </div>

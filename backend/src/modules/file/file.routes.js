@@ -72,9 +72,7 @@ router.put(
       const { subject, document_type, status, is_deleted } = req.body;
       const file = await prisma.files.findUnique({ where: { id: Number(req.params.id) } });
 
-      if (req.user.role !== "Admin" && file.uploaded_by !== req.user.id) {
-        return res.status(403).json({ message: "Access denied" });
-      }
+      if (!file) return res.status(404).json({ message: "File not found" });
 
       const updatedFile = await prisma.files.update({
         where: { id: Number(req.params.id) },
@@ -87,9 +85,9 @@ router.put(
       });
 
       if (status === "Active" && is_deleted === false && file.is_deleted === true) {
-        await logsService.createLog("RESTORE", `Restored ${updatedFile.document_type || 'File'}`, req.user.id);
+        await logsService.createLog("RESTORE", `Restored ${updatedFile.document_type || 'File'} (${updatedFile.document_id || updatedFile.id})`, req.user.id);
       } else {
-        await logsService.createLog("EDIT", `Edited ${updatedFile.document_type || 'File'} ${updatedFile.document_id}`, req.user.id);
+        await logsService.createLog("EDIT", `Edited ${updatedFile.document_type || 'File'} (${updatedFile.document_id || updatedFile.id})`, req.user.id);
       }
 
       res.json(updatedFile);

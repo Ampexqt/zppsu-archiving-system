@@ -287,25 +287,19 @@ exports.searchFiles = async (req, res) => {
   }
 };
 
-// GET FILES
+// GET FILES (Unrestricted for all authenticated Staff and Admins)
 exports.getAllFiles = async (req, res) => {
   try {
-    let files;
-    if (req.user.role === "Admin") {
-      files = await prisma.files.findMany({
-        include: { user: { select: { email: true, name: true } }, file_box: { include: { cabinet: true } } },
-        orderBy: { id: "desc" },
-      });
-    } else {
-      files = await prisma.files.findMany({
-        where: { uploaded_by: req.user.id },
-        include: { user: { select: { email: true, name: true } }, file_box: { include: { cabinet: true } } },
-        orderBy: { id: "desc" },
-      });
-    }
+    const files = await prisma.files.findMany({
+      include: {
+        user: { select: { email: true, name: true, role: true } },
+        file_box: { include: { cabinet: true } },
+      },
+      orderBy: { id: "desc" },
+    });
     return res.json(files);
   } catch (error) {
-    console.error(error);
+    console.error("GET FILES ERROR:", error);
     return res.status(500).json({ message: "Failed to fetch files" });
   }
 };
@@ -317,10 +311,6 @@ exports.deleteFile = async (req, res) => {
     const file = await prisma.files.findUnique({ where: { id } });
 
     if (!file) return res.status(404).json({ message: "File not found" });
-
-    if (req.user.role !== "Admin" && file.uploaded_by !== req.user.id) {
-      return res.status(403).json({ message: "Access denied" });
-    }
 
     await prisma.files.update({
       where: { id },
@@ -334,8 +324,8 @@ exports.deleteFile = async (req, res) => {
       });
     }
 
-    await logsService.createLog("DELETE", `Deleted ${file.document_type || "File"}`, req.user.id);
-    return res.json({ message: "File deleted successfully" });
+    await logsService.createLog("DELETE", `Moved ${file.document_type || "File"} (${file.document_id || file.id}) to trash`, req.user.id);
+    return res.json({ message: "File moved to trash successfully" });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Failed to delete file" });
@@ -349,9 +339,6 @@ exports.restoreFile = async (req, res) => {
     const file = await prisma.files.findUnique({ where: { id } });
 
     if (!file) return res.status(404).json({ message: "File not found" });
-    if (req.user.role !== "Admin" && file.uploaded_by !== req.user.id) {
-      return res.status(403).json({ message: "Access denied" });
-    }
 
     const restoredFile = await prisma.files.update({
       where: { id },
@@ -365,7 +352,7 @@ exports.restoreFile = async (req, res) => {
       });
     }
 
-    await logsService.createLog("RESTORE", `Restored ${restoredFile.document_type || "File"}`, req.user.id);
+    await logsService.createLog("RESTORE", `Restored ${restoredFile.document_type || "File"} (${restoredFile.document_id || restoredFile.id})`, req.user.id);
     return res.json({ message: "File restored successfully" });
   } catch (error) {
     console.error(error);
@@ -380,10 +367,9 @@ exports.permanentDeleteFile = async (req, res) => {
     const file = await prisma.files.findUnique({ where: { id } });
 
     if (!file) return res.status(404).json({ message: "File not found" });
-    if (req.user.role !== "Admin") return res.status(403).json({ message: "Only Admin can permanently delete files" });
 
     const deletedFile = await prisma.files.delete({ where: { id } });
-    await logsService.createLog("PERMANENT DELETE", `Permanently deleted ${deletedFile.document_type || "File"}`, req.user.id);
+    await logsService.createLog("PERMANENT DELETE", `Permanently deleted ${deletedFile.document_type || "File"} (${deletedFile.document_id || deletedFile.id})`, req.user.id);
     
     return res.json({ message: "File permanently deleted" });
   } catch (error) {
@@ -417,14 +403,14 @@ exports.assignFileBox = async (req, res) => {
       await prisma.file_boxes.update({ where: { id: file.file_box_id }, data: { used_space: { decrement: 1 } } });
       await prisma.file_boxes.update({ where: { id: Number(file_box_id) }, data: { used_space: { increment: 1 } } });
 
-      await logsService.createLog("MOVE", `Moved ${file.document_type || "File"} to another box`, req.user.id);
+      await logsService.createLog("MOVE", `Reassigned ${file.document_type || "File"} (${file.document_id || file.id}) to box ${fileBox.name}`, req.user.id);
       return res.json({ message: "File moved successfully" });
     }
 
     await prisma.files.update({ where: { id: fileId }, data: { file_box_id: Number(file_box_id) } });
     await prisma.file_boxes.update({ where: { id: Number(file_box_id) }, data: { used_space: { increment: 1 } } });
 
-    await logsService.createLog("FILE BOX ASSIGNMENT", `Assigned ${file.document_type || "File"} to box`, req.user.id);
+    await logsService.createLog("FILE BOX ASSIGNMENT", `Assigned ${file.document_type || "File"} (${file.document_id || file.id}) to box ${fileBox.name}`, req.user.id);
     return res.json({ message: "File assigned successfully" });
   } catch (error) {
     console.error(error);

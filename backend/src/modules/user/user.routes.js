@@ -345,7 +345,7 @@
 
       data: {
 
-        role: "User",
+        role: "Staff",
 
       },
 
@@ -355,7 +355,7 @@
 
     "DEMOTE USER",
 
-    `${updatedUser.email} demoted to User`
+    `${updatedUser.email} demoted to Staff`
 
   );
 

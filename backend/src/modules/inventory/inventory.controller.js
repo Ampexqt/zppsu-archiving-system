@@ -1,5 +1,6 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
+const logsService = require("../logs/logs.service");
 
 // =======================
 // CABINETS
@@ -15,6 +16,11 @@ exports.createCabinet = async (req, res) => {
         status: "Available",
       },
     });
+
+    if (req.user?.id) {
+      await logsService.createLog("CREATE CABINET", `Created storage cabinet ${name}`, req.user.id);
+    }
+
     return res.status(201).json(cabinet);
   } catch (error) {
     console.error(error);
@@ -55,6 +61,11 @@ exports.deleteCabinet = async (req, res) => {
     }
 
     await prisma.cabinets.delete({ where: { id: cabinetId } });
+
+    if (req.user?.id) {
+      await logsService.createLog("DELETE CABINET", `Deleted storage cabinet ${cabinet.name}`, req.user.id);
+    }
+
     return res.json({ message: "Cabinet deleted successfully" });
   } catch (error) {
     console.error(error);
@@ -72,6 +83,11 @@ exports.updateCabinet = async (req, res) => {
         ...(capacity && { capacity: parseInt(capacity) }),
       },
     });
+
+    if (req.user?.id) {
+      await logsService.createLog("UPDATE CABINET", `Updated storage cabinet ${cabinet.name}`, req.user.id);
+    }
+
     return res.status(200).json(cabinet);
   } catch (error) {
     console.error(error);
@@ -95,6 +111,11 @@ exports.createFileBox = async (req, res) => {
         status: "Available",
       },
     });
+
+    if (req.user?.id) {
+      await logsService.createLog("CREATE FILE BOX", `Created file box ${name}`, req.user.id);
+    }
+
     return res.status(201).json(fileBox);
   } catch (error) {
     console.error(error);
@@ -134,6 +155,11 @@ exports.deleteFileBox = async (req, res) => {
     }
 
     await prisma.file_boxes.delete({ where: { id: fileBoxId } });
+
+    if (req.user?.id) {
+      await logsService.createLog("DELETE FILE BOX", `Deleted file box ${fileBox.name}`, req.user.id);
+    }
+
     return res.json({ message: "File box deleted successfully" });
   } catch (error) {
     console.error(error);
@@ -152,6 +178,11 @@ exports.updateFileBox = async (req, res) => {
         ...(capacity && { capacity: parseInt(capacity) }),
       },
     });
+
+    if (req.user?.id) {
+      await logsService.createLog("UPDATE FILE BOX", `Updated file box ${fileBox.name}`, req.user.id);
+    }
+
     return res.status(200).json(fileBox);
   } catch (error) {
     console.error(error);

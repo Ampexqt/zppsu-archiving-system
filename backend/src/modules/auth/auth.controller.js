@@ -48,127 +48,70 @@ const register = async (req, res) => {
       );
 
     // CREATE USER
-   const user =
-  await prisma.users.create({
-
-    data: {
-
-      name,
-
-      email,
-
-      password:
-        hashedPassword,
-
-      role:
-        "User",
-
-    },
-
-});
+    const user = await prisma.users.create({
+      data: {
+        name,
+        email,
+        password: hashedPassword,
+        role: "Staff",
+      },
+    });
     res.status(201).json({
-
-      message:
-        "User registered successfully",
-
-      user,
-
+      message: "User registered successfully",
+      user: {
+        ...user,
+        role: user.role === "Admin" ? "Admin" : "Staff",
+      },
     });
-
   } catch (error) {
-
-    res.status(500).json({
-
-      message:
-        error.message,
-
-    });
+    res.status(500).json({ message: error.message });
   }
 };
 
 // LOGIN
 const login = async (req, res) => {
-
   try {
-
-    const {
-      email,
-      password
-    } = req.body;
+    const { email, password } = req.body;
 
     // FIND USER
-    const user =
-      await prisma.users.findUnique({
-
-        where: { email },
-
-      });
+    const user = await prisma.users.findUnique({
+      where: { email },
+    });
 
     if (!user) {
-
-      return res.status(400).json({
-
-        message:
-          "Invalid email or password",
-
-      });
+      return res.status(400).json({ message: "Invalid email or password" });
     }
 
     // CHECK PASSWORD
-    const isMatch =
-      await bcrypt.compare(
-
-        password,
-
-        user.password
-
-      );
+    const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
-
-      return res.status(400).json({
-
-        message:
-          "Invalid email or password",
-
-      });
+      return res.status(400).json({ message: "Invalid email or password" });
     }
+
+    const effectiveRole = user.role === "Admin" ? "Admin" : "Staff";
 
     // CREATE TOKEN
-    const token =
-  jwt.sign(
-
-    {
-      id: user.id,
-      email: user.email,
-      role: user.role,
-    },
-
-    process.env.JWT_SECRET,
-
-    {
-      expiresIn: "1d",
-    }
-  );
-
-    // CREATE LOG
-    await logsService.createLog(
-
-      "LOGIN",
-
-      `${user.email} logged in`
-
+    const token = jwt.sign(
+      {
+        id: user.id,
+        email: user.email,
+        role: effectiveRole,
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "1d" }
     );
 
+    // CREATE LOG
+    await logsService.createLog("LOGIN", `${user.email} logged in`, user.id);
+
     res.status(200).json({
-
-      message:
-        "Login successful",
-
+      message: "Login successful",
       token,
-
-      user,
-
+      user: {
+        ...user,
+        role: effectiveRole,
+      },
     });
 
   } catch (error) {

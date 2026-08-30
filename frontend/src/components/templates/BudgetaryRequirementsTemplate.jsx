@@ -76,7 +76,7 @@ export default function BudgetaryRequirementsTemplate({ data }) {
                 padding: "12px",
               }}
             >
-              {data.access_code || ""}
+              {data.access_code || "N/A"}
             </td>
 
             <td

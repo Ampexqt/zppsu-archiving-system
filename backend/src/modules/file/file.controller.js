@@ -64,6 +64,23 @@ exports.uploadFile = async (req, res) => {
       }
     }
 
+    // --- OCR TEXT OPTIMIZATION / CLEANUP ---
+    if (extractedText) {
+      // Split into lines, and remove lines that are mostly garbage/noise from the top
+      let lines = extractedText.split('\n');
+      while (lines.length > 0) {
+        let line = lines[0].trim();
+        // If line is empty, or has less than 5 characters and is mostly symbols, or doesn't have a solid word, drop it
+        if (!line || line.length < 4 || (line.replace(/[^a-zA-Z]/g, '').length < 4 && !line.match(/^[A-Z0-9]{3,}$/))) {
+          lines.shift();
+        } else {
+          break; // Found the first real line (e.g., ZAMBOANGA)
+        }
+      }
+      extractedText = lines.join('\n').trim();
+    }
+
+
     // 🤖 AI LOCAL METADATA EXTRACTION
     let finalSubject = subject;
     let finalDocType = document_type;

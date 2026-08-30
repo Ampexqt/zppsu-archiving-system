@@ -45,7 +45,7 @@ const AaccupTemplate = ({ data }) => {
           <tr>
 
             <td className="border border-black p-2">
-              {data?.access_code}
+              {data?.access_code || "N/A"}
             </td>
 
             <td className="border border-black p-2">

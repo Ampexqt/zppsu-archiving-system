@@ -63,7 +63,7 @@ export default function AccomplishmentReportTemplate({
                 padding: "10px",
               }}
             >
-              {document.access_code}
+              {document.access_code || "N/A"}
             </td>
 
             <td

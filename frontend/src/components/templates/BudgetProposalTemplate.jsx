@@ -78,7 +78,7 @@ export default function BudgetProposalTemplate({ data }) {
                 padding: "12px",
               }}
             >
-              {data.access_code || ""}
+              {data.access_code || "N/A"}
             </td>
 
             <td

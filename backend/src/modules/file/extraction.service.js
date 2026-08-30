@@ -49,13 +49,24 @@ class ExtractionService {
 
     try {
       // 1. Extract Subject
-      const subjectOutput = await this.qaPipeline('What is the title or subject of this document?', contextText);
-      if (subjectOutput && subjectOutput.score > 0.1) {
-        // Clean up the output
-        result.subject = subjectOutput.answer.replace(/^subject:?\s*/i, "").trim();
-        // Capitalize first letter
-        if (result.subject) {
-             result.subject = result.subject.charAt(0).toUpperCase() + result.subject.slice(1);
+      // First try deterministic regex for clear "SUBJECT:" or "RE:" lines
+      const subjectMatch = contextText.match(/(?:SUBJECT|RE)\s*:\s*([^\n]+(?:\n\s+[^\n]+)*)/i);
+      if (subjectMatch && subjectMatch[1]) {
+        // Stop if it hits an empty line or a number bullet (like "1. ")
+        let cleanSubject = subjectMatch[1].split(/\n\s*\n|\n\s*\d+\.\s/)[0].trim();
+        result.subject = cleanSubject.replace(/\s+/g, ' ');
+      }
+
+      // If regex fails, fallback to AI Question Answering
+      if (!result.subject) {
+        const subjectOutput = await this.qaPipeline('What is the title or subject of this document?', contextText);
+        if (subjectOutput && subjectOutput.score > 0.1) {
+          // Clean up the output
+          result.subject = subjectOutput.answer.replace(/^subject:?\s*/i, "").trim();
+          // Capitalize first letter
+          if (result.subject) {
+               result.subject = result.subject.charAt(0).toUpperCase() + result.subject.slice(1);
+          }
         }
       }
 

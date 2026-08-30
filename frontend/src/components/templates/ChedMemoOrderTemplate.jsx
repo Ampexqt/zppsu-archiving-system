@@ -113,7 +113,7 @@ export default function ChedMemoOrderTemplate({ data }) {
                 padding: "10px",
               }}
             >
-              {data.access_code || ""}
+              {data.access_code || "N/A"}
             </td>
 
             <td

@@ -11,7 +11,7 @@ import Dashboard from "./pages/Dashboard";
 import Files from "./pages/Files";
 import DocumentCenter from "./pages/DocumentCenter";
 import Inventory from "./pages/Inventory";
-import AccomplishmentReport from "./pages/AccomplishmentReport";
+import MasterlistReports from "./pages/MasterlistReports";
 import Categories from "./pages/Categories";
 import Users from "./pages/Users";
 import Logs from "./pages/Logs";
@@ -75,10 +75,10 @@ function App() {
             />
 
             <Route
-              path="/accomplishment-report"
+              path="/masterlist-reports"
               element={
                 <ProtectedRoute adminOnly>
-                  <AccomplishmentReport />
+                  <MasterlistReports />
                 </ProtectedRoute>
               }
             />

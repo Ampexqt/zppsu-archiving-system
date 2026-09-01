@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import logo from "../../assets/logo.jpg";
 import { useState } from "react";
+import { useModal } from "../../context/ModalContext";
 
 function DashboardLayout({ children }) {
   const location = useLocation();
@@ -31,10 +32,22 @@ function DashboardLayout({ children }) {
   const isAdmin = user?.role === "Admin";
   const displayRole = isAdmin ? "Admin" : "Staff";
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    navigate("/");
+  const modal = useModal();
+
+  const handleLogout = async () => {
+    const isConfirmed = await modal.confirm({
+      title: "Logout Confirmation",
+      message: "Are you sure you want to log out of the system?",
+      variant: "primary",
+      confirmText: "Log Out",
+      cancelText: "Cancel"
+    });
+
+    if (isConfirmed) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      navigate("/");
+    }
   };
 
   const navItems = [
@@ -46,7 +59,7 @@ function DashboardLayout({ children }) {
     ...(isAdmin ? [
       { name: "Users", path: "/users", icon: Users },
       { name: "Audits & Trails", path: "/logs", icon: Activity },
-      { name: "Accomplishment Report", path: "/accomplishment-report", icon: FileBarChart },
+      { name: "Masterlist Reports", path: "/masterlist-reports", icon: FileBarChart },
     ] : []),
   ];
 

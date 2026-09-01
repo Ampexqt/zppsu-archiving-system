@@ -117,7 +117,7 @@ export default function CoaCircularTemplate({ data }) {
                 padding: "10px",
               }}
             >
-              {data.access_code || ""}
+              {data.access_code || "N/A"}
             </td>
 
             <td

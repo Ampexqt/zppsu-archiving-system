@@ -112,7 +112,7 @@ export default function CscCommunications2024Template({ data }) {
             </td>
 
             <td style={{ border: "1px solid black", padding: "10px" }}>
-              {data.access_code}
+              {data.access_code || "N/A"}
             </td>
 
             <td style={{ border: "1px solid black", padding: "10px" }}>

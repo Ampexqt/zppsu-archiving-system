@@ -67,7 +67,7 @@ export default function CopcTemplate({ data }) {
 
           <tr>
             <td style={{ border: "1px solid #000", padding: "12px" }}>
-              {data.access_code}
+              {data.access_code || "N/A"}
             </td>
 
             <td style={{ border: "1px solid #000", padding: "12px" }}>

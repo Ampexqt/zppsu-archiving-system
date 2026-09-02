@@ -89,7 +89,7 @@ export default function ContractOfServiceVisitingLecturersTemplate({ data }) {
                 padding: "12px",
               }}
             >
-              {data.access_code}
+              {data.access_code || "N/A"}
             </td>
 
             <td

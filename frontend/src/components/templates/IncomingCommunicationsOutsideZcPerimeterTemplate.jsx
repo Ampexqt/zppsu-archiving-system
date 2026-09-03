@@ -34,7 +34,7 @@ export default function IncomingCommunicationsOutsideZcPerimeterTemplate({ data 
 
           <tr>
             <td style={{ border: "1px solid black", padding: "10px" }}>{data.date}</td>
-            <td style={{ border: "1px solid black", padding: "10px" }}>{data.access_code}</td>
+            <td style={{ border: "1px solid black", padding: "10px" }}>{data.access_code || "N/A"}</td>
             <td style={{ border: "1px solid black", padding: "10px" }}>{data.agency}</td>
             <td style={{ border: "1px solid black", padding: "10px" }}>{data.subject}</td>
             <td style={{ border: "1px solid black", padding: "10px" }}>{data.action_taken}</td>

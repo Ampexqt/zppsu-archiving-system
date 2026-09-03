@@ -58,7 +58,7 @@ export default function DbmCirculars1Template({ data }) {
 
           <tr>
             <td style={cellStyle}>{data.date}</td>
-            <td style={cellStyle}>{data.access_code}</td>
+            <td style={cellStyle}>{data.access_code || "N/A"}</td>
             <td style={cellStyle}>{data.subject}</td>
             <td style={cellStyle}>{data.file_location}</td>
           </tr>

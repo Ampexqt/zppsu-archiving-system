@@ -27,7 +27,7 @@ export default function PortfolioOfFacultyTemplate({ data }) {
 
         <tbody>
           <tr>
-            <td style={styles.cell}>{data.access_code}</td>
+            <td style={styles.cell}>{data.access_code || "N/A"}</td>
             <td style={styles.cell}>{data.faculty_name}</td>
             <td style={styles.cell}>{data.file_location}</td>
           </tr>

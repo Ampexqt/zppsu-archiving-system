@@ -30,7 +30,7 @@ export default function PurchaseRequestsTemplate({ data }) {
         <tbody>
           <tr>
             <td style={styles.cell}>{data.date}</td>
-            <td style={styles.cell}>{data.access_code}</td>
+            <td style={styles.cell}>{data.access_code || "N/A"}</td>
             <td style={styles.cell}>{data.items}</td>
             <td style={styles.cell}>{data.amount}</td>
             <td style={styles.cell}>{data.file_location}</td>

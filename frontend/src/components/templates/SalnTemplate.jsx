@@ -28,7 +28,7 @@ export default function SalnTemplate({ data }) {
 
         <tbody>
           <tr>
-            <td style={styles.cell}>{data.access_code}</td>
+            <td style={styles.cell}>{data.access_code || "N/A"}</td>
             <td style={styles.cell}>{data.personnel_name}</td>
             <td style={styles.cell}>{data.year}</td>
             <td style={styles.cell}>{data.file_location}</td>

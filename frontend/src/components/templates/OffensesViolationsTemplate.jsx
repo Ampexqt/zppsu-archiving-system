@@ -29,7 +29,7 @@ export default function OffensesViolationsTemplate({ data }) {
 
         <tbody>
           <tr>
-            <td style={styles.cell}>{data.access_code}</td>
+            <td style={styles.cell}>{data.access_code || "N/A"}</td>
             <td style={styles.cell}>{data.student_name}</td>
             <td style={styles.cell}>{data.school_year_semester}</td>
             <td style={styles.cell}>{data.offenses}</td>

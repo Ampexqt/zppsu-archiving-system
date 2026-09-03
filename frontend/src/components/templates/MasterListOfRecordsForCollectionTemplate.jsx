@@ -90,7 +90,7 @@ export default function MasterListOfRecordsForCollectionTemplate({ data }) {
                 wordBreak: "break-word",
               }}
             >
-              {data.access_code || ""}
+              {data.access_code || "N/A"}
             </td>
 
             <td

@@ -30,7 +30,7 @@ export default function FreeHigherEducationBillingTemplate({ data }) {
         <tbody>
           <tr>
             <td style={styles.cell}>{data.date}</td>
-            <td style={styles.cell}>{data.access_code}</td>
+            <td style={styles.cell}>{data.access_code || "N/A"}</td>
             <td style={styles.cell}>{data.semester}</td>
             <td style={styles.cell}>{data.action_taken}</td>
             <td style={styles.cell}>{data.file_location}</td>

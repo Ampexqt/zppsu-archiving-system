@@ -381,4 +381,40 @@
     }
   );
 
+  // RESET PASSWORD
+  router.put(
+    "/reset-password/:id",
+    authMiddleware,
+    async (req, res) => {
+      try {
+        if (req.user.role !== "Admin") {
+          return res.status(403).json({ message: "Access denied" });
+        }
+        
+        const { password } = req.body;
+        if (!password) {
+          return res.status(400).json({ message: "Password is required" });
+        }
+
+        const bcrypt = require("bcrypt");
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        const updatedUser = await prisma.users.update({
+          where: { id: Number(req.params.id) },
+          data: { password: hashedPassword },
+        });
+
+        await logsService.createLog(
+          "RESET PASSWORD",
+          `Admin reset password for ${updatedUser.email}`
+        );
+
+        res.json({ message: "Password reset successfully" });
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: error.message });
+      }
+    }
+  );
+
   module.exports = router;

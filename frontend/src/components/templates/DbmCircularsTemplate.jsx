@@ -61,7 +61,7 @@ export default function DbmCircularsTemplate({ data }) {
           {/* DATA */}
           <tr>
             <td style={cellStyle}>{data.date}</td>
-            <td style={cellStyle}>{data.access_code}</td>
+            <td style={cellStyle}>{data.access_code || "N/A"}</td>
             <td style={cellStyle}>{data.subject}</td>
             <td style={cellStyle}>{data.action_taken}</td>
             <td style={cellStyle}>{data.memo_number}</td>

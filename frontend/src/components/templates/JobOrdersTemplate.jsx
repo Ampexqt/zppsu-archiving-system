@@ -28,7 +28,7 @@ export default function JobOrdersTemplate({ data }) {
 
         <tbody>
           <tr>
-            <td style={styles.cell}>{data.access_code}</td>
+            <td style={styles.cell}>{data.access_code || "N/A"}</td>
             <td style={styles.cell}>{data.name}</td>
             <td style={styles.cell}>{data.period}</td>
             <td style={styles.cell}>{data.file_location}</td>

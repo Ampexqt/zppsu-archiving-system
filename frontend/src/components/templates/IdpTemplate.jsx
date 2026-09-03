@@ -44,7 +44,7 @@ export default function IdpTemplate({ data }) {
 
           <tr>
             <td style={{ border: "1px solid black", padding: "10px" }}>
-              {data.access_code}
+              {data.access_code || "N/A"}
             </td>
 
             <td style={{ border: "1px solid black", padding: "10px" }}>

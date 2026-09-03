@@ -28,7 +28,7 @@ export default function IpcrTemplate({ data }) {
 
         <tbody>
           <tr>
-            <td style={styles.cell}>{data.access_code}</td>
+            <td style={styles.cell}>{data.access_code || "N/A"}</td>
             <td style={styles.cell}>{data.name_of_faculty}</td>
             <td style={styles.cell}>{data.semester_year}</td>
             <td style={styles.cell}>{data.file_location}</td>

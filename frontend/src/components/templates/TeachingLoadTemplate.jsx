@@ -28,7 +28,7 @@ export default function TeachingLoadTemplate({ data }) {
 
         <tbody>
           <tr>
-            <td style={styles.cell}>{data.access_code}</td>
+            <td style={styles.cell}>{data.access_code || "N/A"}</td>
             <td style={styles.cell}>{data.faculty_name}</td>
             <td style={styles.cell}>{data.academic_year}</td>
             <td style={styles.cell}>{data.file_location}</td>

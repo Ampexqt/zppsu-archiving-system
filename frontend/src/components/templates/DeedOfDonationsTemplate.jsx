@@ -28,7 +28,7 @@ export default function DeedOfDonationsTemplate({ data }) {
 
         <tbody>
           <tr>
-            <td style={styles.cell}>{data.access_code}</td>
+            <td style={styles.cell}>{data.access_code || "N/A"}</td>
             <td style={styles.cell}>{data.donor}</td>
             <td style={styles.cell}>{data.title_of_donation}</td>
             <td style={styles.cell}>{data.file_location}</td>

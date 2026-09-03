@@ -142,8 +142,75 @@ function DocumentTemplateRenderer({ document }) {
   const docTypeKey = (document.document_type || "").toUpperCase().trim();
   const Component = templateMap[docTypeKey];
 
+  const handleExportExcel = async () => {
+    const workbook = new ExcelJS.Workbook();
+    const sheet = workbook.addWorksheet("Masterlist");
+
+    const titleStr = `ZPPSU MASTERLIST OF RECORDS - ${(document.document_type || "DOCUMENT").toUpperCase()}`;
+
+    // Add Title
+    sheet.mergeCells("A1:E1");
+    const titleRow = sheet.getCell("A1");
+    titleRow.value = titleStr;
+    titleRow.font = { bold: true, size: 14 };
+    titleRow.alignment = { horizontal: "center", vertical: "middle" };
+
+    // Use dynamic data if available to match the generated templates, or fallback to standard document metadata
+    const isGenerated = document.is_generated;
+    const data = document.dynamic_data || document;
+    
+    // Most templates have ACTION TAKEN instead of STATUS
+    const statusOrActionHeader = isGenerated && data.action_taken ? "ACTION TAKEN" : "STATUS";
+    const statusOrActionValue = isGenerated && data.action_taken ? data.action_taken : (document.status || "Active");
+
+    // Add Headers
+    const headerRow = sheet.addRow(["DATE", "ACCESS CODE", "SUBJECT", statusOrActionHeader, "FILE LOCATION"]);
+    headerRow.eachCell((cell) => {
+      cell.font = { bold: true };
+      cell.alignment = { horizontal: "center", vertical: "middle" };
+      cell.border = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
+    });
+
+    // Add Data
+    const dataRow = sheet.addRow([
+      data.date || new Date(document.created_at || Date.now()).toLocaleDateString(),
+      data.access_code || document.access_code || "N/A",
+      data.subject || document.subject || document.title || "—",
+      statusOrActionValue,
+      data.file_location || (document.file_box?.cabinet?.name ? `${document.file_box.cabinet.name} - ${document.file_box.name}` : "Unassigned")
+    ]);
+    dataRow.eachCell((cell) => {
+      cell.alignment = { horizontal: "center", vertical: "middle" };
+      cell.border = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
+    });
+
+    sheet.columns = [ { width: 15 }, { width: 20 }, { width: 35 }, { width: 15 }, { width: 25 } ];
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+    const url = window.URL.createObjectURL(blob);
+    const link = window.document.createElement("a");
+    link.href = url;
+    link.download = `${document.document_id || "Document"}.xlsx`;
+    link.click();
+    window.URL.revokeObjectURL(url);
+  };
+
   if (Component && document.is_generated) {
-    return <Component document={document} data={document.dynamic_data || document} />;
+    return (
+      <div className="space-y-6 font-sans">
+        <Component document={document} data={document.dynamic_data || document} />
+        <div className="flex justify-end gap-2 max-w-[950px] mx-auto">
+          <button
+            onClick={handleExportExcel}
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-[#E8E3E1] bg-[#FFFCF7] text-xs font-bold text-[#1D1A1B] hover:bg-[#F4E7EA] transition-colors shadow-xs cursor-pointer"
+          >
+            <FileSpreadsheet className="w-3.5 h-3.5 text-[#6B1D2A]" />
+            <span>Export to Excel</span>
+          </button>
+        </div>
+      </div>
+    );
   }
 
   const fileUrl = document.file_path 
@@ -159,68 +226,6 @@ function DocumentTemplateRenderer({ document }) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }
-  };
-
-  const handleExportExcel = async () => {
-    const workbook = new ExcelJS.Workbook();
-    const sheet = workbook.addWorksheet("Masterlist");
-
-    const titleStr = `ZPPSU MASTERLIST OF RECORDS - ${(document.document_type || "DOCUMENT").toUpperCase()}`;
-
-    // Add Title
-    sheet.mergeCells("A1:E1");
-    const titleRow = sheet.getCell("A1");
-    titleRow.value = titleStr;
-    titleRow.font = { bold: true, size: 14 };
-    titleRow.alignment = { horizontal: "center", vertical: "middle" };
-
-    // Add Headers
-    const headerRow = sheet.addRow(["DATE", "ACCESS CODE", "SUBJECT", "STATUS", "FILE LOCATION"]);
-    headerRow.eachCell((cell) => {
-      cell.font = { bold: true };
-      cell.alignment = { horizontal: "center", vertical: "middle" };
-      cell.border = {
-        top: { style: "thin" },
-        left: { style: "thin" },
-        bottom: { style: "thin" },
-        right: { style: "thin" }
-      };
-    });
-
-    // Add Data
-    const dataRow = sheet.addRow([
-      new Date(document.created_at || Date.now()).toLocaleDateString(),
-      document.document_id || document.access_code || `DOC-${document.id}`,
-      document.subject || document.title || "—",
-      document.status || "Active",
-      document.file_box?.cabinet?.name ? `${document.file_box.cabinet.name} - ${document.file_box.name}` : "Unassigned"
-    ]);
-    dataRow.eachCell((cell) => {
-      cell.alignment = { horizontal: "center", vertical: "middle" };
-      cell.border = {
-        top: { style: "thin" },
-        left: { style: "thin" },
-        bottom: { style: "thin" },
-        right: { style: "thin" }
-      };
-    });
-
-    sheet.columns = [
-      { width: 15 },
-      { width: 20 },
-      { width: 35 },
-      { width: 15 },
-      { width: 25 },
-    ];
-
-    const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-    const url = window.URL.createObjectURL(blob);
-    const link = window.document.createElement("a");
-    link.href = url;
-    link.download = `${document.document_id || "Document"}.xlsx`;
-    link.click();
-    window.URL.revokeObjectURL(url);
   };
 
   return (
@@ -246,7 +251,7 @@ function DocumentTemplateRenderer({ document }) {
                 {new Date(document.created_at || Date.now()).toLocaleDateString()}
               </td>
               <td className="border border-black text-center p-2">
-                {document.document_id || document.access_code || `DOC-${document.id}`}
+                {document.access_code || "N/A"}
               </td>
               <td className="border border-black text-center p-2">
                 {document.subject || document.title || "—"}
@@ -267,19 +272,9 @@ function DocumentTemplateRenderer({ document }) {
           onClick={handleExportExcel}
           className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-[#E8E3E1] bg-[#FFFCF7] text-xs font-bold text-[#1D1A1B] hover:bg-[#F4E7EA] transition-colors shadow-xs cursor-pointer"
         >
-          <FileSpreadsheet className="w-3.5 h-3.5 text-[#16A34A]" />
+          <FileSpreadsheet className="w-3.5 h-3.5 text-[#6B1D2A]" />
           <span>Export to Excel</span>
         </button>
-        {fileUrl && (
-          <a
-            href={fileUrl}
-            download
-            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#6B1D2A] text-xs font-bold text-[#FFFCF7] hover:bg-[#8B3545] transition-colors shadow-xs cursor-pointer"
-          >
-            <Download className="w-3.5 h-3.5" />
-            <span>Download PDF</span>
-          </a>
-        )}
       </div>
 
       {/* EMBEDDED DOCUMENT VIEWER */}
@@ -297,12 +292,36 @@ function DocumentTemplateRenderer({ document }) {
               title="Document PDF Preview"
             />
           ) : isImage ? (
-            <div className="flex justify-center p-4 bg-[#F4E7EA]/30 rounded-xl border border-[#E8E3E1]">
+            <div className="flex flex-col items-center justify-center p-4 bg-[#F4E7EA]/30 rounded-xl border border-[#E8E3E1] space-y-4">
               <img
                 src={fileUrl}
                 alt={document.title || "Document Image"}
                 className="max-h-[600px] w-auto rounded-lg object-contain shadow-xs"
               />
+              <button
+                onClick={async () => {
+                  try {
+                    const response = await fetch(fileUrl);
+                    const blob = await response.blob();
+                    const objectUrl = window.URL.createObjectURL(blob);
+                    const link = window.document.createElement("a");
+                    link.href = objectUrl;
+                    link.download = document.file_name || "downloaded-image";
+                    window.document.body.appendChild(link);
+                    link.click();
+                    window.document.body.removeChild(link);
+                    window.URL.revokeObjectURL(objectUrl);
+                  } catch (err) {
+                    console.error("Failed to download image:", err);
+                    // Fallback to opening in new tab
+                    window.open(fileUrl, '_blank');
+                  }
+                }}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#6B1D2A] text-xs font-bold text-[#FFFCF7] hover:bg-[#8B3545] transition-colors cursor-pointer"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Download Image</span>
+              </button>
             </div>
           ) : (
             <div className="p-8 text-center bg-[#F4E7EA]/20 rounded-xl border border-[#E8E3E1] space-y-3">
@@ -310,14 +329,29 @@ function DocumentTemplateRenderer({ document }) {
               <p className="text-xs text-[#5F5A5C]">
                 Preview not directly supported in-browser for this file format ({document.file_type || "Document"}).
               </p>
-              <a
-                href={fileUrl}
-                download
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#6B1D2A] text-xs font-bold text-[#FFFCF7] hover:bg-[#8B3545] transition-colors"
+              <button
+                onClick={async () => {
+                  try {
+                    const response = await fetch(fileUrl);
+                    const blob = await response.blob();
+                    const objectUrl = window.URL.createObjectURL(blob);
+                    const link = window.document.createElement("a");
+                    link.href = objectUrl;
+                    link.download = document.file_name || "downloaded-file";
+                    window.document.body.appendChild(link);
+                    link.click();
+                    window.document.body.removeChild(link);
+                    window.URL.revokeObjectURL(objectUrl);
+                  } catch (err) {
+                    console.error("Failed to download file:", err);
+                    window.open(fileUrl, '_blank');
+                  }
+                }}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#6B1D2A] text-xs font-bold text-[#FFFCF7] hover:bg-[#8B3545] transition-colors cursor-pointer"
               >
                 <Download className="w-3.5 h-3.5" />
                 <span>Download {document.file_name}</span>
-              </a>
+              </button>
             </div>
           )}
         </div>

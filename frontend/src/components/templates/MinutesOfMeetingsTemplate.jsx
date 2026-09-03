@@ -27,7 +27,7 @@ export default function MinutesOfMeetingsTemplate({ data }) {
 
         <tbody>
           <tr>
-            <td style={styles.cell}>{data.access_code}</td>
+            <td style={styles.cell}>{data.access_code || "N/A"}</td>
             <td style={styles.cell}>
               {data.agenda_and_date_of_meeting}
             </td>

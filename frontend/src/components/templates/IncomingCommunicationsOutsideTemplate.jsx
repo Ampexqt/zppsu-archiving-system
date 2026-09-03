@@ -32,7 +32,7 @@ export default function IncomingCommunicationsOutsideTemplate({ data }) {
         <tbody>
           <tr>
             <td style={styles.cell}>{data.date}</td>
-            <td style={styles.cell}>{data.access_code}</td>
+            <td style={styles.cell}>{data.access_code || "N/A"}</td>
             <td style={styles.cell}>{data.agency}</td>
             <td style={styles.cell}>{data.subject}</td>
             <td style={styles.cell}>{data.action_taken}</td>

@@ -28,7 +28,7 @@ export default function StudentsInOffCampusTeachingTemplate({ data }) {
 
         <tbody>
           <tr>
-            <td style={styles.cell}>{data.access_code}</td>
+            <td style={styles.cell}>{data.access_code || "N/A"}</td>
             <td style={styles.cell}>{data.student_name}</td>
             <td style={styles.cell}>{data.assigned_school}</td>
             <td style={styles.cell}>{data.file_location}</td>

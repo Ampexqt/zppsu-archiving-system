@@ -32,7 +32,7 @@ export default function TrainingsAndSeminarsTemplate({ data }) {
         <tbody>
           <tr>
             <td style={styles.cell}>{data.date}</td>
-            <td style={styles.cell}>{data.access_code}</td>
+            <td style={styles.cell}>{data.access_code || "N/A"}</td>
             <td style={styles.cell}>{data.subject}</td>
             <td style={styles.cell}>{data.personnel}</td>
             <td style={styles.cell}>{data.zppsu_memo_number}</td>

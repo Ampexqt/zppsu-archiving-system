@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { Plus, Trash2, FolderOpen, Box, Archive, X, ChevronLeft, ChevronRight, Layers, FileText, Edit2 } from "lucide-react";
+import { Plus, Trash2, FolderOpen, Box, Archive, X, ChevronLeft, ChevronRight, Layers, FileText, Edit2, Eye } from "lucide-react";
 import DashboardLayout from "../components/layout/DashboardLayout";
+import DocumentTemplateRenderer from "../components/templates/DocumentTemplateRenderer";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -45,6 +46,7 @@ function Inventory() {
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [isFilesModalOpen, setIsFilesModalOpen] = useState(false);
   const [selectedViewTitle, setSelectedViewTitle] = useState("");
+  const [viewingFile, setViewingFile] = useState(null);
 
   const fetchData = async () => {
     try {
@@ -575,7 +577,17 @@ function Inventory() {
                       <h4 className="font-bold text-xs text-[#1D1A1B]">{file.subject || file.title || "Untitled"}</h4>
                       <p className="text-[11px] text-[#5F5A5C] font-mono mt-0.5">{file.document_id || file.file_name}</p>
                     </div>
-                    <Badge variant="outline" className="text-[10px] font-semibold border-[#E8E3E1] text-[#6B1D2A] bg-[#F4E7EA]">{file.document_type || "General"}</Badge>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className="text-[10px] font-semibold border-[#E8E3E1] text-[#6B1D2A] bg-[#F4E7EA]">{file.document_type || "General"}</Badge>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => setViewingFile(file)}
+                        className="h-7 px-2 text-[11px] font-semibold text-[#5F5A5C] hover:text-[#6B1D2A] hover:bg-[#F4E7EA] cursor-pointer"
+                      >
+                        <Eye className="w-3.5 h-3.5 mr-1" /> View
+                      </Button>
+                    </div>
                   </div>
                 ))}
                 {selectedFiles.length === 0 && (
@@ -674,6 +686,33 @@ function Inventory() {
           </DialogContent>
         </Dialog>
       </div>
+
+      {/* DOCUMENT VIEW MODAL */}
+      {viewingFile && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-[60] flex items-center justify-center p-4">
+          <div className="bg-[#FFFCF7] w-full max-w-5xl max-h-[90vh] rounded-2xl shadow-xl border border-[#E8E3E1] flex flex-col">
+            <div className="flex items-center justify-between border-b border-[#E8E3E1] p-4 bg-[#FFFCF7] rounded-t-2xl">
+              <div>
+                <h3 className="font-bold text-[#1D1A1B] text-lg">{viewingFile.subject || viewingFile.title || "Untitled"}</h3>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="text-xs text-[#5F5A5C] font-mono">{viewingFile.document_id || viewingFile.file_name}</span>
+                  <Badge variant="outline" className="text-[10px] font-semibold border-[#E8E3E1] text-[#6B1D2A] bg-[#F4E7EA]">
+                    {viewingFile.document_type || "General"}
+                  </Badge>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button size="sm" variant="ghost" onClick={() => setViewingFile(null)} className="h-8 w-8 p-0 text-[#5F5A5C] hover:text-[#1D1A1B] cursor-pointer">
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+            <div className="p-6 overflow-y-auto flex-1 bg-[#F4E7EA]/30">
+              <DocumentTemplateRenderer document={viewingFile} />
+            </div>
+          </div>
+        </div>
+      )}
     </DashboardLayout>
   );
 }

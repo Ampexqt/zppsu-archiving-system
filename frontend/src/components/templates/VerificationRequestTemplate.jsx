@@ -31,7 +31,7 @@ export default function VerificationRequestTemplate({ data }) {
         <tbody>
           <tr>
             <td style={styles.cell}>{data.date}</td>
-            <td style={styles.cell}>{data.access_code}</td>
+            <td style={styles.cell}>{data.access_code || "N/A"}</td>
             <td style={styles.cell}>{data.requesting_party}</td>
             <td style={styles.cell}>{data.student_name}</td>
             <td style={styles.cell}>{data.action_taken}</td>

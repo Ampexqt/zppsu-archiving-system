@@ -4,7 +4,8 @@ import DashboardLayout from "../components/layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { Search, Download, Calendar, Filter, Activity } from "lucide-react";
+import { Search, Download, Calendar, Filter, Activity, X } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@/components/ui/dialog";
 
 function Logs() {
   const [logs, setLogs] = useState([]);
@@ -15,13 +16,17 @@ function Logs() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
+  // Export Modal States
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [exportUserFilter, setExportUserFilter] = useState("all");
+  const [exportActionType, setExportActionType] = useState("all");
+  const [exportDateRange, setExportDateRange] = useState("all");
+  const [exportStartDate, setExportStartDate] = useState("");
+  const [exportEndDate, setExportEndDate] = useState("");
+
   // Pagination States
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchEmail, selectedAction, startDate, endDate]);
 
   const fetchLogs = async () => {
     try {
@@ -39,35 +44,21 @@ function Logs() {
     fetchLogs();
   }, []);
 
-  // Filter Logic
-  const filteredLogs = logs.filter((log) => {
-    const logDate = new Date(log.created_at);
-    
-    // Email Match
-    const emailMatch = !searchEmail || 
-      (log.user?.email || "System").toLowerCase().includes(searchEmail.toLowerCase());
-      
-    // Action Match
-    const actionMatch = !selectedAction || log.action === selectedAction;
-    
-    // Date Match
-    let dateMatch = true;
-    if (startDate) {
-      const start = new Date(startDate);
-      start.setHours(0, 0, 0, 0);
-      if (logDate < start) dateMatch = false;
-    }
-    if (endDate) {
-      const end = new Date(endDate);
-      end.setHours(23, 59, 59, 999);
-      if (logDate > end) dateMatch = false;
-    }
-
-    return emailMatch && actionMatch && dateMatch;
-  });
+  // Filter Logic for Table (Removed redundant page filters)
+  const filteredLogs = logs;
 
   // Unique Actions for Dropdown
   const uniqueActions = [...new Set(logs.map(log => log.action))].sort();
+  
+  // Unique Users for Export Dropdown
+  const uniqueUsersMap = new Map();
+  logs.forEach(log => {
+    const email = log.user?.email || "System";
+    if (!uniqueUsersMap.has(email)) {
+      uniqueUsersMap.set(email, log.user?.name ? `${log.user.name} (${email})` : email);
+    }
+  });
+  const uniqueUsers = Array.from(uniqueUsersMap.entries()).map(([email, label]) => ({ email, label })).sort((a, b) => a.label.localeCompare(b.label));
 
   // Pagination Logic
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -75,12 +66,56 @@ function Logs() {
   const currentLogs = filteredLogs.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(filteredLogs.length / itemsPerPage);
 
-  // Export CSV
-  const exportCSV = () => {
-    if (filteredLogs.length === 0) return alert("No logs to export.");
+  // Handle Export CSV
+  const handleExportCSV = () => {
+    let exportData = logs.filter((log) => {
+      const logDate = new Date(log.created_at);
+      
+      // Email Match
+      const emailMatch = exportUserFilter === "all" || 
+        (log.user?.email || "System") === exportUserFilter;
+        
+      // Action Match
+      const actionMatch = exportActionType === "all" || log.action === exportActionType;
+      
+      // Date Match
+      let dateMatch = true;
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      if (exportDateRange === "today") {
+        if (logDate < today) dateMatch = false;
+      } else if (exportDateRange === "7_days") {
+        const sevenDaysAgo = new Date(today);
+        sevenDaysAgo.setDate(today.getDate() - 7);
+        if (logDate < sevenDaysAgo) dateMatch = false;
+      } else if (exportDateRange === "1_month") {
+        const oneMonthAgo = new Date(today);
+        oneMonthAgo.setMonth(today.getMonth() - 1);
+        if (logDate < oneMonthAgo) dateMatch = false;
+      } else if (exportDateRange === "custom") {
+        if (exportStartDate) {
+          const start = new Date(exportStartDate);
+          start.setHours(0, 0, 0, 0);
+          if (logDate < start) dateMatch = false;
+        }
+        if (exportEndDate) {
+          const end = new Date(exportEndDate);
+          end.setHours(23, 59, 59, 999);
+          if (logDate > end) dateMatch = false;
+        }
+      }
+
+      return emailMatch && actionMatch && dateMatch;
+    });
+
+    if (exportData.length === 0) {
+      alert("No logs match the selected export criteria.");
+      return;
+    }
 
     const headers = ["Date", "Time", "Email", "Action", "Description"];
-    const rows = filteredLogs.map(log => [
+    const rows = exportData.map(log => [
       new Date(log.created_at).toLocaleDateString(),
       new Date(log.created_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }),
       log.user?.email || "System",
@@ -99,13 +134,15 @@ function Logs() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    
+    setIsExportModalOpen(false);
   };
 
   return (
     <DashboardLayout>
       <div className="space-y-6 font-sans">
         {/* BANNER */}
-        <div className="bg-[#4A0E1C] rounded-2xl p-6 sm:p-8 text-[#FFFCF7] shadow-sm relative overflow-hidden">
+        <div className="bg-[#4A0E1C] rounded-2xl p-6 sm:p-8 text-[#FFFCF7] shadow-sm relative overflow-hidden flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div className="relative z-10">
             <span className="text-xs uppercase tracking-widest text-[#C99A2E] font-bold block mb-1">
               ZPPSU Security & Compliance
@@ -115,79 +152,15 @@ function Logs() {
               System audit trails for accountability and transparency. Monitor all user actions securely.
             </p>
           </div>
+          
+          <button 
+            onClick={() => setIsExportModalOpen(true)}
+            className="h-10 px-5 rounded-xl bg-[#C99A2E] text-[#1D1A1B] font-bold text-xs hover:bg-[#A87818] transition flex items-center justify-center gap-2 shadow-xs whitespace-nowrap z-10 cursor-pointer"
+          >
+            <Download className="w-4 h-4" />
+            Export CSV
+          </button>
         </div>
-
-        {/* FILTERS */}
-        <Card className="border border-[#E8E3E1] shadow-xs bg-[#FFFCF7] rounded-xl">
-          <CardContent className="p-4 sm:p-6">
-            <div className="flex flex-col lg:flex-row gap-4 items-end">
-              
-              <div className="flex-1 w-full space-y-1.5">
-                <label className="text-xs font-bold text-[#1D1A1B] uppercase">Search User / Email</label>
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#5F5A5C]" />
-                  <Input 
-                    placeholder="e.g. admin@zppsu.edu.ph" 
-                    className="pl-9 h-10 bg-[#FFFCF7] border-[#E8E3E1] text-[#1D1A1B] text-xs rounded-xl focus-visible:ring-[#6B1D2A]"
-                    value={searchEmail}
-                    onChange={(e) => setSearchEmail(e.target.value)}
-                  />
-                </div>
-              </div>
-
-              <div className="flex-1 w-full space-y-1.5">
-                <label className="text-xs font-bold text-[#1D1A1B] uppercase">Action Type</label>
-                <div className="relative">
-                  <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#5F5A5C]" />
-                  <select 
-                    className="w-full h-10 pl-9 pr-4 rounded-xl border border-[#E8E3E1] bg-[#FFFCF7] text-xs font-medium text-[#1D1A1B] focus:outline-none focus:ring-2 focus:ring-[#6B1D2A]/20 appearance-none"
-                    value={selectedAction}
-                    onChange={(e) => setSelectedAction(e.target.value)}
-                  >
-                    <option value="">All Actions</option>
-                    {uniqueActions.map(action => (
-                      <option key={action} value={action}>{action}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className="w-full lg:w-auto space-y-1.5">
-                <label className="text-xs font-bold text-[#1D1A1B] uppercase">Date Range</label>
-                <div className="flex items-center gap-2">
-                  <div className="relative">
-                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#5F5A5C]" />
-                    <Input 
-                      type="date"
-                      className="pl-9 h-10 bg-[#FFFCF7] border-[#E8E3E1] text-[#1D1A1B] text-xs rounded-xl focus-visible:ring-[#6B1D2A]"
-                      value={startDate}
-                      onChange={(e) => setStartDate(e.target.value)}
-                    />
-                  </div>
-                  <span className="text-[#5F5A5C] text-xs font-medium">to</span>
-                  <div className="relative">
-                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#5F5A5C]" />
-                    <Input 
-                      type="date"
-                      className="pl-9 h-10 bg-[#FFFCF7] border-[#E8E3E1] text-[#1D1A1B] text-xs rounded-xl focus-visible:ring-[#6B1D2A]"
-                      value={endDate}
-                      onChange={(e) => setEndDate(e.target.value)}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <button 
-                onClick={exportCSV}
-                className="h-10 px-5 rounded-xl bg-[#6B1D2A] text-[#FFFCF7] font-bold text-xs hover:bg-[#8B3545] transition flex items-center justify-center gap-2 shadow-xs whitespace-nowrap w-full lg:w-auto cursor-pointer"
-              >
-                <Download className="w-4 h-4" />
-                Export CSV
-              </button>
-
-            </div>
-          </CardContent>
-        </Card>
 
         {/* LOGS TABLE */}
         <Card className="border border-[#E8E3E1] shadow-xs overflow-hidden rounded-xl bg-[#FFFCF7]">
@@ -269,8 +242,104 @@ function Logs() {
           )}
         </Card>
       </div>
+
+      {/* EXPORT CSV MODAL */}
+      <Dialog open={isExportModalOpen} onOpenChange={setIsExportModalOpen}>
+        <DialogContent className="sm:max-w-[425px] bg-[#FFFCF7] border-[#E8E3E1] shadow-lg rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-[#1D1A1B] font-bold text-lg">Export Audit Logs</DialogTitle>
+            <DialogDescription className="text-[#5F5A5C] text-xs">
+              Select criteria for the logs you want to download.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="grid gap-5 py-4">
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-[#1D1A1B] uppercase">Search User / Email</label>
+              <select 
+                className="w-full h-10 px-3 rounded-xl border border-[#E8E3E1] bg-white text-xs font-medium text-[#1D1A1B] focus:outline-none focus:ring-2 focus:ring-[#6B1D2A]/20"
+                value={exportUserFilter}
+                onChange={(e) => setExportUserFilter(e.target.value)}
+              >
+                <option value="all">All Users</option>
+                {uniqueUsers.map(user => (
+                  <option key={user.email} value={user.email}>{user.label}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-[#1D1A1B] uppercase">Action Type</label>
+              <select 
+                className="w-full h-10 px-3 rounded-xl border border-[#E8E3E1] bg-white text-xs font-medium text-[#1D1A1B] focus:outline-none focus:ring-2 focus:ring-[#6B1D2A]/20"
+                value={exportActionType}
+                onChange={(e) => setExportActionType(e.target.value)}
+              >
+                <option value="all">All Actions</option>
+                {uniqueActions.map(action => (
+                  <option key={action} value={action}>{action}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-[#1D1A1B] uppercase">Date Range</label>
+              <select 
+                className="w-full h-10 px-3 rounded-xl border border-[#E8E3E1] bg-white text-xs font-medium text-[#1D1A1B] focus:outline-none focus:ring-2 focus:ring-[#6B1D2A]/20"
+                value={exportDateRange}
+                onChange={(e) => setExportDateRange(e.target.value)}
+              >
+                <option value="all">All Time</option>
+                <option value="today">Today</option>
+                <option value="7_days">Last 7 Days</option>
+                <option value="1_month">Last 1 Month</option>
+                <option value="custom">Custom Range</option>
+              </select>
+            </div>
+
+            {exportDateRange === "custom" && (
+              <div className="flex items-center gap-2">
+                <div className="space-y-1.5 flex-1">
+                  <label className="text-[10px] font-bold text-[#5F5A5C] uppercase">Start Date</label>
+                  <Input 
+                    type="date"
+                    className="h-10 bg-white border-[#E8E3E1] text-[#1D1A1B] text-xs rounded-xl focus-visible:ring-[#6B1D2A]"
+                    value={exportStartDate}
+                    onChange={(e) => setExportStartDate(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-1.5 flex-1">
+                  <label className="text-[10px] font-bold text-[#5F5A5C] uppercase">End Date</label>
+                  <Input 
+                    type="date"
+                    className="h-10 bg-white border-[#E8E3E1] text-[#1D1A1B] text-xs rounded-xl focus-visible:ring-[#6B1D2A]"
+                    value={exportEndDate}
+                    onChange={(e) => setExportEndDate(e.target.value)}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+
+          <DialogFooter className="sm:justify-end gap-2">
+            <button
+              onClick={() => setIsExportModalOpen(false)}
+              className="h-10 px-4 rounded-xl border border-[#E8E3E1] bg-transparent text-[#1D1A1B] font-bold text-xs hover:bg-[#F4E7EA] transition cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleExportCSV}
+              className="h-10 px-6 rounded-xl bg-[#6B1D2A] text-[#FFFCF7] font-bold text-xs hover:bg-[#8B3545] transition flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+            >
+              <Download className="w-4 h-4" />
+              Download CSV
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 }
 
-export default Logs;
+export default Logs;

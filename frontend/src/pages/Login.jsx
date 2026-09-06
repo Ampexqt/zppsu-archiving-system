@@ -105,9 +105,6 @@ function Login() {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <label className="text-sm font-bold text-[#1D1A1B] tracking-wide">Password</label>
-                <a href="/forgot-password" className="text-sm font-bold text-[#6B1D2A] hover:text-[#8B3545] transition-colors">
-                  Forgot password?
-                </a>
               </div>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[#5F5A5C]">
@@ -155,14 +152,7 @@ function Login() {
             </Button>
           </form>
 
-          <div className="mt-10 text-center">
-            <p className="text-[#5F5A5C] font-medium">
-              Don't have an account?{" "}
-              <a href="/register" className="text-[#6B1D2A] font-bold hover:underline underline-offset-4">
-                Request access
-              </a>
-            </p>
-          </div>
+
         </div>
       </div>
     </div>

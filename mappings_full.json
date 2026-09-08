@@ -1,0 +1,949 @@
+{
+  "AACCUP FINDINGS AND RECOMMENDATIONS": {
+    "headers": [
+      "ACCESS CODE",
+      "PROGRAM",
+      "FILE LOCATION"
+    ],
+    "fields": [
+      "data?.access_code || \"N/A\"",
+      "data?.program",
+      "data?.file_location"
+    ]
+  },
+  "ACCOMPLISHMENT REPORTS": {
+    "headers": [
+      "ACCESS CODE",
+      "SUBJECT",
+      "FILE LOCATION"
+    ],
+    "fields": [
+      "document.access_code || \"N/A\"",
+      "document.subject",
+      "data.file_location"
+    ]
+  },
+  "ANNUAL REPORTS": {
+    "headers": [
+      "ACCESS CODE",
+      "SUBJECT",
+      "FILE LOCATION"
+    ],
+    "fields": [
+      "document.access_code || \"N/A\"",
+      "document.subject",
+      "data.file_location"
+    ]
+  },
+  "ASSESSMENT RECORDS OF STUDENTS": {
+    "headers": [
+      "ACCESS CODE",
+      "NAME OF STUDENT",
+      "FILE LOCATION"
+    ],
+    "fields": [
+      "document.access_code || \"N/A\"",
+      "data.student_name",
+      "data.file_location"
+    ]
+  },
+  "BOARD RESOLUTIONS": {
+    "headers": [
+      "ACCESS CODE",
+      "SUBJECT",
+      "FILE LOCATION"
+    ],
+    "fields": [
+      "document.access_code || \"N/A\"",
+      "document.subject",
+      "data.file_location"
+    ]
+  },
+  "BUDGET PLAN": {
+    "headers": [
+      "ACCESS CODE",
+      "YEAR AND PROPOSED BUDGET",
+      "FILE LOCATION"
+    ],
+    "fields": [
+      "document.access_code || \"N/A\"",
+      "data.year_and_proposed_budget",
+      "data.file_location"
+    ]
+  },
+  "BUDGET PROPOSALS": {
+    "headers": [
+      "ACCESS CODE",
+      "FISCAL YEAR",
+      "FILE LOCATION"
+    ],
+    "fields": [
+      "data.access_code || \"N/A\"",
+      "data.fiscal_year || \"\"",
+      "data.file_location || \"\""
+    ]
+  },
+  "BUDGETARY REQUIREMENTS": {
+    "headers": [
+      "ACCESS CODE",
+      "FISCAL YEAR",
+      "FILE LOCATION"
+    ],
+    "fields": [
+      "data.access_code || \"N/A\"",
+      "data.fiscal_year || \"\"",
+      "data.file_location || \"\""
+    ]
+  },
+  "CHECKS ISSUED": {
+    "headers": [
+      "ACCESS CODE",
+      "PAYEE",
+      "AMOUNT",
+      "FILE LOCATION"
+    ],
+    "fields": [
+      "data.access_code || \"N/A\"",
+      "data.payee || \"\"",
+      "data.amount || \"\"",
+      "data.file_location || \"\""
+    ]
+  },
+  "CHED COMMUNICATIONS 2024": {
+    "headers": [
+      "DATE",
+      "ACCESS CODE",
+      "SUBJECT",
+      "ACTION TAKEN",
+      "FILE LOCATION"
+    ],
+    "fields": [
+      "data.date",
+      "data.access_code || \"N/A\"",
+      "data.subject",
+      "data.action_taken",
+      "data.file_location"
+    ]
+  },
+  "CHED MEMORANDUM ORDERS 2024": {
+    "headers": [
+      "DATE",
+      "ACCESS CODE",
+      "SUBJECT",
+      "ACTION TAKEN",
+      "FILE LOCATION"
+    ],
+    "fields": [
+      "data.date || \"\"",
+      "data.access_code || \"N/A\"",
+      "data.subject || \"\"",
+      "data.action_taken || \"\"",
+      "data.file_location || \"\""
+    ]
+  },
+  "CLASS PROGRAM": {
+    "headers": [
+      "ACCESS CODE",
+      "NAME OF FACULTY",
+      "ACADEMIC YEAR",
+      "FILE LOCATION"
+    ],
+    "fields": [
+      "data.access_code || \"N/A\"",
+      "data.name_of_faculty || \"\"",
+      "data.academic_year || \"\"",
+      "data.file_location || \"\""
+    ]
+  },
+  "COA ANNUAL REPORTS 2024": {
+    "headers": [
+      "DATE",
+      "ACCESS CODE",
+      "SUBJECT",
+      "ACTION TAKEN",
+      "FILE LOCATION"
+    ],
+    "fields": [
+      "data.date || \"\"",
+      "data.access_code || \"N/A\"",
+      "data.subject || \"\"",
+      "data.action_taken || \"\"",
+      "data.file_location || \"\""
+    ]
+  },
+  "COA AUDIT OBSERVATION 2024": {
+    "headers": [
+      "DATE",
+      "ACCESS CODE",
+      "SUBJECT",
+      "ACTION TAKEN",
+      "FILE LOCATION",
+      "JANUARY"
+    ],
+    "fields": [
+      "data.date || \"\"",
+      "data.access_code || \"N/A\"",
+      "data.subject || \"\"",
+      "data.action_taken || \"\"",
+      "data.file_location || \"\""
+    ]
+  },
+  "COA CIRCULARS": {
+    "headers": [
+      "DATE",
+      "SUBJECT",
+      "FILE LOCATION",
+      "JANUARY"
+    ],
+    "fields": [
+      "data.date || \"\"",
+      "data.access_code || \"N/A\"",
+      "data.subject || \"\"",
+      "data.file_location || \"\""
+    ]
+  },
+  "COA COMMUNICATIONS 2024": {
+    "headers": [
+      "DATE",
+      "SUBJECT",
+      "ACTION TAKEN",
+      "FILE LOCATION",
+      "JANUARY"
+    ],
+    "fields": [
+      "data.date || \"\"",
+      "data.access_code || \"N/A\"",
+      "data.subject || \"\"",
+      "data.action_taken || \"\"",
+      "data.file_location || \"\""
+    ]
+  },
+  "COA NOTICE OF DISALLOWANCES 2024": {
+    "headers": [
+      "DATE",
+      "ACCESS CODE",
+      "SUBJECT",
+      "ACTION TAKEN",
+      "FILE LOCATION",
+      "JANUARY"
+    ],
+    "fields": [
+      "data.date || \"\"",
+      "data.access_code || \"N/A\"",
+      "data.subject || \"\"",
+      "data.action_taken || \"\"",
+      "data.file_location || \"\""
+    ]
+  },
+  "COA NOTICE OF SUSPENSION 2024": {
+    "headers": [
+      "DATE",
+      "ACCESS CODE",
+      "SUBJECT",
+      "ACTION TAKEN",
+      "FILE LOCATION",
+      "JANUARY"
+    ],
+    "fields": [
+      "data.date || \"\"",
+      "data.access_code || \"N/A\"",
+      "data.subject || \"\"",
+      "data.action_taken || \"\"",
+      "data.file_location || \"\""
+    ]
+  },
+  "MASTER LIST OF RECORDS FOR COLLECTION": {
+    "headers": [
+      "ACCESS CODE",
+      "RECEIVABLES FROM",
+      "AMOUNT",
+      "FILE LOCATION"
+    ],
+    "fields": [
+      "data.access_code || \"N/A\"",
+      "data.receivables_from || \"\"",
+      "data.amount || \"\"",
+      "data.file_location || \"\""
+    ]
+  },
+  "CONTRACT OF SERVICE (VISITING LECTURERS)": {
+    "headers": [
+      "ACCESS CODE",
+      "NAME",
+      "SEMESTER/YEAR",
+      "FILE LOCATION"
+    ],
+    "fields": [
+      "",
+      "",
+      "",
+      ""
+    ]
+  },
+  "COPC": {
+    "headers": [
+      "ACCESS CODE",
+      "PROGRAM",
+      "FILE LOCATION"
+    ],
+    "fields": [
+      "",
+      "",
+      ""
+    ]
+  },
+  "CSC CIRCULARS": {
+    "headers": [
+      "DATE",
+      "ACCESS CODE",
+      "SUBJECT",
+      "FILE LOCATION",
+      "JANUARY"
+    ],
+    "fields": [
+      "data.date",
+      "data.access_code || \"N/A\"",
+      "data.subject",
+      "data.file_location"
+    ]
+  },
+  "CSC COMMUNICATIONS 2024": {
+    "headers": [
+      "DATE",
+      "SUBJECT",
+      "ACTION TAKEN",
+      "FILE LOCATION",
+      "JANUARY"
+    ],
+    "fields": [
+      "data.date",
+      "data.access_code || \"N/A\"",
+      "data.subject",
+      "data.action_taken",
+      "data.file_location"
+    ]
+  },
+  "DATA ANALYSIS": {
+    "headers": [
+      "ACCESS CODE",
+      "SUBJECT",
+      "FILE LOCATION"
+    ],
+    "fields": [
+      "data.access_code || \"N/A\"",
+      "data.subject",
+      "data.file_location"
+    ]
+  },
+  "DBM CIRCULARS": {
+    "headers": [
+      "DATE",
+      "SUBJECT",
+      "ACTION TAKEN",
+      "ZPPSU MEMO NUMBER",
+      "FILE LOCATION",
+      "JANUARY"
+    ],
+    "fields": [
+      "data.date",
+      "data.access_code || \"N/A\"",
+      "data.subject",
+      "data.action_taken",
+      "data.memo_number",
+      "data.file_location"
+    ]
+  },
+  "DBM CIRCULARS 1": {
+    "headers": [
+      "DATE",
+      "ACCESS CODE",
+      "SUBJECT",
+      "FILE LOCATION",
+      "JANUARY"
+    ],
+    "fields": [
+      "data.date",
+      "data.access_code || \"N/A\"",
+      "data.subject",
+      "data.file_location"
+    ]
+  },
+  "DISBURSEMENTS": {
+    "headers": [
+      "ACCESS CODE",
+      "PARTICULARS",
+      "AMOUNT",
+      "FILE LOCATION"
+    ],
+    "fields": [
+      "data.access_code || \"N/A\"",
+      "data.particulars",
+      "data.amount",
+      "data.file_location"
+    ]
+  },
+  "DOST COMMUNICATIONS": {
+    "headers": [
+      "DATE",
+      "SUBJECT",
+      "ACTION TAKEN",
+      "FILE LOCATION",
+      "JANUARY"
+    ],
+    "fields": [
+      "data.date",
+      "data.access_code || \"N/A\"",
+      "data.subject",
+      "data.action_taken",
+      "data.file_location"
+    ]
+  },
+  "HEMIS": {
+    "headers": [
+      "ACCESS CODE",
+      "SEMESTER/SCHOOL YEAR",
+      "TRACKING DETAILS",
+      "FILE LOCATION"
+    ],
+    "fields": [
+      "data.access_code || \"N/A\"",
+      "data.semester_school_year",
+      "data.tracking_details",
+      "data.file_location"
+    ]
+  },
+  "INDIVIDUAL DAILY PROGRAM IDP": {
+    "headers": [
+      "ACCESS CODE",
+      "NAME OF FACULTY",
+      "SEMESTER/YEAR",
+      "FILE LOCATION"
+    ],
+    "fields": [
+      "data.access_code || \"N/A\"",
+      "data.name_of_faculty",
+      "data.semester_year",
+      "data.file_location"
+    ]
+  },
+  "INCOMING COMMUNICATIONS OUTSIDE ZC PERIMETER": {
+    "headers": [
+      "DATE",
+      "ACCESS CODE",
+      "AGENCY",
+      "SUBJECT",
+      "ACTION TAKEN",
+      "FILE LOCATION"
+    ],
+    "fields": [
+      "data.date",
+      "data.access_code || \"N/A\"",
+      "data.agency",
+      "data.subject",
+      "data.action_taken",
+      "data.file_location"
+    ]
+  },
+  "INCOMING COMMUNICATIONS WITHIN ZC": {
+    "headers": [
+      "DATE",
+      "ACCESS CODE",
+      "AGENCY",
+      "SUBJECT",
+      "ACTION TAKEN",
+      "FILE LOCATION"
+    ],
+    "fields": [
+      "data.date",
+      "data.access_code || \"N/A\"",
+      "data.agency",
+      "data.subject",
+      "data.action_taken",
+      "data.file_location"
+    ]
+  },
+  "IPCR": {
+    "headers": [
+      "ACCESS CODE",
+      "NAME OF FACULTY",
+      "SEMESTER/YEAR",
+      "FILE LOCATION"
+    ],
+    "fields": [
+      "data.access_code || \"N/A\"",
+      "data.name_of_faculty",
+      "data.semester_year",
+      "data.file_location"
+    ]
+  },
+  "JOB ORDER WORKERS": {
+    "headers": [
+      "ACCESS CODE",
+      "NAME",
+      "PERIOD",
+      "FILE LOCATION"
+    ],
+    "fields": [
+      "data.access_code || \"N/A\"",
+      "data.name",
+      "data.period",
+      "data.file_location"
+    ]
+  },
+  "MANUALS OF OPERATIONS": {
+    "headers": [
+      "ACCESS CODE",
+      "SUBJECT",
+      "FILE LOCATION"
+    ],
+    "fields": [
+      "data.access_code || \"N/A\"",
+      "data.subject",
+      "data.file_location"
+    ]
+  },
+  "MEDICAL RECORDS FOR STUDENTS": {
+    "headers": [
+      "ACCESS CODE",
+      "NAME",
+      "FILE LOCATION"
+    ],
+    "fields": [
+      "data.access_code || \"N/A\"",
+      "data.name",
+      "data.file_location"
+    ]
+  },
+  "MEMO OTHER MATTERS": {
+    "headers": [
+      "DATE",
+      "ACCESS CODE",
+      "SUBJECT",
+      "PERSONNEL",
+      "ZPPSU MEMO NUMBER",
+      "FILE LOCATION"
+    ],
+    "fields": [
+      "data.date",
+      "data.access_code || \"N/A\"",
+      "data.subject",
+      "data.personnel",
+      "data.memo_number",
+      "data.file_location"
+    ]
+  },
+  "MEMORANDUM": {
+    "headers": [
+      "DATE",
+      "ACCESS CODE",
+      "SUBJECT",
+      "PERSONNEL",
+      "ZPPSU MEMO NUMBER",
+      "FILE LOCATION"
+    ],
+    "fields": [
+      "data.date",
+      "data.access_code || \"N/A\"",
+      "data.subject",
+      "data.personnel",
+      "data.memo_number",
+      "data.file_location"
+    ]
+  },
+  "MINUTES OF MEETINGS": {
+    "headers": [
+      "ACCESS CODE",
+      "AGENDA AND DATE OF MEETING",
+      "FILE LOCATION"
+    ],
+    "fields": [
+      "data.access_code || \"N/A\"",
+      "data.agenda_and_date_of_meeting",
+      "data.file_location"
+    ]
+  },
+  "MOA/MOU RECORDS": {
+    "headers": [
+      "ACCESS CODE",
+      "AGENCY",
+      "SUBJECT",
+      "FILE LOCATION"
+    ],
+    "fields": [
+      "data.access_code || \"N/A\"",
+      "data.agency",
+      "data.subject",
+      "data.file_location"
+    ]
+  },
+  "NOTICE OF SALARY ADJUSTMENT (NOSA)": {
+    "headers": [
+      "ACCESS CODE",
+      "NAME OF PERSONNEL",
+      "YEAR",
+      "FILE LOCATION"
+    ],
+    "fields": [
+      "data.access_code || \"N/A\"",
+      "data.personnel_name",
+      "data.year",
+      "data.file_location"
+    ]
+  },
+  "SALN RECORDS": {
+    "headers": [
+      "ACCESS CODE",
+      "NAME OF PERSONNEL",
+      "YEAR",
+      "FILE LOCATION"
+    ],
+    "fields": [
+      "data.access_code || \"N/A\"",
+      "data.personnel_name",
+      "data.year",
+      "data.file_location"
+    ]
+  },
+  "NOTICE OF STEP INCREMENT (NSI)": {
+    "headers": [
+      "ACCESS CODE",
+      "NAME OF PERSONNEL",
+      "YEAR",
+      "FILE LOCATION"
+    ],
+    "fields": [
+      "data.access_code || \"N/A\"",
+      "data.personnel",
+      "data.year",
+      "data.file_location"
+    ]
+  },
+  "OFFENSES AND VIOLATIONS": {
+    "headers": [
+      "ACCESS CODE",
+      "NAME OF STUDENT",
+      "SY YEAR, SEMESTER",
+      "OFFENSES",
+      "FILE LOCATION"
+    ],
+    "fields": [
+      "data.access_code || \"N/A\"",
+      "data.student_name",
+      "data.school_year_semester",
+      "data.offenses",
+      "data.file_location"
+    ]
+  },
+  "OUTGOING COMMUNICATIONS OUTSIDE ZC PERIMETER": {
+    "headers": [
+      "DATE",
+      "ACCESS CODE",
+      "CONCERNED AGENCY",
+      "SUBJECT",
+      "TRACKING DETAILS",
+      "FILE LOCATION"
+    ],
+    "fields": [
+      "data.date",
+      "data.access_code || \"N/A\"",
+      "data.concerned_agency",
+      "data.subject",
+      "data.tracking_details",
+      "data.file_location"
+    ]
+  },
+  "PORTFOLIO OF FACULTY": {
+    "headers": [
+      "ACCESS CODE",
+      "NAME OF FACULTY",
+      "FILE LOCATION"
+    ],
+    "fields": [
+      "data.access_code || \"N/A\"",
+      "data.faculty_name",
+      "data.file_location"
+    ]
+  },
+  "PURCHASE REQUESTS": {
+    "headers": [
+      "DATE",
+      "ACCESS CODE",
+      "ITEMS",
+      "AMOUNT",
+      "FILE LOCATION"
+    ],
+    "fields": [
+      "data.date",
+      "data.access_code || \"N/A\"",
+      "data.items",
+      "data.amount",
+      "data.file_location"
+    ]
+  },
+  "REPORT OF RATINGS": {
+    "headers": [
+      "ACCESS CODE",
+      "SEMESTER, SCHOOL YEAR, COURSE PROGRAM, YEAR LEVEL",
+      "FILE LOCATION"
+    ],
+    "fields": [
+      "data.access_code || \"N/A\"",
+      "data.details",
+      "data.file_location"
+    ]
+  },
+  "REQUEST LETTER MEMORANDUM (RLM)": {
+    "headers": [
+      "DATE",
+      "ACCESS CODE",
+      "SUBJECT",
+      "ACTION TAKEN",
+      "FILE LOCATION"
+    ],
+    "fields": [
+      "data.date",
+      "data.access_code || \"N/A\"",
+      "data.subject",
+      "data.action_taken",
+      "data.file_location"
+    ]
+  },
+  "SPECIAL ORDERS": {
+    "headers": [
+      "DATE",
+      "ACCESS CODE",
+      "SUBJECT",
+      "PERSONNEL",
+      "FILE LOCATION"
+    ],
+    "fields": [
+      "data.date",
+      "data.access_code || \"N/A\"",
+      "data.subject",
+      "data.personnel",
+      "data.file_location"
+    ]
+  },
+  "STUDENT ADMISSION RECORDS": {
+    "headers": [
+      "ACCESS CODE",
+      "NAME",
+      "SEMESTER/YEAR",
+      "FILE LOCATION"
+    ],
+    "fields": [
+      "data.access_code || \"N/A\"",
+      "data.name",
+      "data.semester_year",
+      "data.file_location"
+    ]
+  },
+  "STUDENTS IN/OFF CAMPUS TEACHING": {
+    "headers": [
+      "ACCESS CODE",
+      "NAME OF STUDENT",
+      "ASSIGNED SCHOOL",
+      "FILE LOCATION"
+    ],
+    "fields": [
+      "data.access_code || \"N/A\"",
+      "data.student_name",
+      "data.assigned_school",
+      "data.file_location"
+    ]
+  },
+  "STUDENTS PROSPECTUS": {
+    "headers": [
+      "ACCESS CODE",
+      "COURSE AND YEAR",
+      "FILE LOCATION"
+    ],
+    "fields": [
+      "data.access_code || \"N/A\"",
+      "data.course_and_year",
+      "data.file_location"
+    ]
+  },
+  "STUDENTS THESIS": {
+    "headers": [
+      "ACCESS CODE",
+      "NAME OF STUDENT",
+      "TITLE OF THESIS",
+      "FILE LOCATION"
+    ],
+    "fields": [
+      "data.access_code || \"N/A\"",
+      "data.student_name",
+      "data.thesis_title",
+      "data.file_location"
+    ]
+  },
+  "STUDENTS APPRENTICESHIP AND EXPO (APEX)": {
+    "headers": [
+      "ACCESS CODE",
+      "NAME OF STUDENT",
+      "COURSE AND YEAR",
+      "FILE LOCATION"
+    ],
+    "fields": [
+      "data.access_code || \"N/A\"",
+      "data.student_name",
+      "data.course_and_year",
+      "data.file_location"
+    ]
+  },
+  "TEACHING LOAD": {
+    "headers": [
+      "ACCESS CODE",
+      "NAME OF FACULTY",
+      "ACADEMIC YEAR",
+      "FILE LOCATION"
+    ],
+    "fields": [
+      "data.access_code || \"N/A\"",
+      "data.faculty_name",
+      "data.academic_year",
+      "data.file_location"
+    ]
+  },
+  "TRAININGS AND SEMINARS": {
+    "headers": [
+      "DATE",
+      "ACCESS CODE",
+      "SUBJECT",
+      "PERSONNEL",
+      "ZPPSU MEMO NUMBER",
+      "FILE LOCATION"
+    ],
+    "fields": [
+      "data.date",
+      "data.access_code || \"N/A\"",
+      "data.subject",
+      "data.personnel",
+      "data.zppsu_memo_number",
+      "data.file_location"
+    ]
+  },
+  "VARIOUS RECORDS": {
+    "headers": [
+      "ACCESS CODE",
+      "SUBJECT",
+      "FILE LOCATION"
+    ],
+    "fields": [
+      "data.access_code || \"N/A\"",
+      "data.subject",
+      "data.file_location"
+    ]
+  },
+  "VERIFICATION REQUEST": {
+    "headers": [
+      "DATE",
+      "ACCESS CODE",
+      "REQUESTING PARTY",
+      "NAME OF STUDENT",
+      "ACTION TAKEN",
+      "FILE LOCATION"
+    ],
+    "fields": [
+      "data.date",
+      "data.access_code || \"N/A\"",
+      "data.requesting_party",
+      "data.student_name",
+      "data.action_taken",
+      "data.file_location"
+    ]
+  },
+  "VPAA MEMORANDA": {
+    "headers": [
+      "DATE",
+      "ACCESS CODE",
+      "SUBJECT",
+      "PERSONNEL",
+      "FILE LOCATION"
+    ],
+    "fields": [
+      "data.date",
+      "data.access_code || \"N/A\"",
+      "data.subject",
+      "data.personnel",
+      "data.file_location"
+    ]
+  },
+  "VPAF INDORSEMENTS": {
+    "headers": [
+      "ACCESS CODE",
+      "SUBJECT",
+      "CONCERNED PERSONNEL",
+      "FILE LOCATION"
+    ],
+    "fields": [
+      "data.access_code || \"N/A\"",
+      "data.subject",
+      "data.concerned_personnel",
+      "data.file_location"
+    ]
+  },
+  "VPAF MEMORANDUM": {
+    "headers": [
+      "DATE",
+      "ACCESS CODE",
+      "SUBJECT",
+      "PERSONNEL",
+      "FILE LOCATION"
+    ],
+    "fields": [
+      "data.date",
+      "data.access_code || \"N/A\"",
+      "data.subject",
+      "data.personnel",
+      "data.file_location"
+    ]
+  },
+  "VPRE MEMORANDA": {
+    "headers": [
+      "DATE",
+      "ACCESS CODE",
+      "SUBJECT",
+      "PERSONNEL",
+      "FILE LOCATION"
+    ],
+    "fields": [
+      "data.date",
+      "data.access_code || \"N/A\"",
+      "data.subject",
+      "data.personnel",
+      "data.file_location"
+    ]
+  },
+  "FORDEED OF DONATIONS": {
+    "headers": [
+      "ACCESS CODE",
+      "DONOR",
+      "TITLE OF DONATION",
+      "FILE LOCATION"
+    ],
+    "fields": [
+      "data.access_code || \"N/A\"",
+      "data.donor",
+      "data.title_of_donation",
+      "data.file_location"
+    ]
+  },
+  "FREE HIGHER EDUCATION BILLING DETAILS": {
+    "headers": [
+      "DATE",
+      "ACCESS CODE",
+      "SEMESTER",
+      "ACTION TAKEN",
+      "FILE LOCATION"
+    ],
+    "fields": [
+      "data.date",
+      "data.access_code || \"N/A\"",
+      "data.semester",
+      "data.action_taken",
+      "data.file_location"
+    ]
+  }
+}

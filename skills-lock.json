@@ -1,6 +1,12 @@
 {
   "version": 1,
   "skills": {
+    "design-doc-mermaid": {
+      "source": "spillwavesolutions/design-doc-mermaid",
+      "sourceType": "github",
+      "skillPath": "SKILL.md",
+      "computedHash": "cee2494adc2d3bdbedbf2a4b1a87c7eda12482c0de1ec690d8c3c19b9a0c3ebc"
+    },
     "frontend-design": {
       "source": "anthropics/skills",
       "sourceType": "github",

@@ -1,0 +1,49 @@
+flowchart LR
+    User["👤 Authenticated User"]
+    Admin["👤 Administrator"]
+    Worker["⚙️ Processing Engine"]
+
+    subgraph DocSubsystem ["📄 Document Ingestion & Retrieval Subsystem"]
+        direction TB
+
+        UC_UploadFile(["UC-DOC-01: Upload File<br/>(PDF, DOCX, PPTX, XLSX)"])
+        UC_CheckText(["UC-DOC-02: Inspect Machine-Readable Text"])
+        UC_ParseOffice(["UC-DOC-03: Extract Text via OfficeParser"])
+        UC_RunOCR(["UC-DOC-04: Execute Tesseract OCR"])
+        UC_IndexSearch(["UC-DOC-05: Index Metadata & Search Content"])
+        UC_SearchFile(["UC-DOC-06: Search & Filter Documents"])
+        UC_Download(["UC-DOC-07: Preview & Download File"])
+        UC_SoftDelete(["UC-DOC-08: Soft-Delete Document"])
+        UC_Restore(["UC-DOC-09: Restore Soft-Deleted Document"])
+        UC_HardDelete(["UC-DOC-10: Permanently Delete Document"])
+    end
+
+    User --- UC_UploadFile
+    User --- UC_SearchFile
+    User --- UC_Download
+    User --- UC_SoftDelete
+
+    Admin --- UC_Restore
+    Admin --- UC_HardDelete
+
+    UC_UploadFile -.->|«include»| UC_CheckText
+    UC_CheckText -.->|"«extend» Office Document"| UC_ParseOffice
+    UC_CheckText -.->|"«extend» Scanned Image PDF"| UC_RunOCR
+    UC_ParseOffice -.->|«include»| UC_IndexSearch
+    UC_RunOCR -.->|«include»| UC_IndexSearch
+    UC_IndexSearch --- Worker
+
+    UC_SoftDelete -.->|«extend»| UC_Restore
+    UC_SoftDelete -.->|«extend»| UC_HardDelete
+
+    classDef actor fill:#E8F0FE,stroke:#1A73E8,stroke-width:2px,color:#0D47A1
+    classDef worker fill:#E8F5E9,stroke:#2E7D32,stroke-width:2px,color:#1B5E20
+    classDef standardUC fill:#FFFFFF,stroke:#5F6368,stroke-width:1.5px,color:#202124
+    classDef privilegedUC fill:#FEF7E0,stroke:#B06000,stroke-width:1.5px,color:#663C00
+    classDef systemUC fill:#E6F4EA,stroke:#137333,stroke-width:1.5px,color:#0D652D
+
+    class User,Admin actor
+    class Worker worker
+    class UC_UploadFile,UC_SearchFile,UC_Download,UC_SoftDelete standardUC
+    class UC_Restore,UC_HardDelete privilegedUC
+    class UC_CheckText,UC_ParseOffice,UC_RunOCR,UC_IndexSearch systemUC

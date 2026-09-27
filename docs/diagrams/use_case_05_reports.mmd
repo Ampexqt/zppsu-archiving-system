@@ -1,0 +1,38 @@
+flowchart LR
+    Admin["👤 Administrator"]
+    AuditService["⚙️ Audit & Inventory Worker"]
+
+    subgraph ReportSubsystem ["📊 Official Generated Documents Subsystem"]
+        direction TB
+
+        UC_SelectReport(["UC-REP-01: Select Report Type<br/>(Accomplishment, Inventory, Master List)"])
+        UC_SetFilters(["UC-REP-02: Configure Query Filters<br/>(Date Range, Department, Category)"])
+        UC_SelectStorage(["UC-REP-03: Select Target Cabinet & File Box"])
+        UC_CompileDoc(["UC-REP-04: Compile & Render Official PDF"])
+        UC_AutoCenter(["UC-REP-05: Auto-Register into Document Center"])
+        UC_AutoBox(["UC-REP-06: Auto-Update File Box Document Count"])
+        UC_AutoAudit(["UC-REP-07: Auto-Emit Audit Log Event"])
+    end
+
+    Admin --- UC_SelectReport
+
+    UC_SelectReport -.->|«include»| UC_SetFilters
+    UC_SelectReport -.->|«include»| UC_SelectStorage
+    UC_SelectStorage -.->|«include»| UC_CompileDoc
+    UC_CompileDoc -.->|«include»| UC_AutoCenter
+    UC_CompileDoc -.->|«include»| UC_AutoBox
+    UC_CompileDoc -.->|«include»| UC_AutoAudit
+
+    UC_AutoCenter --- AuditService
+    UC_AutoBox --- AuditService
+    UC_AutoAudit --- AuditService
+
+    classDef actor fill:#E8F0FE,stroke:#1A73E8,stroke-width:2px,color:#0D47A1
+    classDef worker fill:#E8F5E9,stroke:#2E7D32,stroke-width:2px,color:#1B5E20
+    classDef interactiveUC fill:#FEF7E0,stroke:#B06000,stroke-width:1.5px,color:#663C00
+    classDef pipelineUC fill:#E6F4EA,stroke:#137333,stroke-width:1.5px,color:#0D652D
+
+    class Admin actor
+    class AuditService worker
+    class UC_SelectReport,UC_SetFilters,UC_SelectStorage interactiveUC
+    class UC_CompileDoc,UC_AutoCenter,UC_AutoBox,UC_AutoAudit pipelineUC

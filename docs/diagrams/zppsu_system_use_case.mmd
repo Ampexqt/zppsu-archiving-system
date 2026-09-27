@@ -1,0 +1,98 @@
+flowchart LR
+    %% Actors with Standard UML Stick Figure Symbols
+    Admin["<svg width='45' height='75' viewBox='0 0 45 75'><circle cx='22.5' cy='12' r='10' stroke='#000000' stroke-width='2.5' fill='#ffffff'/><line x1='22.5' y1='22' x2='22.5' y2='50' stroke='#000000' stroke-width='2.5'/><line x1='5' y1='34' x2='40' y2='34' stroke='#000000' stroke-width='2.5'/><line x1='22.5' y1='50' x2='7' y2='72' stroke='#000000' stroke-width='2.5'/><line x1='22.5' y1='50' x2='38' y2='72' stroke='#000000' stroke-width='2.5'/></svg><br/><b>Administrator</b>"]
+    Staff["<svg width='45' height='75' viewBox='0 0 45 75'><circle cx='22.5' cy='12' r='10' stroke='#000000' stroke-width='2.5' fill='#ffffff'/><line x1='22.5' y1='22' x2='22.5' y2='50' stroke='#000000' stroke-width='2.5'/><line x1='5' y1='34' x2='40' y2='34' stroke='#000000' stroke-width='2.5'/><line x1='22.5' y1='50' x2='7' y2='72' stroke='#000000' stroke-width='2.5'/><line x1='22.5' y1='50' x2='38' y2='72' stroke='#000000' stroke-width='2.5'/></svg><br/><b>University Staff</b>"]
+
+    %% System Boundary
+    subgraph System ["<b>ZPPSU Archiving System</b>"]
+        direction TB
+
+        %% Authentication & User Administration
+        UC_Login(["Log In / Authenticate"])
+        UC_ManageStaff(["Manage Staff Accounts<br/>(Create, Edit, Deactivate)"])
+        UC_ResetStaffPwd(["Reset Staff Password"])
+        UC_GuardAdmin(["Enforce Admin<br/>Protection Guard"])
+
+        %% Document Management
+        UC_Upload(["Upload Document<br/>(PDF, DOCX, PPTX, XLSX)"])
+        UC_Extract(["Extract Text &<br/>Fallback OCR"])
+        UC_Search(["Search Documents"])
+        UC_Filter(["Filter by Category,<br/>Date & Physical Location"])
+        UC_Download(["Preview & Download<br/>Document"])
+        UC_ManageOwn(["Edit / Archive<br/>Own Uploaded File"])
+        UC_RestrictedDocs(["Exclude Other Users'<br/>Files from Edit/Delete"])
+        UC_ManageAllDocs(["Manage All System Documents<br/>(Edit, Archive, Move)"])
+        UC_SoftDelete(["Soft-Delete Document"])
+        UC_Restore(["Restore Soft-Deleted<br/>Document"])
+        UC_PermDelete(["Permanently Delete<br/>Document"])
+
+        %% Physical Inventory
+        UC_ManageCabinets(["Manage Cabinets<br/>(CRUD & Space)"])
+        UC_ManageBoxes(["Manage File Boxes<br/>(CRUD & Assignment)"])
+        UC_AssignLocation(["Assign File to<br/>Cabinet & File Box"])
+        UC_MonitorCapacity(["Monitor Storage Capacity<br/>& Box Occupancy"])
+
+        %% Reports & Audit Trail
+        UC_GenerateReports(["Generate Official Reports<br/>(Accomplishment, Inventory, Master)"])
+        UC_AutoArchive(["Auto-Archive Report<br/>into Document Center"])
+        UC_AuditLog(["Log Activity Audit Entry"])
+        UC_ViewAudit(["View Audit Trail Logs"])
+
+        %% <<include>> Relationships (Dashed with &lt;&lt;include&gt;&gt;)
+        UC_Upload -.->|&lt;&lt;include&gt;&gt;| UC_Extract
+        UC_Upload -.->|&lt;&lt;include&gt;&gt;| UC_AuditLog
+        UC_GenerateReports -.->|&lt;&lt;include&gt;&gt;| UC_AutoArchive
+        UC_GenerateReports -.->|&lt;&lt;include&gt;&gt;| UC_AuditLog
+        UC_ManageStaff -.->|&lt;&lt;include&gt;&gt;| UC_GuardAdmin
+        UC_ManageStaff -.->|&lt;&lt;include&gt;&gt;| UC_AuditLog
+        UC_AssignLocation -.->|&lt;&lt;include&gt;&gt;| UC_MonitorCapacity
+
+        %% <<extend>> Relationships (Dashed with &lt;&lt;extend&gt;&gt;)
+        UC_ManageStaff -.->|&lt;&lt;extend&gt;&gt;| UC_ResetStaffPwd
+        UC_Search -.->|&lt;&lt;extend&gt;&gt;| UC_Filter
+        UC_SoftDelete -.->|&lt;&lt;extend&gt;&gt;| UC_Restore
+        UC_SoftDelete -.->|&lt;&lt;extend&gt;&gt;| UC_PermDelete
+
+        %% <<exclude>> Relationships (Dashed with &lt;&lt;exclude&gt;&gt;)
+        UC_ManageOwn -.->|&lt;&lt;exclude&gt;&gt;| UC_RestrictedDocs
+    end
+
+    %% Administrator Associations (Left Side)
+    Admin --- UC_Login
+    Admin --- UC_ManageStaff
+    Admin --- UC_ResetStaffPwd
+    Admin --- UC_Upload
+    Admin --- UC_Search
+    Admin --- UC_Download
+    Admin --- UC_ManageAllDocs
+    Admin --- UC_SoftDelete
+    Admin --- UC_Restore
+    Admin --- UC_PermDelete
+    Admin --- UC_ManageCabinets
+    Admin --- UC_ManageBoxes
+    Admin --- UC_AssignLocation
+    Admin --- UC_MonitorCapacity
+    Admin --- UC_GenerateReports
+    Admin --- UC_ViewAudit
+
+    %% University Staff Associations (Right Side)
+    UC_Login --- Staff
+    UC_Upload --- Staff
+    UC_Search --- Staff
+    UC_Download --- Staff
+    UC_ManageOwn --- Staff
+    UC_SoftDelete --- Staff
+    UC_AssignLocation --- Staff
+    UC_MonitorCapacity --- Staff
+
+    %% Strict Black and White High-Contrast Styling with Frameless Stick Figure Actors
+    classDef actorStyle fill:transparent,stroke:none,color:#000000
+    classDef ucStyle fill:#ffffff,stroke:#000000,stroke-width:1.5px,color:#000000
+
+    class Admin,Staff actorStyle
+    class UC_Login,UC_ManageStaff,UC_ResetStaffPwd,UC_GuardAdmin ucStyle
+    class UC_Upload,UC_Extract,UC_Search,UC_Filter,UC_Download,UC_ManageOwn,UC_RestrictedDocs,UC_ManageAllDocs,UC_SoftDelete,UC_Restore,UC_PermDelete ucStyle
+    class UC_ManageCabinets,UC_ManageBoxes,UC_AssignLocation,UC_MonitorCapacity ucStyle
+    class UC_GenerateReports,UC_AutoArchive,UC_AuditLog,UC_ViewAudit ucStyle
+
+    style System fill:#ffffff,stroke:#000000,stroke-width:2px,color:#000000

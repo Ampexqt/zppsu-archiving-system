@@ -1,0 +1,7 @@
+flowchart TD
+    Staff["👤 University Staff (User)"]
+    Admin["👤 System Administrator (Admin)"]
+    Admin -.->|"Inherits & Extends"| Staff
+
+    classDef actorStyle fill:#E8F0FE,stroke:#1A73E8,stroke-width:2px,color:#0D47A1
+    class Staff,Admin actorStyle

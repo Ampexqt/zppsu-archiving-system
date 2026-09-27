@@ -1,0 +1,31 @@
+flowchart LR
+    Admin["👤 Administrator"]
+    SecGuard["⚙️ Security Guard Middleware"]
+
+    subgraph AdminSubsystem ["👥 Staff Administration & Security Subsystem"]
+        direction TB
+
+        UC_CreateUser(["UC-ADM-01: Create Staff Account"])
+        UC_UpdateUser(["UC-ADM-02: Edit Staff Profile & Department"])
+        UC_Deactivate(["UC-ADM-03: Deactivate / Reactivate Account"])
+        UC_DeleteUser(["UC-ADM-04: Delete Staff Account (Guard Protected)"])
+        UC_RequirePwd(["UC-ADM-05: Enforce Password Reset on Next Login"])
+        UC_ViewLogs(["UC-ADM-06: Query Activity Audit Trail"])
+    end
+
+    Admin --- UC_CreateUser
+    Admin --- UC_UpdateUser
+    Admin --- UC_Deactivate
+    Admin --- UC_DeleteUser
+    Admin --- UC_RequirePwd
+    Admin --- UC_ViewLogs
+
+    UC_DeleteUser -.->|"«include» Verify Role != Admin"| SecGuard
+
+    classDef actor fill:#E8F0FE,stroke:#1A73E8,stroke-width:2px,color:#0D47A1
+    classDef guard fill:#FCE8E6,stroke:#C5221F,stroke-width:2px,color:#5F1412
+    classDef adminUC fill:#FEF7E0,stroke:#B06000,stroke-width:1.5px,color:#663C00
+
+    class Admin actor
+    class SecGuard guard
+    class UC_CreateUser,UC_UpdateUser,UC_Deactivate,UC_DeleteUser,UC_RequirePwd,UC_ViewLogs adminUC

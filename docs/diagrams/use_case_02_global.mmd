@@ -1,0 +1,90 @@
+flowchart LR
+    Staff["👤 University Staff"]
+    Admin["👤 Administrator"]
+    SysWorker["⚙️ Processing Engine"]
+
+    subgraph Boundary ["🏢 ZPPSU Archiving System Boundary"]
+        direction TB
+
+        %% Authentication & Profile
+        subgraph SubAuth ["🔐 Authentication"]
+            UC_Auth(["UC01: Authenticate & Log In"])
+            UC_Pwd(["UC02: Change Password"])
+        end
+
+        %% Document Management
+        subgraph SubDocs ["📄 Document Center"]
+            UC_Upload(["UC03: Upload Document"])
+            UC_Extract(["UC04: Extract Content & Fallback OCR"])
+            UC_Search(["UC05: Search & Filter Records"])
+            UC_View(["UC06: View & Download File"])
+            UC_ManageOwn(["UC07: Manage Own Document"])
+            UC_AdminDelete(["UC08: Permanently Delete Record"])
+        end
+
+        %% Physical Storage
+        subgraph SubStore ["🗄️ Physical Inventory"]
+            UC_AssignStorage(["UC09: Map Document to Cabinet & Box"])
+            UC_ManageCabinets(["UC10: Administer Cabinets & Boxes"])
+            UC_MonitorCap(["UC11: Monitor Storage Capacity"])
+        end
+
+        %% Reports & Generation
+        subgraph SubReports ["📊 Generated Documents"]
+            UC_GenReport(["UC12: Generate Official Report"])
+            UC_AutoArchive(["UC13: Auto-Archive Generated Record"])
+        end
+
+        %% Administration & Audit
+        subgraph SubAdmin ["👥 Administration & Audit"]
+            UC_ManageUsers(["UC14: Manage Staff Accounts"])
+            UC_ViewAudit(["UC15: Inspect System Audit Logs"])
+            UC_RecordLog(["UC16: Record Activity Audit Entry"])
+        end
+    end
+
+    %% Staff Connections
+    Staff --- UC_Auth
+    Staff --- UC_Pwd
+    Staff --- UC_Upload
+    Staff --- UC_Search
+    Staff --- UC_View
+    Staff --- UC_ManageOwn
+    Staff --- UC_AssignStorage
+    Staff --- UC_MonitorCap
+
+    %% Admin Connections
+    Admin --- UC_Auth
+    Admin --- UC_Pwd
+    Admin --- UC_Upload
+    Admin --- UC_Search
+    Admin --- UC_View
+    Admin --- UC_AdminDelete
+    Admin --- UC_ManageCabinets
+    Admin --- UC_GenReport
+    Admin --- UC_ManageUsers
+    Admin --- UC_ViewAudit
+    Admin --- UC_MonitorCap
+
+    %% System Engine Connections
+    UC_Upload -.->|«include»| UC_Extract
+    UC_Extract --- SysWorker
+    UC_GenReport -.->|«include»| UC_AutoArchive
+    UC_AutoArchive --- SysWorker
+    UC_Upload -.->|«include»| UC_RecordLog
+    UC_GenReport -.->|«include»| UC_RecordLog
+    UC_RecordLog --- SysWorker
+
+    %% High-Contrast Class Definitions
+    classDef actor fill:#E8F0FE,stroke:#1A73E8,stroke-width:2px,color:#0D47A1
+    classDef engine fill:#E8F5E9,stroke:#2E7D32,stroke-width:2px,color:#1B5E20
+    classDef generalUC fill:#FFFFFF,stroke:#5F6368,stroke-width:1.5px,color:#202124
+    classDef adminUC fill:#FEF7E0,stroke:#B06000,stroke-width:1.5px,color:#663C00
+    classDef sysUC fill:#E6F4EA,stroke:#137333,stroke-width:1.5px,color:#0D652D
+
+    class Staff actor
+    class Admin actor
+    class SysWorker engine
+    class UC_Auth,UC_Pwd,UC_Upload,UC_Search,UC_View,UC_ManageOwn,UC_AssignStorage,UC_MonitorCap generalUC
+    class UC_AdminDelete,UC_ManageCabinets,UC_GenReport,UC_ManageUsers,UC_ViewAudit adminUC
+    class UC_Extract,UC_AutoArchive,UC_RecordLog sysUC

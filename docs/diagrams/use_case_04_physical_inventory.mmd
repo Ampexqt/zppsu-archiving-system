@@ -1,0 +1,34 @@
+flowchart LR
+    Staff["👤 University Staff"]
+    Admin["👤 Administrator"]
+
+    subgraph StorageSubsystem ["🗄️ Physical Storage & Inventory Mapping Subsystem"]
+        direction TB
+
+        UC_CreateCabinet(["UC-INV-01: Create / Edit Cabinet"])
+        UC_CreateBox(["UC-INV-02: Create / Edit File Box in Cabinet"])
+        UC_AssignPhysical(["UC-INV-03: Assign Document to Cabinet & Box"])
+        UC_TrackCapacity(["UC-INV-04: View Aggregated Capacity Metrics"])
+        UC_CheckAlerts(["UC-INV-05: Monitor Box Full / Warning State"])
+    end
+
+    Admin --- UC_CreateCabinet
+    Admin --- UC_CreateBox
+    Admin --- UC_TrackCapacity
+
+    Staff --- UC_AssignPhysical
+    Staff --- UC_TrackCapacity
+
+    UC_CreateBox -.->|«include»| UC_CreateCabinet
+    UC_AssignPhysical -.->|«include»| UC_TrackCapacity
+    UC_TrackCapacity -.->|"«extend» Capacity >= 90%"| UC_CheckAlerts
+
+    classDef actor fill:#E8F0FE,stroke:#1A73E8,stroke-width:2px,color:#0D47A1
+    classDef standardUC fill:#FFFFFF,stroke:#5F6368,stroke-width:1.5px,color:#202124
+    classDef privilegedUC fill:#FEF7E0,stroke:#B06000,stroke-width:1.5px,color:#663C00
+    classDef alertUC fill:#FCE8E6,stroke:#C5221F,stroke-width:1.5px,color:#5F1412
+
+    class Staff,Admin actor
+    class UC_AssignPhysical,UC_TrackCapacity standardUC
+    class UC_CreateCabinet,UC_CreateBox privilegedUC
+    class UC_CheckAlerts alertUC

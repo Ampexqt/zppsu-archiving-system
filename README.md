@@ -1,280 +1,259 @@
-# 🏛️ ZPPSU Archiving System
+# 🏛️ ZPPSU Guidance Office Archiving System
 
-Welcome to the **ZPPSU Archiving System**! 
+Welcome to the **ZPPSU Archiving System**!
 
-This guide is written in **plain, simple language** so that anyone—even if you have never worked with databases or code before—can set up, install, test, and use the system smoothly without errors.
-
----
-
-## 📑 Table of Contents
-1. [What is This System?](#-what-is-this-system)
-2. [Important Security Note (Why There is No Sign-Up Page)](#-important-security-note-why-there-is-no-sign-up-page)
-3. [Prerequisites (What You Need Installed First)](#-prerequisites-what-you-need-installed-first)
-4. [Step 1: Create the Database](#-step-1-create-the-database)
-5. [Step 2: Configure Settings (.env)](#-step-2-configure-settings-env)
-6. [Step 3: Install the System Dependencies](#-step-3-install-the-system-dependencies)
-7. [Step 4: Prepare Database & Seed Essential Data](#-step-4-prepare-database--seed-essential-data)
-8. [Default Admin Login Credentials](#-default-admin-login-credentials)
-9. [Step 5: Start the Application](#-step-5-start-the-application)
-10. [Step 6: First-Time Login & Usage Guide](#-step-6-first-time-login--usage-guide)
-11. [How to Create Staff Accounts](#-how-to-create-staff-accounts)
-12. [Troubleshooting & Common Issues](#-troubleshooting--common-issues)
+This guide is written in **plain, simple language** so that anyone—including non-technical staff and clients—can easily download, install, set up, and use the system without confusion.
 
 ---
 
-## 🎯 What is This System?
+## 🧭 Which Guide Do You Need?
 
-The **ZPPSU Archiving System** is a secure digital record-keeping application built for the university. Think of it as a **smart digital filing cabinet**:
-
-- **Store & Digitize Records:** Upload scanned PDFs, images, and office documents.
-- **Smart Text Recognition (OCR):** The system automatically reads text inside scanned photos and documents so you can search for words even if they were handwritten or photocopied.
-- **Physical Location Tracking:** Whenever a document is saved, you can link it to an exact physical **Cabinet** and **Box** in the university storage room.
-- **Institutional Security:** Keeps sensitive university files safe and logs every action for complete accountability.
+| Your Goal | Where to Start |
+| :--- | :--- |
+| **I want to use or download the app on my laptop, tablet, or phone** | 👉 [**Option 1: Download & Install the App (Zero Technical Knowledge Required)**](#-option-1-how-to-download--install-the-app-on-any-device) |
+| **I am setting up the Main Host Laptop or Office Server** | 👉 [**Option 2: Host PC Setup Guide (Step-by-Step Installation)**](#-option-2-host-pc-setup-guide-for-the-main-laptop-or-server) |
 
 ---
 
-## 🔒 Important Security Note (Why There is No Sign-Up Page)
+## 📱 Option 1: How to Download & Install the App on Any Device
 
-Unlike social media websites, this is an **official university records system**. 
+> 💡 **Good News for Office Staff:** You **do NOT** need to install Node.js, databases, or type code on every office laptop!  
+> Once the main host laptop or server is running, **all other laptops, tablets, and phones on the office Wi-Fi can install the app with just 1 click.**
 
-- **Public registration is disabled by design** so unauthorized visitors cannot create accounts.
-- **Only the System Administrator** can create user accounts for authorized university staff.
-- When you first install the system, a **Default Administrator Account** is automatically created via the database seed (see credentials below). Once logged in, the Admin can create accounts for other staff members.
+### Step 1: Connect to the Office Wi-Fi
+Make sure your laptop, phone, or tablet is connected to the same Wi-Fi network or local network as the main host computer.
+
+### Step 2: Open the System in Your Web Browser
+Ask your administrator for the system address (it looks like `http://192.168.x.x:5174` or `http://localhost:5174`).  
+Open **Google Chrome**, **Microsoft Edge**, or **Safari** and enter that link.
+
+### Step 3: Install the App (Turn it into a Desktop or Mobile App)
+
+#### On Windows (Google Chrome or Microsoft Edge):
+1. Look at the right side of the address bar at the top of your browser.
+2. Click the **Install** icon (or click the three dots `⋮` at the top-right > select **Save and share** > **Install ZPPSU Archiving System**).
+3. Click **Install**.
+4. 🎉 **Done!** A dedicated shortcut icon is now on your **Desktop** and **Start Menu**. The app will now open in its own clean window just like Microsoft Word or Excel, with no browser bars!
+
+#### On Apple Mac (Safari or Chrome):
+1. In Safari, click **File** in the top menu bar > click **Add to Dock**.
+2. Or in Chrome, click the three dots `⋮` > **Install ZPPSU Archiving System**.
+3. 🎉 **Done!** You now have a launch icon on your Mac Dock.
+
+#### On Android Phones & Tablets:
+1. Open the link in **Google Chrome**.
+2. Tap the three dots menu `⋮` at the top right.
+3. Tap **Install app** or **Add to Home Screen**.
+4. 🎉 **Done!** An app icon appears on your phone's home screen.
+
+#### On iPhone & iPad:
+1. Open the link in **Safari**.
+2. Tap the **Share** button (the square with an arrow pointing up).
+3. Scroll down and tap **Add to Home Screen**.
+4. Tap **Add**.
+5. 🎉 **Done!**
 
 ---
 
-## 💻 Prerequisites (What You Need Installed First)
+## 💻 Option 2: Host PC Setup Guide (For the Main Laptop or Server)
 
-Before starting, make sure these two programs are installed on your computer:
+Follow this section on the primary laptop or computer that will act as the university office server.
 
-### 1. Node.js (JavaScript Runtime)
-- **What it does:** Runs the backend server and frontend tools.
-- **Download:** [https://nodejs.org/](https://nodejs.org/) (Choose the **LTS / Recommended** version).
-- **Check if installed:** Open your computer's Terminal (or Command Prompt) and type:
-  ```bash
-  node -v
-  npm -v
-  ```
-  *(You should see version numbers like `v20.x.x` or `v22.x.x`).*
+### 📋 Prerequisites (What to Download First)
 
-### 2. PostgreSQL (Database Server)
-- **What it does:** Securely stores your users, document information, categories, and logs.
-- **Download:** [https://www.postgresql.org/download/](https://www.postgresql.org/download/)
-- During installation, the installer will ask you to set a password for the default user (`postgres`). **Remember this password!** You will need it in Step 2.
+You only need two free programs installed on the host computer:
+
+#### 1. Download & Install Node.js
+- **What it is:** The engine that runs the system.
+- **Download Link:** [https://nodejs.org/](https://nodejs.org/)
+- **Instructions:** Download the **LTS (Recommended for Most Users)** version and run the installer. Click **Next** on all prompts with the default options.
+
+#### 2. Download & Install PostgreSQL
+- **What it is:** The secure database that stores your files, categories, and user accounts.
+- **Download Link:** [https://www.postgresql.org/download/windows/](https://www.postgresql.org/download/windows/)
+- **Instructions:** Run the installer. When it asks you to choose a password for the `postgres` user:
+  - ⚠️ **Important:** Write down the password you type (for example: `root` or `password123`). You will need it in Step 2 below!
 
 ---
 
-## 🛠️ Step 1: Create the Database
+### 🛠️ Step 1: Create the Database
 
-You need an empty database in PostgreSQL where the system can store tables.
-
-### Option A: Using pgAdmin (Visual Tool - Easiest for Beginners)
-1. Open **pgAdmin** (search for it in your Windows Start menu).
-2. Enter your master password to unlock your PostgreSQL server.
-3. In the left panel, expand **Servers** > **PostgreSQL**.
-4. Right-click on **Databases** > Select **Create** > Click **Database...**.
-5. In the **Database** field, type:
+1. Open **pgAdmin** from your Windows Start Menu.
+2. Enter the password you chose during PostgreSQL installation to connect.
+3. In the left panel:
+   - Double-click **Servers** > **PostgreSQL**.
+   - Right-click on **Databases** > Click **Create** > **Database...**.
+4. In the **Database** name field, type:
    ```text
    zppsu_archiving_db
    ```
-6. Click **Save**.
-
-### Option B: Using SQL Shell (psql) or Command Line
-If you prefer the command line, open `SQL Shell (psql)` or your terminal and run:
-```sql
-CREATE DATABASE zppsu_archiving_db;
-```
+5. Click **Save**.
 
 ---
 
-## ⚙️ Step 2: Configure Settings (.env)
+### ⚙️ Step 2: Configure Your Database Password (.env)
 
-The system needs to know your database password so it can connect.
+The system needs to know your PostgreSQL password so it can connect to your new database.
 
-1. Navigate to the `backend/` folder in this project:
+1. In File Explorer, go to the project folder:
    ```text
    zppsu-archiving-system/backend/
    ```
-2. Find the file named `.env`. *(If it doesn't exist, make a copy of `.env.example` and rename it to `.env`)*.
-3. Open `.env` in any text editor (like Notepad, VS Code, or Notepad++).
-4. Look for the `DATABASE_URL` line:
+2. Look for the file named `.env`.  
+   *(If you only see `.env.example`, make a copy of it and rename it to `.env`)*.
+3. Right-click `.env` and open it with **Notepad** (or any text editor).
+4. Find line 1:
    ```env
-   DATABASE_URL="postgresql://postgres:root@localhost:5432/zppsu_archiving_db"
+   DATABASE_URL="postgresql://postgres:YOUR_PASSWORD@localhost:5432/zppsu_archiving_db"
    PORT=5000
    JWT_SECRET=mysecretkey
    ```
-5. **Update the password:** Replace `root` with the actual password you set when you installed PostgreSQL:
+5. Replace `YOUR_PASSWORD` with the password you set during PostgreSQL installation.  
+   *Example:* If your password is `root`, it should look like:
    ```env
-   DATABASE_URL="postgresql://<your_username>:<your_password>@localhost:5432/zppsu_archiving_db"
+   DATABASE_URL="postgresql://postgres:root@localhost:5432/zppsu_archiving_db"
    ```
-   *Example:* If your postgres password is `mypassword123`, the line should look like:
-   ```env
-   DATABASE_URL="postgresql://postgres:mypassword123@localhost:5432/zppsu_archiving_db"
-   ```
-6. Save and close the file.
+6. Save and close the file (`Ctrl + S`).
 
 ---
 
-## 📦 Step 3: Install the System Dependencies
+### 📦 Step 3: Install & Prepare the System (One-Time Setup)
 
-Open your terminal in the main project folder (`zppsu-archiving-system`):
+1. Open File Explorer and open the `zppsu-archiving-system` main folder.
+2. Click on the address bar at the top, type `cmd`, and press **Enter**. A black command window will open directly in this folder.
+3. Copy and paste these three commands (press Enter after each):
 
-> **Tip for Windows users:** Open File Explorer, go into the `zppsu-archiving-system` folder, click on the address bar at the top, type `cmd` or `powershell`, and press **Enter**.
-
-Run these two commands:
-
-### 1. Install Backend Dependencies
+#### 1. Install system dependencies:
 ```bash
-npm install
+npm install && npm install --prefix frontend
 ```
-*(Wait until it finishes installing).*
+*(Wait 1–2 minutes until it finishes).*
 
-### 2. Install Frontend Dependencies
+#### 2. Set up database tables and generate client:
 ```bash
-npm install --prefix frontend
+npm run prisma:migrate && npm run prisma:generate
 ```
-*(Wait until it finishes installing).*
+
+#### 3. Seed default admin, categories, and cabinets:
+```bash
+npm run seed
+```
+
+✅ **Setup Complete!** Your database now has:
+- The default Administrator account.
+- University categories: *Administrative, Academic, Financial*.
+- 3 Physical storage cabinets with 12 organized storage boxes ready for files.
 
 ---
 
-## 🗄️ Step 4: Prepare Database & Seed Essential Data
+### 🚀 Step 4: Start the System
 
-Now we will tell the database to create all the necessary tables and populate the default administrator account and storage cabinets.
-
-In the same terminal, run these three commands in order:
-
-### 1. Create the Database Tables
-```bash
-npm run prisma:migrate
-```
-*(This creates all tables: `users`, `files`, `cabinets`, `file_boxes`, `categories`, and `logs`).*
-
-### 2. Generate the Database Client
-```bash
-npm run prisma:generate
-```
-*(This connects your backend code to the database structure).*
-
-### 3. Seed Essential Data
-```bash
-npm run prisma:seed
-```
-*(You can also simply run `npm run seed`).*
-
-### 💡 What Does the Seed Script Do?
-- ✅ **Creates the Default Administrator** (`admin@example.com`).
-- ✅ **Sets up Core Categories:** `Administrative`, `Academic`, and `Financial`.
-- ✅ **Sets up Physical Storage Cabinets:** 3 Cabinets (`Cabinet 01`, `Cabinet 02`, `Cabinet 03`).
-- ✅ **Sets up File Boxes:** 4 Storage Boxes per cabinet (12 boxes total, each with a 50-file capacity).
-- 🚫 **Zero Fake/Dummy Files:** No dummy files are added. The database starts completely clean and ready for real university uploads!
-
----
-
-## 🔑 Default Admin Login Credentials
-
-Once the seed completes, use these credentials to log in:
-
-| Field | Value |
-| :--- | :--- |
-| **Login URL** | [http://localhost:5174/login](http://localhost:5174/login) |
-| **Email** | `admin@example.com` |
-| **Password** | `password123` |
-| **Role** | **Admin** (Full Access) |
-
-> 🔒 **Security Best Practice:** Once you log in, navigate to **Users** or settings to update your password if desired.
-
----
-
-## 🚀 Step 5: Start the Application
-
-You are all set! To start both the backend server and frontend website together, run:
+Whenever you want to use the system, simply open a terminal in the project folder and run:
 
 ```bash
 npm run dev
 ```
 
-You will see output indicating both servers are running:
-- **Backend Server:** Running on port `5000` (`http://localhost:5000`)
-- **Frontend App:** Running on port `5174` (`http://localhost:5174`)
+You will see:
+- 🟢 **Backend Server:** Running on port `5000`
+- 🟢 **Frontend App:** Ready at `http://localhost:5174`
 
-> **To stop the system:** Click inside your terminal window and press `Ctrl + C` (then type `y` if prompted).
+Open your browser and visit: **[http://localhost:5174](http://localhost:5174)**!
 
----
-
-## 🖥️ Step 6: First-Time Login & Usage Guide
-
-1. Open your web browser (Google Chrome, Microsoft Edge, Firefox, or Safari).
-2. Go to: **[http://localhost:5174](http://localhost:5174)**
-3. You will be greeted with the ZPPSU Guidance Office Archiving System homepage.
-4. Click **Sign In** (or go directly to **[http://localhost:5174/login](http://localhost:5174/login)**).
-5. Enter:
-   - **Email:** `admin@example.com`
-   - **Password:** `password123`
-6. Click **Sign in to Dashboard**.
-
-### 🌟 What You Can Do Once Logged In:
-
-- 📊 **Dashboard:** View overall statistics, total uploaded documents, active categories, and storage space.
-- 📁 **Document Center & Files:**
-  - Click **Upload Document** to add a new digital file or scanned document.
-  - Fill out document details (Title, Category, Subject, Document Type).
-  - Assign the physical copy to a **Cabinet** and **File Box**.
-  - The system automatically extracts text via OCR, allowing instant keyword searching.
-- 🗄️ **Inventory:**
-  - View physical storage racks and boxes.
-  - See how many files are currently inside each box and available storage space.
-  - Add new cabinets or boxes as university storage expands.
-- 🏷️ **Categories:**
-  - Create and manage document categories (e.g., Guidance, Financial, Student Records).
-- 📜 **Activity Logs:**
-  - View an audit trail of every file uploaded, edited, or deleted for compliance.
+> 🛑 **To stop the system:** Click inside the terminal and press `Ctrl + C`, then type `y` and press Enter.
 
 ---
 
-## 👥 How to Create Staff Accounts
+## 🌐 How to Let Other Laptops in the Office Connect
 
-Because there is no public sign-up page, administrators add university personnel manually:
+You can access the system from any laptop or computer in the office connected to the same Wi-Fi:
 
-1. Log in as the **Admin** (`admin@example.com`).
-2. In the left navigation sidebar, click on **Users** (or go to `http://localhost:5174/users`).
-3. Click the **Add User** / **Register Staff** button.
-4. Fill in the staff member's details:
+1. On the host computer, open Command Prompt (`cmd`) and type:
+   ```bash
+   ipconfig
+   ```
+2. Look for **IPv4 Address** under your active Wi-Fi or Ethernet connection (for example: `192.168.1.45`).
+3. On other office laptops, simply open their web browser and type:
+   ```text
+   http://192.168.1.45:5174
+   ```
+   *(Replace `192.168.1.45` with your actual IPv4 address).*
+4. The system will load immediately! They can then click **Install App** as explained in [Option 1](#-option-1-how-to-download--install-the-app-on-any-device).
+
+---
+
+## 🔑 Default Login Credentials
+
+Use these credentials to log in for the first time:
+
+| Field | Credentials |
+| :--- | :--- |
+| **System URL** | [http://localhost:5174/login](http://localhost:5174/login) |
+| **Email** | `admin@example.com` |
+| **Password** | `password123` |
+| **Role** | **Admin** (Full Management Access) |
+
+> 🔒 **Security Notice:** There is no public registration page. This is intentional to ensure only authorized university personnel have access to institutional archives.
+
+---
+
+## 👥 How to Add Staff Members
+
+Once logged in as Admin, you can easily register accounts for other staff members:
+
+1. Log in with the **Admin** account.
+2. In the left navigation menu, click **Users** (`http://localhost:5174/users`).
+3. Click the **Register User** button at the top right.
+4. Enter the staff member's:
    - **Full Name**
-   - **Email Address** (e.g., `staff@zppsu.edu.ph`)
-   - **Initial Password**
-   - **Role** (Select `User` for standard staff access, or `Admin` for administrative access).
-5. Click **Save / Register**.
-6. Give the login credentials to that staff member so they can log in at `http://localhost:5174/login`.
+   - **Email Address** (e.g., `guidance.staff@zppsu.edu.ph`)
+   - **Password**
+   - **Role:** Choose `User` (Staff) or `Admin`.
+5. Click **Save**.
+6. That staff member can now log in from their own laptop or device using their email and password!
 
 ---
 
-## ❓ Troubleshooting & Common Issues
+## 🌟 What Can You Do in the System?
 
-### 1. `Authentication failed for user "postgres"` or `P1000` Database Error
-- **Cause:** The password in `backend/.env` does not match your PostgreSQL server password.
-- **Fix:** Open `backend/.env`, verify the password in `DATABASE_URL="postgresql://postgres:<YOUR_PASSWORD>@localhost:5432/zppsu_archiving_db"`, and re-run `npm run seed`.
+- 📄 **Upload & Digitize Records:** Upload PDFs, scanned documents, and photos.
+- 🔍 **Smart Text Search (OCR):** Search by any keyword. The system searches inside scanned text, title, subject, and document notes.
+- 🗄️ **Physical Cabinet & Box Tracking:** Whenever a file is uploaded, assign it to a physical **Cabinet** and **Storage Box** in the records room so physical copies are never lost.
+- 📊 **Cabinet Capacity Management:** Live storage gauges show how full each box is (with automatic warnings when boxes approach capacity).
+- 📜 **Audit Trail & Activity Logs:** Automatically tracks and records who logged in, logged out, uploaded, viewed, downloaded, edited, or deleted files with timestamps and IP addresses for full legal accountability.
+- 📑 **Export Masterlist:** Download the complete archive catalog to CSV / Excel spreadsheet anytime.
 
-### 2. `database "zppsu_archiving_db" does not exist`
-- **Cause:** The database was not created yet in PostgreSQL.
-- **Fix:** Open pgAdmin or SQL Shell and run `CREATE DATABASE zppsu_archiving_db;`, then run `npm run prisma:migrate`.
+---
 
-### 3. `Port 5000 or 5174 is already in use`
-- **Cause:** Another program or an older instance of the system is already running in the background.
-- **Fix:** Close any other open terminal windows running Node.js, or restart your computer.
+## ❓ Beginner Troubleshooting FAQ
 
-### 4. `command not found: node` or `'node' is not recognized`
-- **Cause:** Node.js was not installed or your terminal was open before Node.js finished installing.
-- **Fix:** Close all open terminals and restart Command Prompt/PowerShell, or re-install Node.js from [nodejs.org](https://nodejs.org/).
+### 1. "Authentication failed for user 'postgres'" or Error `P1000`
+- **Cause:** The database password in `backend/.env` is incorrect.
+- **Fix:** Open `backend/.env` in Notepad and ensure the password inside `DATABASE_URL="postgresql://postgres:YOUR_PASSWORD@localhost:5432/zppsu_archiving_db"` matches what you set during PostgreSQL installation.
 
-### 5. I forgot the Admin password or want to reset to clean state
-- Simply run:
+### 2. "Database 'zppsu_archiving_db' does not exist"
+- **Cause:** Step 1 was skipped.
+- **Fix:** Open pgAdmin, right-click **Databases** > **Create** > **Database...**, name it `zppsu_archiving_db`, click Save, and then run `npm run prisma:migrate`.
+
+### 3. "Port 5000 or 5174 is already in use"
+- **Cause:** Another instance of the system is already running in the background.
+- **Fix:** Close all open command prompt windows running Node.js, or restart your computer.
+
+### 4. Other laptops cannot connect to `http://<IP>:5174`
+- **Cause:** Both computers must be on the same Wi-Fi, or Windows Firewall is blocking inbound connections.
+- **Fix:**
+  1. Make sure both computers are connected to the exact same Wi-Fi network.
+  2. In Windows search, type **Allow an app through Windows Firewall**, ensure **Node.js** has both Private and Public network boxes checked.
+
+### 5. How do I reset the Admin account or database?
+- Simply run in your terminal:
   ```bash
-  npm run prisma:seed
+  npm run seed
   ```
-  This safely resets the default administrator account back to `admin@example.com` / `password123`.
+  This restores the default admin (`admin@example.com` / `password123`), default categories, and storage cabinets safely.
 
 ---
 
 ## 📞 Support & Documentation
 
-For technical specifications, architecture diagrams, and development references, check the [`docs/`](file:///d:/Web%20development/zppsu-archiving-system/docs) folder.
+For technical system architecture, API specifications, and database entity diagrams, please see the [`docs/`](docs/) directory.

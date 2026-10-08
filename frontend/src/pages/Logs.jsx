@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
 import DashboardLayout from "../components/layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { Search, Download, Calendar, Filter, Activity, X } from "lucide-react";
+import { Search, Download, Calendar, Filter, Activity, X, FileSpreadsheet } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@/components/ui/dialog";
+import ExcelJS from "exceljs";
+import { api } from "../services/api";
 
 function Logs() {
   const [logs, setLogs] = useState([]);
@@ -30,10 +31,7 @@ function Logs() {
 
   const fetchLogs = async () => {
     try {
-      const token = localStorage.getItem("token");
-      const response = await axios.get("http://localhost:5000/api/logs", {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await api.get("/api/logs");
       setLogs(response.data);
     } catch (error) {
       console.error(error);
@@ -75,8 +73,8 @@ function Logs() {
   const currentLogs = filteredLogs.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(filteredLogs.length / itemsPerPage);
 
-  // Handle Export CSV
-  const handleExportCSV = () => {
+  // Handle Export (Excel .xlsx with professional styling, or CSV fallback)
+  const handleExport = async (format = "xlsx") => {
     let exportData = logs.filter((log) => {
       const logDate = new Date(log.created_at);
       
@@ -123,28 +121,239 @@ function Logs() {
       return;
     }
 
-    const headers = ["Date", "Time", "Email", "Action", "Description"];
-    const rows = exportData.map(log => [
-      new Date(log.created_at).toLocaleDateString(),
-      new Date(log.created_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }),
-      log.user?.email || "System",
-      log.action,
-      `"${log.description.replace(/"/g, '""')}"` // escape quotes
-    ]);
+    if (format === "csv") {
+      // Clean CSV with UTF-8 BOM so Excel opens special characters correctly
+      const headers = ["No.", "Date", "Time", "User Email", "User Name", "Action", "Description"];
+      const rows = exportData.map((log, idx) => [
+        idx + 1,
+        new Date(log.created_at).toLocaleDateString(),
+        new Date(log.created_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }),
+        `"${(log.user?.email || "System").replace(/"/g, '""')}"`,
+        `"${(log.user?.name || "System Automated").replace(/"/g, '""')}"`,
+        `"${log.action.replace(/"/g, '""')}"`,
+        `"${(log.description || "").replace(/"/g, '""')}"`
+      ]);
 
-    const csvContent = [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
-    const url = URL.createObjectURL(blob);
-    
-    link.setAttribute("href", url);
-    link.setAttribute("download", `audit_trails_${new Date().toISOString().split('T')[0]}.csv`);
-    link.style.visibility = "hidden";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    
-    setIsExportModalOpen(false);
+      const csvContent = "\uFEFF" + [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", `ZPPSU_Audit_Trails_${new Date().toISOString().split("T")[0]}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setIsExportModalOpen(false);
+      return;
+    }
+
+    // EXCEL (.XLSX) WITH PROFESSIONAL UNIVERSITY DESIGN & GENEROUS COLUMN WIDTHS
+    try {
+      const workbook = new ExcelJS.Workbook();
+      workbook.creator = "ZPPSU Archiving System";
+      workbook.lastModifiedBy = "ZPPSU Guidance Office";
+      workbook.created = new Date();
+      workbook.modified = new Date();
+
+      const sheet = workbook.addWorksheet("Audit Trails", {
+        views: [{ showGridLines: true }]
+      });
+
+      // 1. Institution Header Title (Row 1)
+      sheet.mergeCells("A1:G1");
+      const headerTitle = sheet.getCell("A1");
+      headerTitle.value = "ZAMBOANGA PENINSULA POLYTECHNIC STATE UNIVERSITY";
+      headerTitle.font = { name: "Calibri", size: 14, bold: true, color: { argb: "FFFFFFFF" } };
+      headerTitle.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FF4A0E1C" } // University Dark Maroon
+      };
+      headerTitle.alignment = { horizontal: "center", vertical: "middle" };
+      sheet.getRow(1).height = 32;
+
+      // 2. Subtitle Banner (Row 2)
+      sheet.mergeCells("A2:G2");
+      const subTitle = sheet.getCell("A2");
+      subTitle.value = "OFFICE OF THE GUIDANCE SERVICES — SYSTEM AUDIT & ACTIVITY TRAILS";
+      subTitle.font = { name: "Calibri", size: 11, bold: true, color: { argb: "FFFFFFFF" } };
+      subTitle.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FF6B1D2A" } // Secondary Maroon
+      };
+      subTitle.alignment = { horizontal: "center", vertical: "middle" };
+      sheet.getRow(2).height = 24;
+
+      // 3. Metadata Information Bar (Row 3)
+      sheet.mergeCells("A3:G3");
+      const metaBar = sheet.getCell("A3");
+      const filterSummary = `Generated: ${new Date().toLocaleString()}  |  User Filter: ${exportUserFilter === "all" ? "All Users" : exportUserFilter}  |  Action Filter: ${exportActionType === "all" ? "All Actions" : exportActionType}  |  Period: ${exportDateRange.toUpperCase()}`;
+      metaBar.value = filterSummary;
+      metaBar.font = { name: "Calibri", size: 9, italic: true, color: { argb: "FF4B5563" } };
+      metaBar.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FFF4E7EA" } // Soft Warm Accent
+      };
+      metaBar.alignment = { horizontal: "center", vertical: "middle" };
+      sheet.getRow(3).height = 20;
+
+      // Row 4: Spacer
+      sheet.getRow(4).height = 8;
+
+      // 4. Column Headers (Row 5)
+      const headers = [
+        "NO.",
+        "DATE",
+        "TIME",
+        "USER / EMAIL",
+        "USER NAME",
+        "ACTION",
+        "DESCRIPTION / EVENT DETAILS"
+      ];
+
+      const headerRow = sheet.getRow(5);
+      headers.forEach((h, idx) => {
+        const cell = headerRow.getCell(idx + 1);
+        cell.value = h;
+        cell.font = { name: "Calibri", size: 10, bold: true, color: { argb: "FFFFFFFF" } };
+        cell.fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: { argb: "FF4A0E1C" } // Dark Maroon
+        };
+        cell.alignment = {
+          horizontal: ["NO.", "DATE", "TIME", "ACTION"].includes(h) ? "center" : "left",
+          vertical: "middle",
+          wrapText: true
+        };
+        cell.border = {
+          top: { style: "thin", color: { argb: "FF2D0710" } },
+          left: { style: "thin", color: { argb: "FF2D0710" } },
+          bottom: { style: "medium", color: { argb: "FFC99A2E" } }, // Gold Accent Line
+          right: { style: "thin", color: { argb: "FF2D0710" } }
+        };
+      });
+      headerRow.height = 28;
+
+      // 5. Data Rows (Row 6 onwards)
+      exportData.forEach((log, index) => {
+        const rowIndex = 6 + index;
+        const row = sheet.getRow(rowIndex);
+        
+        const logDate = new Date(log.created_at);
+        const isEven = index % 2 === 0;
+        const rowBgColor = isEven ? "FFFFFFFF" : "FFFDFBF7"; // Gentle zebra striping
+
+        const rowValues = [
+          index + 1,
+          logDate.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" }),
+          logDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true }),
+          log.user?.email || "System Auto",
+          log.user?.name || "System Automated",
+          log.action,
+          log.description || "N/A"
+        ];
+
+        rowValues.forEach((val, colIdx) => {
+          const cell = row.getCell(colIdx + 1);
+          cell.value = val;
+          cell.font = { name: "Calibri", size: 10, color: { argb: "FF1F2937" } };
+          
+          // Action badge styling
+          if (colIdx === 5) {
+            cell.font = { name: "Calibri", size: 9.5, bold: true, color: { argb: "FF6B1D2A" } };
+          }
+
+          cell.fill = {
+            type: "pattern",
+            pattern: "solid",
+            fgColor: { argb: rowBgColor }
+          };
+
+          cell.alignment = {
+            horizontal: [0, 1, 2, 5].includes(colIdx) ? "center" : "left",
+            vertical: "middle",
+            wrapText: colIdx === 6 // Wrap long descriptions cleanly
+          };
+
+          cell.border = {
+            top: { style: "thin", color: { argb: "FFE5E7EB" } },
+            left: { style: "thin", color: { argb: "FFE5E7EB" } },
+            bottom: { style: "thin", color: { argb: "FFE5E7EB" } },
+            right: { style: "thin", color: { argb: "FFE5E7EB" } }
+          };
+        });
+
+        row.height = 24;
+      });
+
+      // 6. Summary Footer Row
+      const summaryRowIdx = 6 + exportData.length;
+      sheet.mergeCells(`A${summaryRowIdx}:C${summaryRowIdx}`);
+      const summaryCell = sheet.getCell(`A${summaryRowIdx}`);
+      summaryCell.value = `TOTAL AUDIT ENTRIES: ${exportData.length}`;
+      summaryCell.font = { name: "Calibri", size: 10, bold: true, color: { argb: "FF4A0E1C" } };
+      summaryCell.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FFF4E7EA" }
+      };
+      summaryCell.alignment = { horizontal: "center", vertical: "middle" };
+      sheet.getRow(summaryRowIdx).height = 24;
+
+      // Border across summary row
+      for (let c = 1; c <= 7; c++) {
+        const cell = sheet.getRow(summaryRowIdx).getCell(c);
+        if (!cell.fill || !cell.fill.fgColor) {
+          cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF4E7EA" } };
+        }
+        cell.border = {
+          top: { style: "medium", color: { argb: "FFC99A2E" } },
+          bottom: { style: "double", color: { argb: "FF4A0E1C" } }
+        };
+      }
+
+      // 7. Generous Auto-Fit Column Widths (Prevent tight/crammed columns)
+      sheet.getColumn(1).width = 8;   // NO.
+      sheet.getColumn(2).width = 16;  // DATE
+      sheet.getColumn(3).width = 14;  // TIME
+      sheet.getColumn(4).width = 34;  // USER / EMAIL (fits long university emails easily)
+      sheet.getColumn(5).width = 24;  // USER NAME
+      sheet.getColumn(6).width = 26;  // ACTION (fits 'FILE BOX ASSIGNMENT', 'LOGIN_FAILED', etc.)
+      sheet.getColumn(7).width = 65;  // DESCRIPTION / EVENT DETAILS (wide with wrap text)
+
+      // Generate binary buffer & trigger direct download
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `ZPPSU_Audit_Trails_${new Date().toISOString().split("T")[0]}.xlsx`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      // Track export activity
+      try {
+        await api.post("/api/logs/track", {
+          action: "EXPORT AUDIT LOGS",
+          description: `Exported Excel audit trail (${exportData.length} records)`,
+          module: "logs"
+        });
+      } catch (trackErr) {
+        console.error("Export tracking error:", trackErr);
+      }
+
+      setIsExportModalOpen(false);
+    } catch (err) {
+      console.error("Excel generation error:", err);
+      alert("Failed to generate Excel file. Please try again.");
+    }
   };
 
   return (
@@ -166,8 +375,8 @@ function Logs() {
             onClick={() => setIsExportModalOpen(true)}
             className="h-10 px-5 rounded-xl bg-[#C99A2E] text-[#1D1A1B] font-bold text-xs hover:bg-[#A87818] transition flex items-center justify-center gap-2 shadow-xs whitespace-nowrap z-10 cursor-pointer"
           >
-            <Download className="w-4 h-4" />
-            Export CSV
+            <FileSpreadsheet className="w-4 h-4" />
+            Export Logs
           </button>
         </div>
 
@@ -284,13 +493,16 @@ function Logs() {
         </Card>
       </div>
 
-      {/* EXPORT CSV MODAL */}
+      {/* EXPORT LOGS MODAL */}
       <Dialog open={isExportModalOpen} onOpenChange={setIsExportModalOpen}>
-        <DialogContent className="sm:max-w-[425px] bg-[#FFFCF7] border-[#E8E3E1] shadow-lg rounded-2xl">
+        <DialogContent className="sm:max-w-[460px] bg-[#FFFCF7] border-[#E8E3E1] shadow-lg rounded-2xl">
           <DialogHeader>
-            <DialogTitle className="text-[#1D1A1B] font-bold text-lg">Export Audit Logs</DialogTitle>
+            <DialogTitle className="text-[#1D1A1B] font-bold text-lg flex items-center gap-2">
+              <FileSpreadsheet className="w-5 h-5 text-[#6B1D2A]" />
+              Export Audit & Activity Logs
+            </DialogTitle>
             <DialogDescription className="text-[#5F5A5C] text-xs">
-              Select criteria for the logs you want to download.
+              Download institutional activity trails formatted with professional Excel column widths and university styling.
             </DialogDescription>
           </DialogHeader>
 
@@ -362,7 +574,7 @@ function Logs() {
             )}
           </div>
 
-          <DialogFooter className="sm:justify-end gap-2">
+          <DialogFooter className="sm:justify-end gap-2 flex-wrap pt-2">
             <button
               onClick={() => setIsExportModalOpen(false)}
               className="h-10 px-4 rounded-xl border border-[#E8E3E1] bg-transparent text-[#1D1A1B] font-bold text-xs hover:bg-[#F4E7EA] transition cursor-pointer"
@@ -370,11 +582,20 @@ function Logs() {
               Cancel
             </button>
             <button
-              onClick={handleExportCSV}
-              className="h-10 px-6 rounded-xl bg-[#6B1D2A] text-[#FFFCF7] font-bold text-xs hover:bg-[#8B3545] transition flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+              onClick={() => handleExport("csv")}
+              className="h-10 px-3.5 rounded-xl border border-[#E8E3E1] bg-white text-[#5F5A5C] font-semibold text-xs hover:bg-[#F4E7EA] transition flex items-center justify-center gap-1.5 cursor-pointer"
+              title="Download unformatted comma-separated values"
             >
-              <Download className="w-4 h-4" />
-              Download CSV
+              <Download className="w-3.5 h-3.5" />
+              CSV
+            </button>
+            <button
+              onClick={() => handleExport("xlsx")}
+              className="h-10 px-5 rounded-xl bg-[#6B1D2A] text-[#FFFCF7] font-bold text-xs hover:bg-[#8B3545] transition flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+              title="Download formatted Excel workbook (.xlsx)"
+            >
+              <FileSpreadsheet className="w-4 h-4 text-[#C99A2E]" />
+              Download Excel (.xlsx)
             </button>
           </DialogFooter>
         </DialogContent>

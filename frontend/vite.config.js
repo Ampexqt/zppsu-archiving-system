@@ -14,20 +14,19 @@ export default defineConfig({
         enabled: true
       },
       manifest: {
-        name: 'ZPPSU Archiving System',
+        name: 'ZPPSU Archiving & Records Management System',
         short_name: 'ZPPSU Archive',
-        description: 'ZPPSU Archiving System PWA',
-        theme_color: '#ffffff',
+        description: 'ZPPSU Official Institutional Guidance Records and Archiving System',
+        theme_color: '#4A0E1C',
+        background_color: '#FFFCF7',
+        display: 'standalone',
+        orientation: 'any',
         icons: [
           {
-            src: 'pwa-192x192.png',
-            sizes: '192x192',
-            type: 'image/png'
-          },
-          {
-            src: 'pwa-512x512.png',
-            sizes: '512x512',
-            type: 'image/png'
+            src: '/logo.jpg',
+            sizes: '192x192 512x512',
+            type: 'image/jpeg',
+            purpose: 'any maskable'
           }
         ]
       }
@@ -39,6 +38,24 @@ export default defineConfig({
     },
   },
   server: {
-    port: 5174
+    port: 5174,
+    host: true, // Listen on 0.0.0.0 so other laptops/devices on the same Wi-Fi/LAN can connect
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules/exceljs')) {
+            return 'excel';
+          }
+          if (id.includes('node_modules/lucide-react')) {
+            return 'icons';
+          }
+          if (id.includes('node_modules/react') || id.includes('node_modules/react-dom') || id.includes('node_modules/react-router-dom')) {
+            return 'vendor';
+          }
+        }
+      }
+    }
   }
 })

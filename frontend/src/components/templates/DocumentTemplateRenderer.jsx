@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Sparkles, Download, Copy, Check, FileText, ExternalLink, FileSpreadsheet } from "lucide-react";
 import ExcelJS from "exceljs";
+import { API_BASE_URL } from "../../services/api";
 import AccomplishmentReportTemplate from "./AccomplishmentReportTemplate";
 import AaccupTemplate from "./AaccupTemplate";
 import AnnualReportTemplate from "./AnnualReportTemplate";
@@ -201,7 +202,7 @@ function DocumentTemplateRenderer({ document }) {
     try {
       const token = localStorage.getItem("token");
       if (token) {
-        await fetch("http://localhost:5000/api/logs/track", {
+        await fetch(`${API_BASE_URL}/api/logs/track`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -239,7 +240,7 @@ function DocumentTemplateRenderer({ document }) {
   }
 
   const fileUrl = document.file_path 
-    ? (document.file_path.startsWith("http") ? document.file_path : `http://localhost:5000/${document.file_path}`)
+    ? (document.file_path.startsWith("http") ? document.file_path : `${API_BASE_URL}/${document.file_path}`)
     : null;
 
   const isPdf = document.file_name?.toLowerCase().endsWith(".pdf") || document.file_type === "PDF";

@@ -36,7 +36,10 @@ async function main() {
   // Create Admin
   const admin = await prisma.users.upsert({
     where: { email: 'admin@example.com' },
-    update: {},
+    update: {
+      password: passwordHash,
+      role: 'Admin',
+    },
     create: {
       name: 'System Admin',
       email: 'admin@example.com',
@@ -44,7 +47,7 @@ async function main() {
       role: 'Admin',
     },
   });
-  console.log(`Created admin user with id: ${admin.id}`);
+  console.log(`Verified admin user: ${admin.email}`);
 
   // Clean up duplicate categories
   const allCats = await prisma.categories.findMany();
@@ -91,53 +94,29 @@ async function main() {
   }
   console.log(`Created ${cabinets.length} cabinets and ${fileBoxes.length} file boxes.`);
 
-  // Create Categories and Files
-  for (const [categoryName, docTypes] of Object.entries(documentTypesMap)) {
+  // Create Categories (Essential structure only - no dummy files seeded)
+  const categoryNames = Object.keys(documentTypesMap);
+  for (const categoryName of categoryNames) {
     let category = await prisma.categories.findFirst({ where: { name: categoryName } });
     if (!category) {
-      category = await prisma.categories.create({ data: { name: categoryName } });
-    }
-
-    console.log(`Seeding files for category: ${categoryName}`);
-    
-    // Seed 2 files per document type
-    for (const docType of docTypes) {
-      for (let i = 1; i <= 2; i++) {
-        const docId = `DOC-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
-        const randomBox = fileBoxes[Math.floor(Math.random() * fileBoxes.length)];
-        
-        await prisma.files.create({
-          data: {
-            title: `Sample ${docType} ${i}`,
-            category: categoryName,
-            document_type: docType,
-            document_id: docId,
-            uploaded_by: admin.id,
-            status: "Active",
-            subject: `Sample Subject for ${docType} ${i}`,
-            memo_date: new Date(),
-            file_box_id: randomBox.id,
-            dynamic_data: {
-              access_code: `AC-${Math.floor(1000 + Math.random() * 9000)}`,
-              subject: `Sample Subject for ${docType} ${i}`,
-              file_location: `${randomBox.cabinet_id} - ${randomBox.name}`,
-              student_name: `Student ${Math.floor(1 + Math.random() * 100)}`,
-              fiscal_year: "2024",
-              payee: "Sample Payee Inc.",
-            }
-          }
-        });
-
-        // Increment used_space for the assigned box
-        await prisma.file_boxes.update({
-          where: { id: randomBox.id },
-          data: { used_space: { increment: 1 } }
-        });
-      }
+      await prisma.categories.create({ data: { name: categoryName } });
     }
   }
 
-  console.log('Seeding finished.');
+  console.log('\n============================================================');
+  console.log('🌱 Database seeding completed successfully!');
+  console.log('============================================================');
+  console.log('🔑 Default Administrator Credentials:');
+  console.log('   Email:    admin@example.com');
+  console.log('   Password: password123');
+  console.log('   Role:     Admin');
+  console.log('------------------------------------------------------------');
+  console.log('📁 Initialized Infrastructure:');
+  console.log(`   - Categories: ${categoryNames.join(', ')}`);
+  console.log(`   - Storage Cabinets: ${cabinets.length} (Cabinet 01 - 03)`);
+  console.log(`   - File Boxes: ${fileBoxes.length} (Capacity: 50 each, Used: 0)`);
+  console.log('   - Files: 0 (Clean database ready for real uploads)');
+  console.log('============================================================\n');
 }
 
 main()

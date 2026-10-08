@@ -6,6 +6,8 @@ const prisma = require("../../../prisma/client");
 const authMiddleware = require("../../middleware/auth.middleware");    
 const logsService = require("../logs/logs.service");
 
+const { requireAdmin } = require("../../middleware/role.middleware");
+
 // UPLOAD FILE (New Modern Workflow)
 router.post(
   "/upload",
@@ -35,24 +37,26 @@ router.get(
   fileController.getAllFiles
 );
 
-// PERMANENT DELETE
+// PERMANENT DELETE (Admin Only)
 router.delete(
   "/permanent/:id",
   authMiddleware,
+  requireAdmin,
   fileController.permanentDeleteFile
 );
 
-// SOFT DELETE
+// SOFT DELETE (Admin or Owner)
 router.delete(
   "/:id",
   authMiddleware,
   fileController.deleteFile
 );
 
-// RESTORE
+// RESTORE (Admin Only)
 router.put(
   "/restore/:id",
   authMiddleware,
+  requireAdmin,
   fileController.restoreFile
 );
 
@@ -63,7 +67,7 @@ router.put(
   fileController.assignFileBox
 );
 
-// UPDATE FILE
+// UPDATE FILE (Admin or Owner)
 router.put(
   "/:id",
   authMiddleware,
@@ -73,6 +77,11 @@ router.put(
       const file = await prisma.files.findUnique({ where: { id: Number(req.params.id) } });
 
       if (!file) return res.status(404).json({ message: "File not found" });
+
+      // Enforce ownership: Staff can only edit files they uploaded
+      if (req.user.role !== "Admin" && file.uploaded_by !== req.user.id) {
+        return res.status(403).json({ message: "Access denied. You can only edit documents you uploaded." });
+      }
 
       const updatedFile = await prisma.files.update({
         where: { id: Number(req.params.id) },

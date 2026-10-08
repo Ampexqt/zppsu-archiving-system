@@ -51,6 +51,12 @@ app.use(
     path.join(__dirname, "uploads")
   )
 );
+app.use(
+  "/src/uploads", 
+  express.static(
+    path.join(__dirname, "uploads")
+  )
+);
 
 console.log(
   path.join(__dirname, "uploads")
@@ -99,6 +105,11 @@ app.use(
 
 app.use(
   "/api/accomplishment",
+  accomplishmentRoutes
+);
+
+app.use(
+  "/api/accomplishments",
   accomplishmentRoutes
 );
 

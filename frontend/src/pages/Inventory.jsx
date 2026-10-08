@@ -17,6 +17,14 @@ import { useModal } from "../context/ModalContext";
 function Inventory() {
   const toast = useToast();
   const modal = useModal();
+  const [currentUser, setCurrentUser] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("user") || "{}");
+    } catch {
+      return {};
+    }
+  });
+  const isAdmin = currentUser?.role === "Admin";
   const [activeTab, setActiveTab] = useState("cabinets");
 
   // Cabinets State
@@ -253,98 +261,100 @@ function Inventory() {
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
-            {activeTab === "cabinets" ? (
-              <Dialog open={isCabinetModalOpen} onOpenChange={setIsCabinetModalOpen}>
-                <DialogTrigger className="bg-[#6B1D2A] text-[#FFFCF7] hover:bg-[#8B3545] h-9 px-4 rounded-xl font-bold text-xs shadow-xs flex items-center gap-1.5 cursor-pointer">
-                  <Plus className="w-3.5 h-3.5" />
-                  <span>New Cabinet</span>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-md bg-[#FFFCF7] border border-[#E8E3E1] rounded-2xl p-6">
-                  <DialogHeader className="mb-3">
-                    <DialogTitle className="text-base font-bold text-[#1D1A1B]">Create Storage Cabinet</DialogTitle>
-                    <DialogDescription className="text-xs text-[#5F5A5C]">Add a new physical filing cabinet to the inventory.</DialogDescription>
-                  </DialogHeader>
-                  <div className="space-y-3 text-xs">
-                    <div className="space-y-1">
-                      <label className="font-bold text-[#1D1A1B] uppercase">Cabinet Name</label>
-                      <Input
-                        type="text"
-                        placeholder="e.g. Cabinet Alpha"
-                        value={cabinetName}
-                        onChange={(e) => setCabinetName(e.target.value)}
-                        className="h-10 text-xs rounded-xl border-[#E8E3E1] bg-[#FFFCF7] text-[#1D1A1B]"
-                      />
+          {isAdmin && (
+            <div className="flex items-center gap-2">
+              {activeTab === "cabinets" ? (
+                <Dialog open={isCabinetModalOpen} onOpenChange={setIsCabinetModalOpen}>
+                  <DialogTrigger className="bg-[#6B1D2A] text-[#FFFCF7] hover:bg-[#8B3545] h-9 px-4 rounded-xl font-bold text-xs shadow-xs flex items-center gap-1.5 cursor-pointer">
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>New Cabinet</span>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-md bg-[#FFFCF7] border border-[#E8E3E1] rounded-2xl p-6">
+                    <DialogHeader className="mb-3">
+                      <DialogTitle className="text-base font-bold text-[#1D1A1B]">Create Storage Cabinet</DialogTitle>
+                      <DialogDescription className="text-xs text-[#5F5A5C]">Add a new physical filing cabinet to the inventory.</DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-3 text-xs">
+                      <div className="space-y-1">
+                        <label className="font-bold text-[#1D1A1B] uppercase">Cabinet Name</label>
+                        <Input
+                          type="text"
+                          placeholder="e.g. Cabinet Alpha"
+                          value={cabinetName}
+                          onChange={(e) => setCabinetName(e.target.value)}
+                          className="h-10 text-xs rounded-xl border-[#E8E3E1] bg-[#FFFCF7] text-[#1D1A1B]"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="font-bold text-[#1D1A1B] uppercase">Capacity (File Box Limit)</label>
+                        <Input
+                          type="number"
+                          placeholder="e.g. 20"
+                          value={cabinetCapacity}
+                          onChange={(e) => setCabinetCapacity(e.target.value)}
+                          className="h-10 text-xs rounded-xl border-[#E8E3E1] bg-[#FFFCF7] text-[#1D1A1B]"
+                        />
+                      </div>
+                      <Button onClick={handleCreateCabinet} className="w-full bg-[#6B1D2A] text-[#FFFCF7] hover:bg-[#8B3545] h-10 rounded-xl font-bold text-xs mt-2 cursor-pointer">
+                        Confirm Cabinet Creation
+                      </Button>
                     </div>
-                    <div className="space-y-1">
-                      <label className="font-bold text-[#1D1A1B] uppercase">Capacity (File Box Limit)</label>
-                      <Input
-                        type="number"
-                        placeholder="e.g. 20"
-                        value={cabinetCapacity}
-                        onChange={(e) => setCabinetCapacity(e.target.value)}
-                        className="h-10 text-xs rounded-xl border-[#E8E3E1] bg-[#FFFCF7] text-[#1D1A1B]"
-                      />
+                  </DialogContent>
+                </Dialog>
+              ) : (
+                <Dialog open={isFileBoxModalOpen} onOpenChange={setIsFileBoxModalOpen}>
+                  <DialogTrigger className="bg-[#6B1D2A] text-[#FFFCF7] hover:bg-[#8B3545] h-9 px-4 rounded-xl font-bold text-xs shadow-xs flex items-center gap-1.5 cursor-pointer">
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>New File Box</span>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-md bg-[#FFFCF7] border border-[#E8E3E1] rounded-2xl p-6">
+                    <DialogHeader className="mb-3">
+                      <DialogTitle className="text-base font-bold text-[#1D1A1B]">Create File Box Container</DialogTitle>
+                      <DialogDescription className="text-xs text-[#5F5A5C]">Add a file box and assign it to a parent cabinet.</DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-3 text-xs">
+                      <div className="space-y-1">
+                        <label className="font-bold text-[#1D1A1B] uppercase">File Box Name / Code</label>
+                        <Input
+                          type="text"
+                          placeholder="e.g. BOX-2024-A"
+                          value={fileBoxName}
+                          onChange={(e) => setFileBoxName(e.target.value)}
+                          className="h-10 text-xs rounded-xl border-[#E8E3E1] bg-[#FFFCF7] text-[#1D1A1B]"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="font-bold text-[#1D1A1B] uppercase">Parent Cabinet</label>
+                        <select
+                          value={selectedCabinetId}
+                          onChange={(e) => setSelectedCabinetId(e.target.value)}
+                          className="h-10 w-full rounded-xl border border-[#E8E3E1] bg-[#FFFCF7] px-3 text-xs font-medium text-[#1D1A1B] focus:ring-2 focus:ring-[#6B1D2A]/20"
+                        >
+                          <option value="">Select Target Cabinet</option>
+                          {cabinets.map((cab) => (
+                            <option key={cab.id} value={cab.id}>{cab.name}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="space-y-1">
+                        <label className="font-bold text-[#1D1A1B] uppercase">Document Capacity</label>
+                        <Input
+                          type="number"
+                          placeholder="e.g. 100"
+                          value={fileBoxCapacity}
+                          onChange={(e) => setFileBoxCapacity(e.target.value)}
+                          className="h-10 text-xs rounded-xl border-[#E8E3E1] bg-[#FFFCF7] text-[#1D1A1B]"
+                        />
+                      </div>
+                      <Button onClick={handleCreateFileBox} className="w-full bg-[#6B1D2A] text-[#FFFCF7] hover:bg-[#8B3545] h-10 rounded-xl font-bold text-xs mt-2 cursor-pointer">
+                        Confirm File Box Creation
+                      </Button>
                     </div>
-                    <Button onClick={handleCreateCabinet} className="w-full bg-[#6B1D2A] text-[#FFFCF7] hover:bg-[#8B3545] h-10 rounded-xl font-bold text-xs mt-2 cursor-pointer">
-                      Confirm Cabinet Creation
-                    </Button>
-                  </div>
-                </DialogContent>
-              </Dialog>
-            ) : (
-              <Dialog open={isFileBoxModalOpen} onOpenChange={setIsFileBoxModalOpen}>
-                <DialogTrigger className="bg-[#6B1D2A] text-[#FFFCF7] hover:bg-[#8B3545] h-9 px-4 rounded-xl font-bold text-xs shadow-xs flex items-center gap-1.5 cursor-pointer">
-                  <Plus className="w-3.5 h-3.5" />
-                  <span>New File Box</span>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-md bg-[#FFFCF7] border border-[#E8E3E1] rounded-2xl p-6">
-                  <DialogHeader className="mb-3">
-                    <DialogTitle className="text-base font-bold text-[#1D1A1B]">Create File Box Container</DialogTitle>
-                    <DialogDescription className="text-xs text-[#5F5A5C]">Add a file box and assign it to a parent cabinet.</DialogDescription>
-                  </DialogHeader>
-                  <div className="space-y-3 text-xs">
-                    <div className="space-y-1">
-                      <label className="font-bold text-[#1D1A1B] uppercase">File Box Name / Code</label>
-                      <Input
-                        type="text"
-                        placeholder="e.g. BOX-2024-A"
-                        value={fileBoxName}
-                        onChange={(e) => setFileBoxName(e.target.value)}
-                        className="h-10 text-xs rounded-xl border-[#E8E3E1] bg-[#FFFCF7] text-[#1D1A1B]"
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="font-bold text-[#1D1A1B] uppercase">Parent Cabinet</label>
-                      <select
-                        value={selectedCabinetId}
-                        onChange={(e) => setSelectedCabinetId(e.target.value)}
-                        className="h-10 w-full rounded-xl border border-[#E8E3E1] bg-[#FFFCF7] px-3 text-xs font-medium text-[#1D1A1B] focus:ring-2 focus:ring-[#6B1D2A]/20"
-                      >
-                        <option value="">Select Target Cabinet</option>
-                        {cabinets.map((cab) => (
-                          <option key={cab.id} value={cab.id}>{cab.name}</option>
-                        ))}
-                      </select>
-                    </div>
-                    <div className="space-y-1">
-                      <label className="font-bold text-[#1D1A1B] uppercase">Document Capacity</label>
-                      <Input
-                        type="number"
-                        placeholder="e.g. 100"
-                        value={fileBoxCapacity}
-                        onChange={(e) => setFileBoxCapacity(e.target.value)}
-                        className="h-10 text-xs rounded-xl border-[#E8E3E1] bg-[#FFFCF7] text-[#1D1A1B]"
-                      />
-                    </div>
-                    <Button onClick={handleCreateFileBox} className="w-full bg-[#6B1D2A] text-[#FFFCF7] hover:bg-[#8B3545] h-10 rounded-xl font-bold text-xs mt-2 cursor-pointer">
-                      Confirm File Box Creation
-                    </Button>
-                  </div>
-                </DialogContent>
-              </Dialog>
-            )}
-          </div>
+                  </DialogContent>
+                </Dialog>
+              )}
+            </div>
+          )}
         </div>
 
         {/* TABS */}
@@ -385,7 +395,7 @@ function Inventory() {
                     <th className="px-5 py-3.5 font-bold">Active Boxes</th>
                     <th className="px-5 py-3.5 font-bold">Storage Occupancy</th>
                     <th className="px-5 py-3.5 font-bold">Status</th>
-                    <th className="px-5 py-3.5 font-bold text-right">Actions</th>
+                    {isAdmin && <th className="px-5 py-3.5 font-bold text-right">Actions</th>}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#E8E3E1]">
@@ -411,32 +421,34 @@ function Inventory() {
                               {cab.status || "Active"}
                             </span>
                           </td>
-                          <td className="px-5 py-3.5 text-right flex items-center justify-end gap-1">
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => openEditCabinet(cab)}
-                              className="h-7 w-7 p-0 text-[#5F5A5C] hover:text-[#6B1D2A] hover:bg-[#F4E7EA] cursor-pointer"
-                              title="Edit Cabinet"
-                            >
-                              <Edit2 className="w-3.5 h-3.5" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => handleDeleteCabinet(cab.id)}
-                              className="h-7 w-7 p-0 text-[#5F5A5C] hover:text-[#4A0E1C] hover:bg-[#F4E7EA] cursor-pointer"
-                              title="Delete Cabinet"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </Button>
-                          </td>
+                          {isAdmin && (
+                            <td className="px-5 py-3.5 text-right flex items-center justify-end gap-1">
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => openEditCabinet(cab)}
+                                className="h-7 w-7 p-0 text-[#5F5A5C] hover:text-[#6B1D2A] hover:bg-[#F4E7EA] cursor-pointer"
+                                title="Edit Cabinet"
+                              >
+                                <Edit2 className="w-3.5 h-3.5" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => handleDeleteCabinet(cab.id)}
+                                className="h-7 w-7 p-0 text-[#5F5A5C] hover:text-[#4A0E1C] hover:bg-[#F4E7EA] cursor-pointer"
+                                title="Delete Cabinet"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </Button>
+                            </td>
+                          )}
                         </tr>
                       );
                     })
                   ) : (
                     <tr>
-                      <td colSpan="6" className="px-5 py-8 text-center text-[#5F5A5C] italic">No physical cabinets configured yet.</td>
+                      <td colSpan={isAdmin ? 6 : 5} className="px-5 py-8 text-center text-[#5F5A5C] italic">No physical cabinets configured yet.</td>
                     </tr>
                   )}
                 </tbody>
@@ -509,24 +521,28 @@ function Inventory() {
                                 <FolderOpen className="w-3.5 h-3.5 mr-1 text-[#6B1D2A]" />
                                 <span>Inspect ({box.files?.length || 0})</span>
                               </Button>
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={() => openEditFileBox(box)}
-                                className="h-7 w-7 p-0 text-[#5F5A5C] hover:text-[#6B1D2A] hover:bg-[#F4E7EA] cursor-pointer"
-                                title="Edit File Box"
-                              >
-                                <Edit2 className="w-3.5 h-3.5" />
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={() => handleDeleteFileBox(box.id)}
-                                className="h-7 w-7 p-0 text-[#5F5A5C] hover:text-[#4A0E1C] hover:bg-[#F4E7EA] cursor-pointer"
-                                title="Delete File Box"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </Button>
+                              {isAdmin && (
+                                <>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() => openEditFileBox(box)}
+                                    className="h-7 w-7 p-0 text-[#5F5A5C] hover:text-[#6B1D2A] hover:bg-[#F4E7EA] cursor-pointer"
+                                    title="Edit File Box"
+                                  >
+                                    <Edit2 className="w-3.5 h-3.5" />
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() => handleDeleteFileBox(box.id)}
+                                    className="h-7 w-7 p-0 text-[#5F5A5C] hover:text-[#4A0E1C] hover:bg-[#F4E7EA] cursor-pointer"
+                                    title="Delete File Box"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </Button>
+                                </>
+                              )}
                             </div>
                           </td>
                         </tr>

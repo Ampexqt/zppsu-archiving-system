@@ -194,6 +194,31 @@ function DocumentTemplateRenderer({ document }) {
     link.download = `${document.document_id || "Document"}.xlsx`;
     link.click();
     window.URL.revokeObjectURL(url);
+    trackDownload("Excel spreadsheet");
+  };
+
+  const trackDownload = async (type = "file") => {
+    try {
+      const token = localStorage.getItem("token");
+      if (token) {
+        await fetch("http://localhost:5000/api/logs/track", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            action: "DOWNLOAD",
+            description: `Downloaded ${type} for ${document.file_name || document.document_id || "Document"}`,
+            file_id: document.id,
+            document_id: document.document_id,
+            module: "documents"
+          })
+        });
+      }
+    } catch (e) {
+      console.error("Track download error:", e);
+    }
   };
 
   if (Component && document.is_generated) {
@@ -311,6 +336,7 @@ function DocumentTemplateRenderer({ document }) {
                     link.click();
                     window.document.body.removeChild(link);
                     window.URL.revokeObjectURL(objectUrl);
+                    trackDownload("image");
                   } catch (err) {
                     console.error("Failed to download image:", err);
                     // Fallback to opening in new tab
@@ -342,6 +368,7 @@ function DocumentTemplateRenderer({ document }) {
                     link.click();
                     window.document.body.removeChild(link);
                     window.URL.revokeObjectURL(objectUrl);
+                    trackDownload("file");
                   } catch (err) {
                     console.error("Failed to download file:", err);
                     window.open(fileUrl, '_blank');

@@ -94,7 +94,7 @@ exports.exportPdf = async (req, res) => {
         is_generated: true,
         generated_type: "Accomplishment",
         file_name: fileName,
-        file_path: `src/uploads/${fileName}`,
+        file_path: `uploads/${fileName}`,
         uploaded_by: req.user.id,
         status: "Active",
       },

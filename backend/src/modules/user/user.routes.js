@@ -9,138 +9,87 @@
 
   const authMiddleware =
     require("../../middleware/auth.middleware");
+  const { requireAdmin } =
+    require("../../middleware/role.middleware");
 
   // LOGS SERVICE
   const logsService =
     require("../logs/logs.service");
 
-  // GET ALL USERS
-  router.get("/", async (req, res) => {
-
+  // GET ALL USERS (Admin Only - Never expose password hashes)
+  router.get("/", authMiddleware, requireAdmin, async (req, res) => {
     try {
-
       const users =
         await prisma.users.findMany({
-
-          orderBy: {
-
-            created_at: "desc",
-
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+            created_at: true,
           },
-
+          orderBy: {
+            created_at: "desc",
+          },
         });
 
       res.status(200).json(users);
-
     } catch (error) {
-
       res.status(500).json({
-
         message: error.message,
-
       });
-
     }
-
   });
 
-  // DELETE USER
+  // DELETE USER (Admin Only - Enforce Admin Protection Guard)
   router.delete(
     "/:id",
-
     authMiddleware,
-
+    requireAdmin,
     async (req, res) => {
-
       try {
-
-        if (
-          req.user.role !== "Admin"
-        ) {
-
-          return res.status(403).json({
-
-            message: "Access denied",
-
-          });
-
-        }
-
         if (
           Number(req.params.id) ===
           req.user.id
         ) {
-
           return res.status(400).json({
-
             message:
               "You cannot delete yourself",
+          });
+        }
 
+        const targetUser =
+          await prisma.users.findUnique({
+            where: {
+              id: Number(req.params.id),
+            },
           });
 
+        if (!targetUser) {
+          return res.status(404).json({
+            message: "User not found",
+          });
         }
-        const targetUser =
-    await prisma.users.findUnique({
 
-      where: {
-
-        id: Number(
-          req.params.id
-        ),
-
-      },
-
-    });
-
-  if (
-    targetUser?.role ===
-    "Admin"
-  ) {
-
-    const adminCount =
-      await prisma.users.count({
-
-        where: {
-
-          role: "Admin",
-
-        },
-
-      });
-
-    if (
-      adminCount <= 1
-    ) {
-
-      return res.status(400).json({
-
-        message:
-          "Cannot delete the last Admin",
-
-      });
-
-    }
-
-  }
+        // Admin Protection Guard: Administrators cannot be deleted
+        if (targetUser.role === "Admin") {
+          return res.status(403).json({
+            message: "Administrator accounts cannot be deleted",
+          });
+        }
 
         await logsService.createLog(
-
           "DELETE USER",
-
-          `${targetUser.email} deleted`
-
+          `${targetUser.email} deleted`,
+          req.user.id
         );  
 
         await prisma.users.delete({
-
           where: {
-
             id: Number(
               req.params.id
             ),
-
           },
-
         });
 
         res.status(200).json({
@@ -205,11 +154,9 @@
           });
 
         await logsService.createLog(
-
           "PROMOTE USER",
-
-          `${updatedUser.email} promoted to Admin`
-
+          `${updatedUser.email} promoted to Admin`,
+          req.user.id
         );
 
         res.json({
@@ -241,7 +188,8 @@
         });
         await logsService.createLog(
           "UPDATE USER",
-          `${updatedUser.email} updated by Admin`
+          `${updatedUser.email} updated by Admin`,
+          req.user.id
         );
         res.json({ message: "User updated successfully", user: updatedUser });
       } catch (error) {
@@ -352,31 +300,19 @@
     });
 
   await logsService.createLog(
-
     "DEMOTE USER",
-
-    `${updatedUser.email} demoted to Staff`
-
+    `${updatedUser.email} demoted to Staff`,
+    req.user.id
   );
 
   res.json({
-
-    message:
-      "User demoted successfully",
-
+    message: "User demoted successfully",
   });
-
 } catch (error) {
-
   console.error(error);
-
   res.status(500).json({
-
-    message:
-      error.message,
-
+    message: error.message,
   });
-
 }
     }
   );
@@ -406,7 +342,8 @@
 
         await logsService.createLog(
           "RESET PASSWORD",
-          `Admin reset password for ${updatedUser.email}`
+          `Admin reset password for ${updatedUser.email}`,
+          req.user.id
         );
 
         res.json({ message: "Password reset successfully" });

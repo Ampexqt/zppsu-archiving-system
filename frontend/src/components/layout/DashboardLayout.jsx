@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import logo from "../../assets/logo.jpg";
 import { useState } from "react";
+import axios from "axios";
 import { useModal } from "../../context/ModalContext";
 
 function DashboardLayout({ children }) {
@@ -44,9 +45,20 @@ function DashboardLayout({ children }) {
     });
 
     if (isConfirmed) {
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-      navigate("/");
+      try {
+        const token = localStorage.getItem("token");
+        if (token) {
+          await axios.post("http://localhost:5000/api/auth/logout", {}, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+        }
+      } catch (err) {
+        console.error("Logout tracking error:", err);
+      } finally {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        navigate("/");
+      }
     }
   };
 

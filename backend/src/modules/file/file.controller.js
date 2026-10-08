@@ -126,13 +126,25 @@ exports.uploadFile = async (req, res) => {
     const prefix = prefixMap[finalDocType] || "DOC";
     const documentId = `${prefix}-${currentYear}-${sequence}`;
 
+    let parsedFileBoxId = null;
+    if (file_box_id) {
+      const box = await prisma.file_boxes.findUnique({ where: { id: Number(file_box_id) } });
+      if (!box) {
+        return res.status(400).json({ message: "Specified file box does not exist" });
+      }
+      if (box.used_space >= box.capacity) {
+        return res.status(400).json({ message: "Specified file box is already full" });
+      }
+      parsedFileBoxId = box.id;
+    }
+
     // SAVE DATABASE
     const newFile = await prisma.files.create({
       data: {
         document_id: documentId,
         title: title || req.file.originalname,
         category,
-        file_box_id: file_box_id ? Number(file_box_id) : null,
+        file_box_id: parsedFileBoxId,
         access_code: access_code || "N/A",
         subject: finalSubject || "N/A",
         document_type: finalDocType || "Document",
@@ -151,12 +163,12 @@ exports.uploadFile = async (req, res) => {
       },
     });
 
-    if (file_box_id) {
+    if (parsedFileBoxId) {
       await prisma.file_boxes.update({
-        where: { id: Number(file_box_id) },
+        where: { id: parsedFileBoxId },
         data: { used_space: { increment: 1 } },
       });
-      await logsService.createLog("FILE BOX ASSIGNMENT", `Assigned file to box ${file_box_id}`, req.user.id);
+      await logsService.createLog("FILE BOX ASSIGNMENT", `Assigned file to box ${parsedFileBoxId}`, req.user.id);
     }
 
     await logsService.createLog("UPLOAD FILE", `Uploaded document ${document_type || "File"}`, req.user.id);
@@ -212,12 +224,24 @@ exports.generateDocument = async (req, res) => {
     const documentId = `${prefix}-${currentYear}-${sequence}`;
     const templateFileName = getTemplateFileName(document_type);
 
+    let parsedFileBoxId = null;
+    if (file_box_id) {
+      const box = await prisma.file_boxes.findUnique({ where: { id: Number(file_box_id) } });
+      if (!box) {
+        return res.status(400).json({ message: "Specified file box does not exist" });
+      }
+      if (box.used_space >= box.capacity) {
+        return res.status(400).json({ message: "Specified file box is already full" });
+      }
+      parsedFileBoxId = box.id;
+    }
+
     const newFile = await prisma.files.create({
       data: {
         document_id: documentId,
         title: title || `Generated ${document_type}`,
         category,
-        file_box_id: file_box_id ? Number(file_box_id) : null,
+        file_box_id: parsedFileBoxId,
         access_code,
         subject,
         document_type,
@@ -227,7 +251,7 @@ exports.generateDocument = async (req, res) => {
         memo_date: memo_date ? new Date(memo_date) : null,
         received_date: received_date ? new Date(received_date) : null,
         file_name: templateFileName,
-        file_path: `src/uploads/${templateFileName}`,
+        file_path: `uploads/${templateFileName}`,
         dynamic_data: dynamicData,
         is_deleted: false,
         status: "Active",
@@ -237,12 +261,12 @@ exports.generateDocument = async (req, res) => {
 
     await appendToExcel(document_type, { ...req.body, document_id: documentId });
 
-    if (file_box_id) {
+    if (parsedFileBoxId) {
       await prisma.file_boxes.update({
-        where: { id: Number(file_box_id) },
+        where: { id: parsedFileBoxId },
         data: { used_space: { increment: 1 } },
       });
-      await logsService.createLog("FILE BOX ASSIGNMENT", `Assigned generated file to box ${file_box_id}`, req.user.id);
+      await logsService.createLog("FILE BOX ASSIGNMENT", `Assigned generated file to box ${parsedFileBoxId}`, req.user.id);
     }
 
     await logsService.createLog("GENERATE REPORT", `Generated ${document_type}`, req.user.id);
@@ -321,13 +345,18 @@ exports.getAllFiles = async (req, res) => {
   }
 };
 
-// SOFT DELETE FILE
+// SOFT DELETE FILE (Admin or Owner)
 exports.deleteFile = async (req, res) => {
   try {
     const id = Number(req.params.id);
     const file = await prisma.files.findUnique({ where: { id } });
 
     if (!file) return res.status(404).json({ message: "File not found" });
+
+    // Enforce ownership: Staff can only soft-delete their own documents
+    if (req.user.role !== "Admin" && file.uploaded_by !== req.user.id) {
+      return res.status(403).json({ message: "Access denied. You can only delete documents you uploaded." });
+    }
 
     await prisma.files.update({
       where: { id },
@@ -349,9 +378,13 @@ exports.deleteFile = async (req, res) => {
   }
 };
 
-// RESTORE FILE
+// RESTORE FILE (Admin Only)
 exports.restoreFile = async (req, res) => {
   try {
+    if (req.user.role !== "Admin") {
+      return res.status(403).json({ message: "Access denied. Only administrators can restore documents." });
+    }
+
     const id = Number(req.params.id);
     const file = await prisma.files.findUnique({ where: { id } });
 
@@ -377,13 +410,33 @@ exports.restoreFile = async (req, res) => {
   }
 };
 
-// PERMANENT DELETE
+// PERMANENT DELETE (Admin Only)
 exports.permanentDeleteFile = async (req, res) => {
   try {
+    if (req.user.role !== "Admin") {
+      return res.status(403).json({ message: "Access denied. Only administrators can permanently delete documents." });
+    }
+
     const id = Number(req.params.id);
     const file = await prisma.files.findUnique({ where: { id } });
 
     if (!file) return res.status(404).json({ message: "File not found" });
+
+    // Decrement file box used space if active in a box
+    if (file.file_box_id && !file.is_deleted) {
+      await prisma.file_boxes.update({
+        where: { id: file.file_box_id },
+        data: { used_space: { decrement: 1 } },
+      });
+    }
+
+    // Safely remove file on disk if it exists
+    if (file.file_name) {
+      const fullDiskPath = path.join(__dirname, "../../uploads", file.file_name);
+      if (fs.existsSync(fullDiskPath)) {
+        try { fs.unlinkSync(fullDiskPath); } catch (e) { /* ignore cleanup error */ }
+      }
+    }
 
     const deletedFile = await prisma.files.delete({ where: { id } });
     await logsService.createLog("PERMANENT DELETE", `Permanently deleted ${deletedFile.document_type || "File"} (${deletedFile.document_id || deletedFile.id})`, req.user.id);
@@ -401,6 +454,14 @@ exports.assignFileBox = async (req, res) => {
     const fileId = Number(req.params.id);
     const { file_box_id } = req.body;
 
+    const file = await prisma.files.findUnique({ where: { id: fileId } });
+    if (!file) return res.status(404).json({ message: "File not found" });
+
+    // Staff can only assign storage to their own files
+    if (req.user.role !== "Admin" && file.uploaded_by !== req.user.id) {
+      return res.status(403).json({ message: "Access denied. You can only assign storage to documents you uploaded." });
+    }
+
     const fileBox = await prisma.file_boxes.findUnique({
       where: { id: Number(file_box_id) },
       include: { files: true }
@@ -408,9 +469,6 @@ exports.assignFileBox = async (req, res) => {
 
     if (!fileBox) return res.status(404).json({ message: "File box not found" });
     if (fileBox.used_space >= fileBox.capacity) return res.status(400).json({ message: "File box is already full" });
-
-    const file = await prisma.files.findUnique({ where: { id: fileId } });
-    if (!file) return res.status(404).json({ message: "File not found" });
 
     // Move logic
     if (file.file_box_id) {

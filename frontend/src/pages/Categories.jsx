@@ -13,6 +13,8 @@ import { useModal } from "../context/ModalContext";
 function Categories() {
   const toast = useToast();
   const modal = useModal();
+  const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
+  const isAdmin = currentUser?.role === "Admin";
   const [categories, setCategories] = useState([]);
   const [name, setName] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -125,35 +127,37 @@ function Categories() {
             </p>
           </div>
 
-          <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-            <DialogTrigger className="bg-[#6B1D2A] text-[#FFFCF7] hover:bg-[#8B3545] h-9 px-4 rounded-xl font-bold text-xs shadow-xs flex items-center gap-1.5 cursor-pointer">
-              <Plus className="w-3.5 h-3.5" />
-              <span>Add Category</span>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-md bg-[#FFFCF7] border border-[#E8E3E1] rounded-2xl p-6">
-              <DialogHeader className="mb-3">
-                <DialogTitle className="text-base font-bold text-[#1D1A1B]">New Category Classification</DialogTitle>
-                <DialogDescription className="text-xs text-[#5F5A5C]">
-                  Create a new document category for guidance archives.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-3 text-xs">
-                <div className="space-y-1">
-                  <label className="font-bold text-[#1D1A1B] uppercase">Category Title</label>
-                  <Input
-                    type="text"
-                    placeholder="e.g. Guidance Counseling Notes"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="h-10 text-xs rounded-xl border-[#E8E3E1] bg-[#FFFCF7] text-[#1D1A1B]"
-                  />
+          {isAdmin && (
+            <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+              <DialogTrigger className="bg-[#6B1D2A] text-[#FFFCF7] hover:bg-[#8B3545] h-9 px-4 rounded-xl font-bold text-xs shadow-xs flex items-center gap-1.5 cursor-pointer">
+                <Plus className="w-3.5 h-3.5" />
+                <span>Add Category</span>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-md bg-[#FFFCF7] border border-[#E8E3E1] rounded-2xl p-6">
+                <DialogHeader className="mb-3">
+                  <DialogTitle className="text-base font-bold text-[#1D1A1B]">New Category Classification</DialogTitle>
+                  <DialogDescription className="text-xs text-[#5F5A5C]">
+                    Create a new document category for guidance archives.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-3 text-xs">
+                  <div className="space-y-1">
+                    <label className="font-bold text-[#1D1A1B] uppercase">Category Title</label>
+                    <Input
+                      type="text"
+                      placeholder="e.g. Guidance Counseling Notes"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      className="h-10 text-xs rounded-xl border-[#E8E3E1] bg-[#FFFCF7] text-[#1D1A1B]"
+                    />
+                  </div>
+                  <Button onClick={handleAddCategory} className="w-full bg-[#6B1D2A] text-[#FFFCF7] hover:bg-[#8B3545] h-10 rounded-xl font-bold text-xs mt-2 cursor-pointer">
+                    Confirm Category
+                  </Button>
                 </div>
-                <Button onClick={handleAddCategory} className="w-full bg-[#6B1D2A] text-[#FFFCF7] hover:bg-[#8B3545] h-10 rounded-xl font-bold text-xs mt-2 cursor-pointer">
-                  Confirm Category
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
+              </DialogContent>
+            </Dialog>
+          )}
         </div>
 
         {/* CATEGORIES TABLE */}
@@ -164,7 +168,7 @@ function Categories() {
                 <tr>
                   <th className="px-5 py-3.5 font-bold">Category Name</th>
                   <th className="px-5 py-3.5 font-bold">Created Date</th>
-                  <th className="px-5 py-3.5 font-bold text-right">Actions</th>
+                  {isAdmin && <th className="px-5 py-3.5 font-bold text-right">Actions</th>}
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#E8E3E1]">
@@ -182,31 +186,33 @@ function Categories() {
                       <td className="px-5 py-3.5 text-[#5F5A5C]">
                         {cat.created_at ? new Date(cat.created_at).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" }) : "—"}
                       </td>
-                      <td className="px-5 py-3.5 text-right flex items-center justify-end gap-1">
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => openEditModal(cat)}
-                          className="h-7 w-7 p-0 text-[#5F5A5C] hover:text-[#6B1D2A] hover:bg-[#F4E7EA] cursor-pointer"
-                          title="Edit Category"
-                        >
-                          <Edit2 className="w-3.5 h-3.5" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => handleDeleteCategory(cat.id)}
-                          className="h-7 w-7 p-0 text-[#5F5A5C] hover:text-[#4A0E1C] hover:bg-[#F4E7EA] cursor-pointer"
-                          title="Delete Category"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </Button>
-                      </td>
+                      {isAdmin && (
+                        <td className="px-5 py-3.5 text-right flex items-center justify-end gap-1">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => openEditModal(cat)}
+                            className="h-7 w-7 p-0 text-[#5F5A5C] hover:text-[#6B1D2A] hover:bg-[#F4E7EA] cursor-pointer"
+                            title="Edit Category"
+                          >
+                            <Edit2 className="w-3.5 h-3.5" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleDeleteCategory(cat.id)}
+                            className="h-7 w-7 p-0 text-[#5F5A5C] hover:text-[#4A0E1C] hover:bg-[#F4E7EA] cursor-pointer"
+                            title="Delete Category"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </Button>
+                        </td>
+                      )}
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="3" className="px-5 py-8 text-center text-[#5F5A5C] italic">
+                    <td colSpan={isAdmin ? 3 : 2} className="px-5 py-8 text-center text-[#5F5A5C] italic">
                       No classification categories created yet.
                     </td>
                   </tr>

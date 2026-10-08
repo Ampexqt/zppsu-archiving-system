@@ -34,6 +34,14 @@ import { useModal } from "../context/ModalContext";
 function DocumentCenter() {
   const toast = useToast();
   const modal = useModal();
+  const [currentUser, setCurrentUser] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("user") || "{}");
+    } catch {
+      return {};
+    }
+  });
+  const isAdmin = currentUser?.role === "Admin";
   const [files, setFiles] = useState([]);
   const [search, setSearch] = useState("");
   const [searchMode, setSearchMode] = useState("standard"); // "standard" or "ai"
@@ -176,6 +184,22 @@ function DocumentCenter() {
     } catch (error) {
       console.error(error);
       toast.error("Permanent delete failed.", "Error");
+    }
+  };
+
+  const handleRestore = async (id) => {
+    try {
+      const token = localStorage.getItem("token");
+      await axios.put(
+        `http://localhost:5000/api/files/restore/${id}`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      toast.success("Document restored from trash.", "Restored");
+      fetchFiles();
+    } catch (error) {
+      console.error(error);
+      toast.error(error.response?.data?.message || "Restore failed.", "Error");
     }
   };
 
@@ -425,50 +449,58 @@ function DocumentCenter() {
 
                             {!showTrash ? (
                               <>
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  onClick={() => {
-                                    setEditingFile(file);
-                                    setEditSubject(file.subject || file.title || "");
-                                    setEditDocumentType(file.document_type || "");
-                                    setEditStatus(file.status || "Active");
-                                  }}
-                                  className="h-7 w-7 p-0 text-[#5F5A5C] hover:text-[#6B1D2A] hover:bg-[#F4E7EA] cursor-pointer"
-                                  title="Edit Record"
-                                >
-                                  <Edit className="w-3.5 h-3.5" />
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  onClick={() => handleDelete(file.id)}
-                                  className="h-7 w-7 p-0 text-[#5F5A5C] hover:text-[#4A0E1C] hover:bg-[#F4E7EA] cursor-pointer"
-                                  title="Move to Trash"
-                                >
-                                  <Trash2 className="w-3.5 h-3.5" />
-                                </Button>
+                                {(isAdmin || file.uploaded_by === currentUser?.id) && (
+                                  <>
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={() => {
+                                        setEditingFile(file);
+                                        setEditSubject(file.subject || file.title || "");
+                                        setEditDocumentType(file.document_type || "");
+                                        setEditStatus(file.status || "Active");
+                                      }}
+                                      className="h-7 w-7 p-0 text-[#5F5A5C] hover:text-[#6B1D2A] hover:bg-[#F4E7EA] cursor-pointer"
+                                      title="Edit Record"
+                                    >
+                                      <Edit className="w-3.5 h-3.5" />
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={() => handleDelete(file.id)}
+                                      className="h-7 w-7 p-0 text-[#5F5A5C] hover:text-[#4A0E1C] hover:bg-[#F4E7EA] cursor-pointer"
+                                      title="Move to Trash"
+                                    >
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                    </Button>
+                                  </>
+                                )}
                               </>
                             ) : (
                               <>
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  onClick={() => handleQuickStatus(file.id, "Active")}
-                                  className="h-7 w-7 p-0 text-[#6B1D2A] hover:bg-[#F4E7EA] cursor-pointer"
-                                  title="Restore Document"
-                                >
-                                  <RotateCcw className="w-3.5 h-3.5" />
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  onClick={() => handlePermanentDelete(file.id)}
-                                  className="h-7 w-7 p-0 text-[#4A0E1C] hover:bg-[#F4E7EA] cursor-pointer"
-                                  title="Permanently Delete"
-                                >
-                                  <Trash2 className="w-3.5 h-3.5" />
-                                </Button>
+                                {isAdmin && (
+                                  <>
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={() => handleRestore(file.id)}
+                                      className="h-7 w-7 p-0 text-[#6B1D2A] hover:bg-[#F4E7EA] cursor-pointer"
+                                      title="Restore Document"
+                                    >
+                                      <RotateCcw className="w-3.5 h-3.5" />
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={() => handlePermanentDelete(file.id)}
+                                      className="h-7 w-7 p-0 text-[#4A0E1C] hover:bg-[#F4E7EA] cursor-pointer"
+                                      title="Permanently Delete"
+                                    >
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                    </Button>
+                                  </>
+                                )}
                               </>
                             )}
                           </div>

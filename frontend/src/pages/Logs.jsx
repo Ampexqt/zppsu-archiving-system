@@ -44,8 +44,17 @@ function Logs() {
     fetchLogs();
   }, []);
 
-  // Filter Logic for Table (Removed redundant page filters)
-  const filteredLogs = logs;
+  // Filter Logic for Table
+  const filteredLogs = logs.filter((log) => {
+    const term = searchEmail.toLowerCase().trim();
+    const matchesTerm =
+      !term ||
+      (log.user?.email && log.user.email.toLowerCase().includes(term)) ||
+      (log.user?.name && log.user.name.toLowerCase().includes(term)) ||
+      (log.description && log.description.toLowerCase().includes(term));
+    const matchesAction = !selectedAction || log.action === selectedAction;
+    return matchesTerm && matchesAction;
+  });
 
   // Unique Actions for Dropdown
   const uniqueActions = [...new Set(logs.map(log => log.action))].sort();
@@ -160,6 +169,38 @@ function Logs() {
             <Download className="w-4 h-4" />
             Export CSV
           </button>
+        </div>
+
+        {/* SEARCH & FILTER CONTROLS */}
+        <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
+          <div className="relative flex-1 w-full">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#5F5A5C]" />
+            <Input
+              type="text"
+              placeholder="Search by user email, name, or description keyword..."
+              value={searchEmail}
+              onChange={(e) => {
+                setSearchEmail(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="pl-10 h-10 text-xs rounded-xl border-[#E8E3E1] bg-[#FFFCF7] text-[#1D1A1B] placeholder-[#5F5A5C]/60 focus:border-[#6B1D2A]"
+            />
+          </div>
+          <div className="w-full sm:w-64">
+            <select
+              className="w-full h-10 px-3 rounded-xl border border-[#E8E3E1] bg-[#FFFCF7] text-xs font-medium text-[#1D1A1B] focus:outline-none focus:ring-2 focus:ring-[#6B1D2A]/20"
+              value={selectedAction}
+              onChange={(e) => {
+                setSelectedAction(e.target.value);
+                setCurrentPage(1);
+              }}
+            >
+              <option value="">All Action Types</option>
+              {uniqueActions.map((action) => (
+                <option key={action} value={action}>{action}</option>
+              ))}
+            </select>
+          </div>
         </div>
 
         {/* LOGS TABLE */}

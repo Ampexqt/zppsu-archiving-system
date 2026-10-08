@@ -178,6 +178,21 @@ function MasterlistReports() {
     link.download = `ZPPSU_${selectedDocType.replace(/\s+/g, '_')}_Masterlist.xlsx`;
     link.click();
     window.URL.revokeObjectURL(url);
+
+    try {
+      const token = localStorage.getItem("token");
+      await axios.post(
+        "http://localhost:5000/api/logs/track",
+        {
+          action: "EXPORT MASTERLIST",
+          description: `Exported Excel masterlist for ${selectedDocType} (${filteredReports.length} records)`,
+          module: "reports"
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+    } catch (trackErr) {
+      console.error("Export tracking error:", trackErr);
+    }
   };
 
   return (

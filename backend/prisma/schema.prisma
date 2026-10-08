@@ -8,15 +8,19 @@ datasource db {
 }
 
 model users {
-  id         Int      @id @default(autoincrement())
-  name       String
-  email      String   @unique
-  password   String
-  role       String   @default("User")
-  created_at DateTime @default(now())
-
-  logs  logs[]
-  files files[]
+  id                       Int       @id @default(autoincrement())
+  name                     String
+  email                    String    @unique
+  password                 String
+  created_at               DateTime  @default(now())
+  role                     String    @default("User")
+  department               String?
+  is_active                Boolean   @default(true)
+  last_login               DateTime?
+  phone_number             String?
+  requires_password_change Boolean   @default(false)
+  files                    files[]
+  logs                     logs[]
 }
 
 model categories {
@@ -26,32 +30,31 @@ model categories {
 }
 
 model files {
-  id            Int      @id @default(autoincrement())
-  title         String
-  category      String
-  file_name     String?
-  file_path     String?
-  uploaded_by   Int?
-  file_box_id   Int?
-  access_code   String?
-  subject       String?
-  document_type String?
-  file_type     String?
-  is_generated  Boolean @default(false)
+  id             Int         @id @default(autoincrement())
+  title          String
+  category       String
+  file_name      String?
+  file_path      String?
+  uploaded_by    Int?
+  created_at     DateTime    @default(now())
+  access_code    String?
+  document_type  String?
+  memo_date      DateTime?
+  received_date  DateTime?
+  subject        String?
+  dynamic_data   Json?
+  document_id    String?
+  status         String?     @default("Active")
+  is_deleted     Boolean     @default(false)
+  ocr_text       String?
+  file_box_id    Int?
+  file_type      String?
   generated_type String?
-  dynamic_data  Json?
-  ocr_text      String?
-  document_id   String?
-  memo_date     DateTime?
-  received_date DateTime?
-  created_at    DateTime @default(now())
-  status        String? @default("Active")
-  is_deleted    Boolean @default(false)
-  embedding     Float[] @default([])
-
-  user users? @relation(fields: [uploaded_by], references: [id])
-
-  file_box file_boxes? @relation("FileBoxFiles", fields: [file_box_id], references: [id])
+  is_generated   Boolean     @default(false)
+  embedding      Float[]     @default([])
+  file_box       file_boxes? @relation("FileBoxFiles", fields: [file_box_id], references: [id])
+  user           users?      @relation(fields: [uploaded_by], references: [id])
+  logs           logs[]
 }
 
 model logs {
@@ -60,29 +63,31 @@ model logs {
   description String
   user_id     Int?
   created_at  DateTime @default(now())
-
-  user users? @relation(fields: [user_id], references: [id])
+  ip_address  String?
+  module      String?
+  document_id String?
+  file_id     Int?
+  files       files?   @relation(fields: [file_id], references: [id], onDelete: Cascade)
+  user        users?   @relation(fields: [user_id], references: [id])
 }
 
 model cabinets {
-  id            Int      @id @default(autoincrement())
-  name          String
-  capacity      Int
-  status        String
-  created_at    DateTime @default(now())
-
-  file_boxes    file_boxes[] @relation("CabinetFileBoxes")
+  id         Int          @id @default(autoincrement())
+  name       String
+  capacity   Int
+  status     String
+  created_at DateTime     @default(now())
+  file_boxes file_boxes[] @relation("CabinetFileBoxes")
 }
 
 model file_boxes {
-  id            Int      @id @default(autoincrement())
-  name          String
-  cabinet_id    Int
-  capacity      Int
-  used_space    Int @default(0)
-  status        String
-  created_at    DateTime @default(now())
-
-  cabinet       cabinets @relation("CabinetFileBoxes", fields: [cabinet_id], references: [id])
-  files         files[] @relation("FileBoxFiles")
+  id         Int      @id @default(autoincrement())
+  name       String
+  cabinet_id Int
+  capacity   Int
+  used_space Int      @default(0)
+  status     String
+  created_at DateTime @default(now())
+  cabinet    cabinets @relation("CabinetFileBoxes", fields: [cabinet_id], references: [id])
+  files      files[]  @relation("FileBoxFiles")
 }

@@ -1,16 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import { 
   UploadCloud, 
   FilePlus, 
-  Box, 
-  Layers, 
   X, 
   FileText, 
   Loader2,
   ArrowRight,
-  Clock,
   CheckCircle2,
   FolderOpen
 } from "lucide-react";
@@ -20,6 +17,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import ShadcnSelect from "@/components/ui/ShadcnSelect";
 import PhysicalStoragePlacementCard from "../components/files/PhysicalStoragePlacementCard";
+import RecentFiledDocumentsBar from "../components/files/RecentFiledDocumentsBar";
+import UploadDocumentSection from "../components/files/UploadDocumentSection";
 import { documentCategories, getFieldsForDocumentType } from "@/utils/documentConfigs";
 import { useToast } from "../context/ToastContext";
 
@@ -34,7 +33,6 @@ function Files() {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadCabinet, setUploadCabinet] = useState("");
   const [uploadFileBox, setUploadFileBox] = useState("");
-  const [isDragOver, setIsDragOver] = useState(false);
 
   // REGISTER FORM STATE
   const [category, setCategory] = useState("");
@@ -43,6 +41,59 @@ function Files() {
   const [registerCabinet, setRegisterCabinet] = useState("");
   const [registerFileBox, setRegisterFileBox] = useState("");
   const [isRegistering, setIsRegistering] = useState(false);
+
+  // Derive all available document types with their parent category
+  const allDocumentTypeOptions = useMemo(() => {
+    const list = [];
+    Object.entries(documentCategories).forEach(([catName, docTypes]) => {
+      docTypes.forEach((docType) => {
+        list.push({
+          value: docType,
+          label: docType,
+          subtitle: catName,
+          category: catName,
+          searchKey: `${docType} ${catName}`,
+        });
+      });
+    });
+    return list;
+  }, []);
+
+  // Document types list: when a category is selected, prioritize that category's items first, while keeping all available
+  const documentTypeOptions = useMemo(() => {
+    if (!category) {
+      return allDocumentTypeOptions;
+    }
+    const matching = allDocumentTypeOptions.filter((opt) => opt.category === category);
+    const others = allDocumentTypeOptions.filter((opt) => opt.category !== category);
+    return [...matching, ...others];
+  }, [category, allDocumentTypeOptions]);
+
+  const handleDocumentTypeChange = (val) => {
+    setDocumentType(val);
+    setFormData({});
+    // Auto-detect and populate category if not set or mismatched
+    if (val) {
+      for (const [catName, docTypes] of Object.entries(documentCategories)) {
+        if (docTypes.includes(val)) {
+          setCategory(catName);
+          break;
+        }
+      }
+    }
+  };
+
+  const handleCategoryChange = (val) => {
+    setCategory(val);
+    // If the currently selected document type is not in the newly selected category, reset it
+    if (val && documentType) {
+      const allowed = documentCategories[val] || [];
+      if (!allowed.includes(documentType)) {
+        setDocumentType("");
+        setFormData({});
+      }
+    }
+  };
 
   const selectedFields = getFieldsForDocumentType(documentType);
 
@@ -76,15 +127,6 @@ function Files() {
     fetchRecentFiles();
     fetchInventories();
   }, []);
-
-  // DRAG & DROP HANDLERS
-  const handleDrop = (e) => {
-    e.preventDefault();
-    setIsDragOver(false);
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      setFile(e.dataTransfer.files[0]);
-    }
-  };
 
   // HANDLE UPLOAD
   const handleUpload = async (e) => {
@@ -177,28 +219,6 @@ function Files() {
     }
   };
 
-  // Cabinet & File Box Options
-  const cabinetOptions = inventories.map((inv) => ({
-    value: String(inv.id),
-    label: inv.name || inv.cabinet_name || `Cabinet ${inv.id}`,
-  }));
-
-  const uploadBoxOptions = (
-    inventories.find((inv) => String(inv.id) === String(uploadCabinet))?.file_boxes || []
-  ).map((box) => ({
-    value: String(box.id),
-    label: box.name,
-    subtitle: `(${box.used_space || 0}/${box.capacity || 0})`,
-  }));
-
-  const registerBoxOptions = (
-    inventories.find((inv) => String(inv.id) === String(registerCabinet))?.file_boxes || []
-  ).map((box) => ({
-    value: String(box.id),
-    label: box.name,
-    subtitle: `(${box.used_space || 0}/${box.capacity || 0})`,
-  }));
-
   return (
     <div className="space-y-6 font-sans max-w-5xl mx-auto">
       {/* PAGE HEADER */}
@@ -277,139 +297,63 @@ function Files() {
         <div className="p-6 sm:p-8">
           {/* ================= MODE 1: UPLOAD ================= */}
           {mode === "upload" && (
-            <form onSubmit={handleUpload} className="space-y-6">
-              {/* DRAG AND DROP ZONE */}
-              <div
-                onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
-                onDragLeave={() => setIsDragOver(false)}
-                onDrop={handleDrop}
-                onClick={() => document.getElementById("main-file-upload")?.click()}
-                className={cn(
-                  "border-2 border-dashed rounded-2xl p-8 transition-all flex flex-col items-center justify-center text-center cursor-pointer space-y-3",
-                  isDragOver ? "border-[#6B1D2A] bg-[#F4E7EA]/40" : "border-[#E8E3E1] bg-[#FFFCF7] hover:border-[#6B1D2A]/60"
-                )}
-              >
-                <input
-                  id="main-file-upload"
-                  type="file"
-                  accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png"
-                  onChange={(e) => setFile(e.target.files?.[0] || null)}
-                  className="hidden"
-                />
-
-                <div className="w-14 h-14 rounded-2xl bg-[#F4E7EA] border border-[#E8E3E1] flex items-center justify-center text-[#6B1D2A] shadow-xs">
-                  <UploadCloud className="w-7 h-7 stroke-[2]" />
-                </div>
-
-                {file ? (
-                  <div className="space-y-1.5">
-                    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#F4E7EA] border border-[#E8E3E1]">
-                      <FileText className="w-4 h-4 text-[#6B1D2A]" />
-                      <span className="font-bold text-xs text-[#1D1A1B]">{file.name}</span>
-                      <span className="text-[11px] text-[#5F5A5C]">
-                        ({(file.size / 1024 / 1024).toFixed(2)} MB)
-                      </span>
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setFile(null);
-                        }}
-                        className="p-1 rounded-md text-[#5F5A5C] hover:text-[#6B1D2A] hover:bg-[#FFFCF7] ml-1 transition-colors"
-                      >
-                        <X className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                    <p className="text-[11px] text-[#6B1D2A] font-semibold flex items-center justify-center gap-1">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-[#6B1D2A]" /> File ready to be indexed
-                    </p>
-                  </div>
-                ) : (
-                  <div className="space-y-1">
-                    <p className="text-sm font-bold text-[#1D1A1B]">
-                      Choose a document or drag it here
-                    </p>
-                    <p className="text-xs text-[#5F5A5C]">
-                      PDF, DOCX, PPTX, or JPG format up to 10MB
-                    </p>
-                    <span className="inline-block mt-2 text-xs font-bold text-[#6B1D2A] bg-[#F4E7EA] px-3 py-1 rounded-lg">
-                      Browse Computer
-                    </span>
-                  </div>
-                )}
-              </div>
-
-              {/* PHYSICAL STORAGE PLACEMENT (CUSTOMIZABLE CABINET / STEEL / SHELVES / ARCHFILE) */}
-              <PhysicalStoragePlacementCard
-                selectedCabinetId={uploadCabinet}
-                onCabinetChange={setUploadCabinet}
-                selectedBoxId={uploadFileBox}
-                onBoxChange={setUploadFileBox}
-                cabinets={inventories}
-              />
-
-              {/* ACTION BUTTON */}
-              <Button
-                type="submit"
-                disabled={!file || isUploading}
-                className="w-full bg-[#6B1D2A] text-[#FFFCF7] hover:bg-[#8B3545] py-6 rounded-xl font-bold text-sm shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
-              >
-                {isUploading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Processing Document & OCR Indexing...</span>
-                  </>
-                ) : (
-                  <>
-                    <UploadCloud className="w-5 h-5" />
-                    <span>Upload & File Document</span>
-                  </>
-                )}
-              </Button>
-            </form>
+            <UploadDocumentSection
+              file={file}
+              setFile={setFile}
+              uploadCabinet={uploadCabinet}
+              setUploadCabinet={setUploadCabinet}
+              uploadFileBox={uploadFileBox}
+              setUploadFileBox={setUploadFileBox}
+              inventories={inventories}
+              isUploading={isUploading}
+              onUpload={handleUpload}
+            />
           )}
 
           {/* ================= MODE 2: REGISTER METADATA ================= */}
           {mode === "register" && (
             <form onSubmit={handleRegister} className="space-y-5">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {/* CATEGORY SELECT (SHADCN SELECT) */}
+                {/* CATEGORY SELECT (OPTIONAL QUICK FILTER) */}
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-[#1D1A1B] uppercase">Category</label>
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold text-[#1D1A1B] uppercase">Classification / Category</label>
+                    {category && (
+                      <span className="text-[10px] font-semibold text-[#6B1D2A] bg-[#F4E7EA] px-2 py-0.5 rounded-md">
+                        Filtered
+                      </span>
+                    )}
+                  </div>
                   <ShadcnSelect
                     value={category}
-                    onChange={(val) => {
-                      setCategory(val);
-                      setDocumentType("");
-                      setFormData({});
-                    }}
+                    onChange={handleCategoryChange}
+                    allowClear={true}
+                    clearLabel="All Classifications"
                     options={Object.keys(documentCategories).map((cat) => ({
                       value: cat,
                       label: cat,
                     }))}
-                    placeholder="Select Classification"
+                    placeholder="All Classifications (Optional filter)"
                     className="h-11"
                   />
                 </div>
 
-                {/* DOCUMENT TYPE SELECT (SHADCN SELECT WITH FILTER) */}
+                {/* DOCUMENT TYPE SELECT (ALWAYS SCROLLABLE & SEARCHABLE ACROSS ALL 60+ TYPES) */}
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-[#1D1A1B] uppercase">Document Type</label>
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold text-[#1D1A1B] uppercase">Document Type</label>
+                    <span className="text-[10px] text-[#5F5A5C]">
+                      {category ? `${documentCategories[category]?.length || 0} in ${category} • 63 total` : `All ${documentTypeOptions.length} available`}
+                    </span>
+                  </div>
                   <ShadcnSelect
                     value={documentType}
-                    onChange={(val) => {
-                      setDocumentType(val);
-                      setFormData({});
-                    }}
-                    disabled={!category}
-                    options={(category && documentCategories[category] || []).map((doc) => ({
-                      value: doc,
-                      label: doc,
-                    }))}
-                    placeholder="Select Document Type"
+                    onChange={handleDocumentTypeChange}
+                    options={documentTypeOptions}
+                    placeholder={category ? `Select Document Type (${category})...` : "Select or search Document Type (all 63 types)..."}
                     searchable={true}
-                    searchPlaceholder="Filter document types..."
-                    popoverWidth="w-72"
+                    searchPlaceholder="Search document type or classification..."
+                    popoverWidth="w-80 sm:w-96"
                     className="h-11"
                   />
                 </div>
@@ -473,58 +417,7 @@ function Files() {
         </div>
 
         {/* RECENTLY FILED DOCUMENTS ACTIVITY BAR */}
-        {recentRecords.length > 0 && (
-          <div className="border-t border-[#E8E3E1] bg-[#FCFAF8] p-5 sm:p-6">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-[#6B1D2A]" />
-                <span className="text-xs font-bold text-[#1D1A1B] uppercase tracking-wider">
-                  Recently Filed Documents
-                </span>
-              </div>
-              <Link
-                to="/document-center"
-                className="text-xs font-bold text-[#6B1D2A] hover:underline flex items-center gap-1"
-              >
-                <span>View all in Document Center</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-              {recentRecords.slice(0, 4).map((rec) => (
-                <div
-                  key={rec.id}
-                  className="p-3 rounded-xl bg-[#FFFCF7] border border-[#E8E3E1] shadow-xs flex flex-col justify-between"
-                >
-                  <div>
-                    <span className="text-[10px] font-bold text-[#6B1D2A] block uppercase truncate">
-                      {rec.document_type || "Document"}
-                    </span>
-                    <p className="text-xs font-bold text-[#1D1A1B] truncate mt-0.5" title={rec.subject || rec.title}>
-                      {rec.subject || rec.title || "Untitled Document"}
-                    </p>
-                  </div>
-                  <div className="mt-2.5 pt-2 border-t border-[#E8E3E1]/60 flex items-center justify-between text-[10px]">
-                    <span className="font-mono text-[#5F5A5C]">
-                      {rec.access_code && rec.access_code !== "N/A" ? rec.access_code : rec.document_id || `ID-${rec.id}`}
-                    </span>
-                    {rec.file_box?.cabinet?.name ? (
-                      <span className="text-[#6B1D2A] font-semibold flex items-center gap-1">
-                        <Box className="w-3 h-3 text-[#6B1D2A]" />
-                        {rec.file_box.name}
-                      </span>
-                    ) : (
-                      <span className="text-[#A87818] font-semibold">
-                        Awaiting Box
-                      </span>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+        <RecentFiledDocumentsBar recentRecords={recentRecords} />
       </Card>
     </div>
   );

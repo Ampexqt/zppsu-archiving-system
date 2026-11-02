@@ -1,5 +1,5 @@
 import React from "react";
-import { Search, SearchCheck, FilterX, Trash2 } from "lucide-react";
+import { Search, SearchCheck, FilterX, Trash2, Download } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -27,6 +27,8 @@ export default function DocumentFiltersBar({
   showTrash,
   setShowTrash,
   trashCount = 0,
+  onExport,
+  isExporting = false,
 }) {
   return (
     <Card className="border border-[#E8E3E1] shadow-xs bg-[#FFFCF7] rounded-xl">
@@ -125,6 +127,21 @@ export default function DocumentFiltersBar({
               >
                 <FilterX className="w-3.5 h-3.5" />
                 <span>Clear</span>
+              </Button>
+            )}
+
+            {/* EXPORT EXCEL CATALOG BUTTON */}
+            {onExport && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onExport}
+                disabled={isExporting}
+                className="h-10 px-3 rounded-xl text-xs font-bold bg-[#FFFCF7] text-[#6B1D2A] border-[#6B1D2A]/30 hover:bg-[#F4E7EA] hover:border-[#6B1D2A] cursor-pointer transition-colors inline-flex items-center gap-1.5"
+                title="Export catalog records to Excel (.xlsx)"
+              >
+                <Download className="w-3.5 h-3.5 text-[#6B1D2A]" />
+                <span>{isExporting ? "Exporting..." : "Export Catalog"}</span>
               </Button>
             )}
 

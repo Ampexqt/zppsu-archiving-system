@@ -6,6 +6,7 @@ import DocumentFiltersBar from "../components/documents/DocumentFiltersBar";
 import DocumentTable from "../components/documents/DocumentTable";
 import DocumentEditModal from "../components/modals/DocumentEditModal";
 import DocumentViewModal from "../components/modals/DocumentViewModal";
+import { exportDocumentCatalog } from "../utils/documentCatalogExporter";
 import { useToast } from "../context/ToastContext";
 import { useModal } from "../context/ModalContext";
 
@@ -41,6 +42,7 @@ export default function DocumentCenter() {
   const [viewingFile, setViewingFile] = useState(null);
   const [editingFile, setEditingFile] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -237,6 +239,24 @@ export default function DocumentCenter() {
     }
   };
 
+  const handleExportCatalog = async () => {
+    if (filteredFiles.length === 0) {
+      toast.info("No documents to export matching current filters.", "Export Catalog");
+      return;
+    }
+    try {
+      setIsExporting(true);
+      const filterSummary = hasActiveFilters ? "Filtered Selection" : "Complete Archive";
+      await exportDocumentCatalog(filteredFiles, filterSummary);
+      toast.success(`Exported ${filteredFiles.length} document records to Excel (.xlsx).`, "Catalog Exported");
+    } catch (error) {
+      console.error("Export error:", error);
+      toast.error(error.message || "Failed to generate document export.", "Export Failed");
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   const clearAllFilters = () => {
     setSearch("");
     setSelectedYear("");
@@ -319,6 +339,8 @@ export default function DocumentCenter() {
           showTrash={showTrash}
           setShowTrash={setShowTrash}
           trashCount={trashCount}
+          onExport={handleExportCatalog}
+          isExporting={isExporting}
         />
 
         {/* DOCUMENTS DATA TABLE */}

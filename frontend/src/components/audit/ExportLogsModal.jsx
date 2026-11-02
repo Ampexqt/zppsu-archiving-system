@@ -94,10 +94,14 @@ export default function ExportLogsModal({
           return `${log.id},"${log.user?.email || "System"}","${log.user?.name || "System"}",${log.action},${desc},${dateStr},${timeStr}`;
         });
         const blob = new Blob([csvHeader + csvRows.join("\n")], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
+        link.href = url;
         link.download = `ZPPSU_Audit_Logs_${new Date().toISOString().split("T")[0]}.csv`;
+        document.body.appendChild(link);
         link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
         setIsExporting(false);
         onClose();
         return;
@@ -390,7 +394,7 @@ export default function ExportLogsModal({
               className="h-9 px-3.5 rounded-xl text-xs font-semibold text-[#1D1A1B] bg-[#FFFCF7] border-[#E8E3E1] hover:bg-[#F4E7EA] cursor-pointer inline-flex items-center gap-1.5 disabled:opacity-50"
             >
               <Download className="w-3.5 h-3.5 text-[#5F5A5C]" />
-              <span>CSV</span>
+              <span>Download CSV</span>
             </Button>
             <Button
               type="button"

@@ -1,40 +1,45 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import DashboardLayout from "../components/layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { Search, Download, Calendar, Filter, Activity, X, FileSpreadsheet } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@/components/ui/dialog";
-import ExcelJS from "exceljs";
+import { Button } from "@/components/ui/button";
+import { 
+  Search, 
+  FileSpreadsheet, 
+  History, 
+  Calendar, 
+  Clock, 
+  User, 
+  FilterX, 
+  ChevronLeft, 
+  ChevronRight,
+  ShieldCheck,
+  Shield,
+  Layers
+} from "lucide-react";
+import ShadcnSelect from "@/components/ui/ShadcnSelect";
+import LogSummaryCards from "../components/audit/LogSummaryCards";
+import ExportLogsModal from "../components/audit/ExportLogsModal";
 import { api } from "../services/api";
 
-function Logs() {
+export default function Logs() {
   const [logs, setLogs] = useState([]);
   
   // Filter States
-  const [searchEmail, setSearchEmail] = useState("");
+  const [search, setSearch] = useState("");
   const [selectedAction, setSelectedAction] = useState("");
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
-
-  // Export Modal States
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
-  const [exportUserFilter, setExportUserFilter] = useState("all");
-  const [exportActionType, setExportActionType] = useState("all");
-  const [exportDateRange, setExportDateRange] = useState("all");
-  const [exportStartDate, setExportStartDate] = useState("");
-  const [exportEndDate, setExportEndDate] = useState("");
 
   // Pagination States
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(10);
+  const itemsPerPage = 10;
 
   const fetchLogs = async () => {
     try {
       const response = await api.get("/api/logs");
-      setLogs(response.data);
+      setLogs(response.data || []);
     } catch (error) {
-      console.error(error);
+      console.error("FETCH LOGS ERROR:", error);
     }
   };
 
@@ -44,564 +49,377 @@ function Logs() {
 
   // Filter Logic for Table
   const filteredLogs = logs.filter((log) => {
-    const term = searchEmail.toLowerCase().trim();
+    const term = search.toLowerCase().trim();
     const matchesTerm =
       !term ||
       (log.user?.email && log.user.email.toLowerCase().includes(term)) ||
       (log.user?.name && log.user.name.toLowerCase().includes(term)) ||
-      (log.description && log.description.toLowerCase().includes(term));
+      (log.description && log.description.toLowerCase().includes(term)) ||
+      (log.action && log.action.toLowerCase().includes(term));
+
     const matchesAction = !selectedAction || log.action === selectedAction;
     return matchesTerm && matchesAction;
   });
 
-  // Unique Actions for Dropdown
-  const uniqueActions = [...new Set(logs.map(log => log.action))].sort();
-  
-  // Unique Users for Export Dropdown
+  // Unique Actions for Filter Dropdown
+  const uniqueActions = [...new Set(logs.map((log) => log.action).filter(Boolean))].sort();
+
+  // Unique Users for Export
   const uniqueUsersMap = new Map();
-  logs.forEach(log => {
-    const email = log.user?.email || "System";
+  logs.forEach((log) => {
+    const email = log.user?.email || "System Service";
     if (!uniqueUsersMap.has(email)) {
       uniqueUsersMap.set(email, log.user?.name ? `${log.user.name} (${email})` : email);
     }
   });
-  const uniqueUsers = Array.from(uniqueUsersMap.entries()).map(([email, label]) => ({ email, label })).sort((a, b) => a.label.localeCompare(b.label));
+  const uniqueUsers = Array.from(uniqueUsersMap.entries())
+    .map(([email, label]) => ({ email, label }))
+    .sort((a, b) => a.label.localeCompare(b.label));
 
   // Pagination Logic
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentLogs = filteredLogs.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(filteredLogs.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredLogs.length / itemsPerPage) || 1;
+  const paginatedLogs = filteredLogs.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
-  // Handle Export (Excel .xlsx with professional styling, or CSV fallback)
-  const handleExport = async (format = "xlsx") => {
-    let exportData = logs.filter((log) => {
-      const logDate = new Date(log.created_at);
-      
-      // Email Match
-      const emailMatch = exportUserFilter === "all" || 
-        (log.user?.email || "System") === exportUserFilter;
-        
-      // Action Match
-      const actionMatch = exportActionType === "all" || log.action === exportActionType;
-      
-      // Date Match
-      let dateMatch = true;
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, selectedAction]);
 
-      if (exportDateRange === "today") {
-        if (logDate < today) dateMatch = false;
-      } else if (exportDateRange === "7_days") {
-        const sevenDaysAgo = new Date(today);
-        sevenDaysAgo.setDate(today.getDate() - 7);
-        if (logDate < sevenDaysAgo) dateMatch = false;
-      } else if (exportDateRange === "1_month") {
-        const oneMonthAgo = new Date(today);
-        oneMonthAgo.setMonth(today.getMonth() - 1);
-        if (logDate < oneMonthAgo) dateMatch = false;
-      } else if (exportDateRange === "custom") {
-        if (exportStartDate) {
-          const start = new Date(exportStartDate);
-          start.setHours(0, 0, 0, 0);
-          if (logDate < start) dateMatch = false;
-        }
-        if (exportEndDate) {
-          const end = new Date(exportEndDate);
-          end.setHours(23, 59, 59, 999);
-          if (logDate > end) dateMatch = false;
-        }
+  // Metric counts
+  const securityCount = logs.filter((l) =>
+    ["LOGIN", "LOGOUT", "PROMOTE USER", "DEMOTE USER", "RESET PASSWORD", "DELETE USER"].includes(l.action)
+  ).length;
+
+  const filingCount = logs.filter((l) =>
+    ["VIEW", "UPLOAD", "EDIT", "FILE BOX ASSIGNMENT", "MOVE", "RESTORE"].includes(l.action)
+  ).length;
+
+  const deleteCount = logs.filter((l) =>
+    ["DELETE", "PERMANENT DELETE", "DELETE USER"].includes(l.action)
+  ).length;
+
+  // Helper to format descriptions and highlight document identifiers
+  const renderFormattedDescription = (desc) => {
+    if (!desc) return "No event description available.";
+    
+    // Highlight codes like (MEMO-2026-0005) or ACC-2026-0015
+    const parts = desc.split(/(\([A-Z0-9_-]+\)|to box [A-Za-z0-9_-]+)/g);
+    return parts.map((part, idx) => {
+      if (part.startsWith("(") && part.endsWith(")")) {
+        return (
+          <span 
+            key={idx} 
+            className="font-mono text-[10px] font-bold text-[#6B1D2A] bg-[#F4E7EA]/70 border border-[#E8E3E1] px-1.5 py-0.5 rounded mx-1 inline-block"
+          >
+            {part.slice(1, -1)}
+          </span>
+        );
       }
-
-      return emailMatch && actionMatch && dateMatch;
+      if (part.startsWith("to box ")) {
+        return (
+          <span key={idx} className="font-semibold text-[#1D1A1B] underline decoration-[#C99A2E]">
+            {part}
+          </span>
+        );
+      }
+      return <span key={idx}>{part}</span>;
     });
+  };
 
-    if (exportData.length === 0) {
-      alert("No logs match the selected export criteria.");
-      return;
+  // Helper to render semantic action badges matching 11-color palette
+  const renderActionBadge = (action) => {
+    if (!action) return null;
+    const act = action.toUpperCase();
+
+    // Destructive
+    if (act.includes("DELETE")) {
+      return (
+        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#F4E7EA] text-[#4A0E1C] border border-[#E8E3E1] whitespace-nowrap">
+          {action}
+        </span>
+      );
     }
-
-    if (format === "csv") {
-      // Clean CSV with UTF-8 BOM so Excel opens special characters correctly
-      const headers = ["No.", "Date", "Time", "User Email", "User Name", "Action", "Description"];
-      const rows = exportData.map((log, idx) => [
-        idx + 1,
-        new Date(log.created_at).toLocaleDateString(),
-        new Date(log.created_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }),
-        `"${(log.user?.email || "System").replace(/"/g, '""')}"`,
-        `"${(log.user?.name || "System Automated").replace(/"/g, '""')}"`,
-        `"${log.action.replace(/"/g, '""')}"`,
-        `"${(log.description || "").replace(/"/g, '""')}"`
-      ]);
-
-      const csvContent = "\uFEFF" + [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
-      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-      const link = document.createElement("a");
-      const url = URL.createObjectURL(blob);
-      link.setAttribute("href", url);
-      link.setAttribute("download", `ZPPSU_Audit_Trails_${new Date().toISOString().split("T")[0]}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      setIsExportModalOpen(false);
-      return;
+    // Security & Privilege changes
+    if (act.includes("PROMOTE") || act.includes("DEMOTE") || act.includes("PASSWORD")) {
+      return (
+        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#F2DFB0] text-[#A87818] border border-[#C99A2E] whitespace-nowrap">
+          {action}
+        </span>
+      );
     }
-
-    // EXCEL (.XLSX) WITH PROFESSIONAL UNIVERSITY DESIGN & GENEROUS COLUMN WIDTHS
-    try {
-      const workbook = new ExcelJS.Workbook();
-      workbook.creator = "ZPPSU Archiving System";
-      workbook.lastModifiedBy = "ZPPSU Guidance Office";
-      workbook.created = new Date();
-      workbook.modified = new Date();
-
-      const sheet = workbook.addWorksheet("Audit Trails", {
-        views: [{ showGridLines: true }]
-      });
-
-      // 1. Institution Header Title (Row 1)
-      sheet.mergeCells("A1:G1");
-      const headerTitle = sheet.getCell("A1");
-      headerTitle.value = "ZAMBOANGA PENINSULA POLYTECHNIC STATE UNIVERSITY";
-      headerTitle.font = { name: "Calibri", size: 14, bold: true, color: { argb: "FFFFFFFF" } };
-      headerTitle.fill = {
-        type: "pattern",
-        pattern: "solid",
-        fgColor: { argb: "FF4A0E1C" } // University Dark Maroon
-      };
-      headerTitle.alignment = { horizontal: "center", vertical: "middle" };
-      sheet.getRow(1).height = 32;
-
-      // 2. Subtitle Banner (Row 2)
-      sheet.mergeCells("A2:G2");
-      const subTitle = sheet.getCell("A2");
-      subTitle.value = "OFFICE OF THE GUIDANCE SERVICES — SYSTEM AUDIT & ACTIVITY TRAILS";
-      subTitle.font = { name: "Calibri", size: 11, bold: true, color: { argb: "FFFFFFFF" } };
-      subTitle.fill = {
-        type: "pattern",
-        pattern: "solid",
-        fgColor: { argb: "FF6B1D2A" } // Secondary Maroon
-      };
-      subTitle.alignment = { horizontal: "center", vertical: "middle" };
-      sheet.getRow(2).height = 24;
-
-      // 3. Metadata Information Bar (Row 3)
-      sheet.mergeCells("A3:G3");
-      const metaBar = sheet.getCell("A3");
-      const filterSummary = `Generated: ${new Date().toLocaleString()}  |  User Filter: ${exportUserFilter === "all" ? "All Users" : exportUserFilter}  |  Action Filter: ${exportActionType === "all" ? "All Actions" : exportActionType}  |  Period: ${exportDateRange.toUpperCase()}`;
-      metaBar.value = filterSummary;
-      metaBar.font = { name: "Calibri", size: 9, italic: true, color: { argb: "FF4B5563" } };
-      metaBar.fill = {
-        type: "pattern",
-        pattern: "solid",
-        fgColor: { argb: "FFF4E7EA" } // Soft Warm Accent
-      };
-      metaBar.alignment = { horizontal: "center", vertical: "middle" };
-      sheet.getRow(3).height = 20;
-
-      // Row 4: Spacer
-      sheet.getRow(4).height = 8;
-
-      // 4. Column Headers (Row 5)
-      const headers = [
-        "NO.",
-        "DATE",
-        "TIME",
-        "USER / EMAIL",
-        "USER NAME",
-        "ACTION",
-        "DESCRIPTION / EVENT DETAILS"
-      ];
-
-      const headerRow = sheet.getRow(5);
-      headers.forEach((h, idx) => {
-        const cell = headerRow.getCell(idx + 1);
-        cell.value = h;
-        cell.font = { name: "Calibri", size: 10, bold: true, color: { argb: "FFFFFFFF" } };
-        cell.fill = {
-          type: "pattern",
-          pattern: "solid",
-          fgColor: { argb: "FF4A0E1C" } // Dark Maroon
-        };
-        cell.alignment = {
-          horizontal: ["NO.", "DATE", "TIME", "ACTION"].includes(h) ? "center" : "left",
-          vertical: "middle",
-          wrapText: true
-        };
-        cell.border = {
-          top: { style: "thin", color: { argb: "FF2D0710" } },
-          left: { style: "thin", color: { argb: "FF2D0710" } },
-          bottom: { style: "medium", color: { argb: "FFC99A2E" } }, // Gold Accent Line
-          right: { style: "thin", color: { argb: "FF2D0710" } }
-        };
-      });
-      headerRow.height = 28;
-
-      // 5. Data Rows (Row 6 onwards)
-      exportData.forEach((log, index) => {
-        const rowIndex = 6 + index;
-        const row = sheet.getRow(rowIndex);
-        
-        const logDate = new Date(log.created_at);
-        const isEven = index % 2 === 0;
-        const rowBgColor = isEven ? "FFFFFFFF" : "FFFDFBF7"; // Gentle zebra striping
-
-        const rowValues = [
-          index + 1,
-          logDate.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" }),
-          logDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true }),
-          log.user?.email || "System Auto",
-          log.user?.name || "System Automated",
-          log.action,
-          log.description || "N/A"
-        ];
-
-        rowValues.forEach((val, colIdx) => {
-          const cell = row.getCell(colIdx + 1);
-          cell.value = val;
-          cell.font = { name: "Calibri", size: 10, color: { argb: "FF1F2937" } };
-          
-          // Action badge styling
-          if (colIdx === 5) {
-            cell.font = { name: "Calibri", size: 9.5, bold: true, color: { argb: "FF6B1D2A" } };
-          }
-
-          cell.fill = {
-            type: "pattern",
-            pattern: "solid",
-            fgColor: { argb: rowBgColor }
-          };
-
-          cell.alignment = {
-            horizontal: [0, 1, 2, 5].includes(colIdx) ? "center" : "left",
-            vertical: "middle",
-            wrapText: colIdx === 6 // Wrap long descriptions cleanly
-          };
-
-          cell.border = {
-            top: { style: "thin", color: { argb: "FFE5E7EB" } },
-            left: { style: "thin", color: { argb: "FFE5E7EB" } },
-            bottom: { style: "thin", color: { argb: "FFE5E7EB" } },
-            right: { style: "thin", color: { argb: "FFE5E7EB" } }
-          };
-        });
-
-        row.height = 24;
-      });
-
-      // 6. Summary Footer Row
-      const summaryRowIdx = 6 + exportData.length;
-      sheet.mergeCells(`A${summaryRowIdx}:C${summaryRowIdx}`);
-      const summaryCell = sheet.getCell(`A${summaryRowIdx}`);
-      summaryCell.value = `TOTAL AUDIT ENTRIES: ${exportData.length}`;
-      summaryCell.font = { name: "Calibri", size: 10, bold: true, color: { argb: "FF4A0E1C" } };
-      summaryCell.fill = {
-        type: "pattern",
-        pattern: "solid",
-        fgColor: { argb: "FFF4E7EA" }
-      };
-      summaryCell.alignment = { horizontal: "center", vertical: "middle" };
-      sheet.getRow(summaryRowIdx).height = 24;
-
-      // Border across summary row
-      for (let c = 1; c <= 7; c++) {
-        const cell = sheet.getRow(summaryRowIdx).getCell(c);
-        if (!cell.fill || !cell.fill.fgColor) {
-          cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF4E7EA" } };
-        }
-        cell.border = {
-          top: { style: "medium", color: { argb: "FFC99A2E" } },
-          bottom: { style: "double", color: { argb: "FF4A0E1C" } }
-        };
-      }
-
-      // 7. Generous Auto-Fit Column Widths (Prevent tight/crammed columns)
-      sheet.getColumn(1).width = 8;   // NO.
-      sheet.getColumn(2).width = 16;  // DATE
-      sheet.getColumn(3).width = 14;  // TIME
-      sheet.getColumn(4).width = 34;  // USER / EMAIL (fits long university emails easily)
-      sheet.getColumn(5).width = 24;  // USER NAME
-      sheet.getColumn(6).width = 26;  // ACTION (fits 'FILE BOX ASSIGNMENT', 'LOGIN_FAILED', etc.)
-      sheet.getColumn(7).width = 65;  // DESCRIPTION / EVENT DETAILS (wide with wrap text)
-
-      // Generate binary buffer & trigger direct download
-      const buffer = await workbook.xlsx.writeBuffer();
-      const blob = new Blob([buffer], {
-        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-      });
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `ZPPSU_Audit_Trails_${new Date().toISOString().split("T")[0]}.xlsx`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-
-      // Track export activity
-      try {
-        await api.post("/api/logs/track", {
-          action: "EXPORT AUDIT LOGS",
-          description: `Exported Excel audit trail (${exportData.length} records)`,
-          module: "logs"
-        });
-      } catch (trackErr) {
-        console.error("Export tracking error:", trackErr);
-      }
-
-      setIsExportModalOpen(false);
-    } catch (err) {
-      console.error("Excel generation error:", err);
-      alert("Failed to generate Excel file. Please try again.");
+    // Filing & Assignment
+    if (act.includes("ASSIGNMENT") || act.includes("MOVE") || act.includes("UPLOAD")) {
+      return (
+        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#F4E7EA] text-[#6B1D2A] border border-[#E8E3E1] whitespace-nowrap">
+          {action}
+        </span>
+      );
     }
+    // Routine Read / Auth
+    return (
+      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#FFFCF7] text-[#5F5A5C] border border-[#E8E3E1] whitespace-nowrap">
+        {action}
+      </span>
+    );
   };
 
   return (
     <DashboardLayout>
-      <div className="space-y-6 font-sans">
-        {/* BANNER */}
-        <div className="bg-[#4A0E1C] rounded-2xl p-6 sm:p-8 text-[#FFFCF7] shadow-sm relative overflow-hidden flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="space-y-6">
+        {/* HERO BANNER */}
+        <div className="bg-[#4A0E1C] rounded-2xl p-6 sm:p-7 text-[#FFFCF7] border border-[#6B1D2A] shadow-xs relative overflow-hidden flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div className="relative z-10">
-            <span className="text-xs uppercase tracking-widest text-[#C99A2E] font-bold block mb-1">
+            <span className="text-[11px] uppercase tracking-widest text-[#C99A2E] font-bold block mb-1">
               ZPPSU Security & Compliance
             </span>
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight mb-2 text-[#FFFCF7]">Activity & Audit Logs</h1>
-            <p className="text-white/80 text-sm max-w-xl">
-              System audit trails for accountability and transparency. Monitor all user actions securely.
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight mb-1.5 text-[#FFFCF7]">
+              Activity & Audit Logs
+            </h1>
+            <p className="text-white/80 text-xs sm:text-sm max-w-xl">
+              System-wide immutable audit ledger for institutional transparency, records provenance, and access control.
             </p>
           </div>
           
-          <button 
+          <Button 
             onClick={() => setIsExportModalOpen(true)}
-            className="h-10 px-5 rounded-xl bg-[#C99A2E] text-[#1D1A1B] font-bold text-xs hover:bg-[#A87818] transition flex items-center justify-center gap-2 shadow-xs whitespace-nowrap z-10 cursor-pointer"
+            className="h-10 px-5 rounded-xl bg-[#C99A2E] text-[#1D1A1B] font-bold text-xs hover:bg-[#A87818] transition-all flex items-center justify-center gap-2 shadow-xs whitespace-nowrap z-10 cursor-pointer"
           >
             <FileSpreadsheet className="w-4 h-4" />
-            Export Logs
-          </button>
+            <span>Export Logs</span>
+          </Button>
         </div>
 
-        {/* SEARCH & FILTER CONTROLS */}
-        <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
-          <div className="relative flex-1 w-full">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#5F5A5C]" />
-            <Input
-              type="text"
-              placeholder="Search by user email, name, or description keyword..."
-              value={searchEmail}
-              onChange={(e) => {
-                setSearchEmail(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="pl-10 h-10 text-xs rounded-xl border-[#E8E3E1] bg-[#FFFCF7] text-[#1D1A1B] placeholder-[#5F5A5C]/60 focus:border-[#6B1D2A]"
-            />
-          </div>
-          <div className="w-full sm:w-64">
-            <select
-              className="w-full h-10 px-3 rounded-xl border border-[#E8E3E1] bg-[#FFFCF7] text-xs font-medium text-[#1D1A1B] focus:outline-none focus:ring-2 focus:ring-[#6B1D2A]/20"
-              value={selectedAction}
-              onChange={(e) => {
-                setSelectedAction(e.target.value);
-                setCurrentPage(1);
-              }}
-            >
-              <option value="">All Action Types</option>
-              {uniqueActions.map((action) => (
-                <option key={action} value={action}>{action}</option>
-              ))}
-            </select>
-          </div>
-        </div>
+        {/* SUMMARY STAT CARDS (PALETTE STRICT - NO GREEN) */}
+        <LogSummaryCards
+          totalLogs={logs.length}
+          securityCount={securityCount}
+          filingCount={filingCount}
+          deleteCount={deleteCount}
+        />
+
+        {/* SEARCH & FILTERS BAR */}
+        <Card className="border border-[#E8E3E1] shadow-xs bg-[#FFFCF7] rounded-xl">
+          <CardContent className="p-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="relative flex-1 w-full">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#5F5A5C]" />
+              <Input
+                type="text"
+                placeholder="Search audit trail by user email, action, or description..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-10 pr-10 h-10 text-xs rounded-xl border-[#E8E3E1] bg-[#FFFCF7] text-[#1D1A1B] placeholder-[#5F5A5C]/60 focus:border-[#6B1D2A]"
+              />
+              {search && (
+                <button
+                  type="button"
+                  onClick={() => setSearch("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#5F5A5C] hover:text-[#1D1A1B] p-1 rounded-md cursor-pointer"
+                  aria-label="Clear search"
+                >
+                  <FilterX className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+
+            <div className="flex items-center gap-2.5 w-full sm:w-auto justify-end">
+              <div className="w-full sm:w-56">
+                <ShadcnSelect
+                  value={selectedAction}
+                  onChange={setSelectedAction}
+                  options={[
+                    { value: "", label: "All Action Types" },
+                    ...uniqueActions.map((act) => ({ value: act, label: act })),
+                  ]}
+                  placeholder="All Action Types"
+                  popoverWidth="w-60"
+                  searchable={true}
+                  searchPlaceholder="Search actions..."
+                  className="h-10"
+                />
+              </div>
+
+              {(search || selectedAction) && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setSearch("");
+                    setSelectedAction("");
+                  }}
+                  className="h-10 px-2.5 rounded-xl text-xs font-semibold text-[#5F5A5C] hover:text-[#6B1D2A] hover:bg-[#F4E7EA] cursor-pointer inline-flex items-center gap-1 shrink-0"
+                  title="Clear filters"
+                >
+                  <FilterX className="w-3.5 h-3.5" />
+                  <span>Clear</span>
+                </Button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
 
         {/* LOGS TABLE */}
-        <Card className="border border-[#E8E3E1] shadow-xs overflow-hidden rounded-xl bg-[#FFFCF7]">
-          <div className="overflow-x-auto">
-            <Table className="w-full text-xs">
-              <TableHeader className="bg-[#F4E7EA] border-b border-[#E8E3E1]">
-                <TableRow className="border-b border-[#E8E3E1]">
-                  <TableHead className="font-bold text-[#5F5A5C] px-5 py-3.5 text-xs uppercase">User / Email</TableHead>
-                  <TableHead className="font-bold text-[#5F5A5C] px-5 py-3.5 text-xs uppercase">Action</TableHead>
-                  <TableHead className="font-bold text-[#5F5A5C] px-5 py-3.5 text-xs uppercase min-w-[300px]">Description</TableHead>
-                  <TableHead className="font-bold text-[#5F5A5C] px-5 py-3.5 text-xs uppercase">Date</TableHead>
-                  <TableHead className="font-bold text-[#5F5A5C] px-5 py-3.5 text-xs uppercase">Time</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody className="divide-y divide-[#E8E3E1]">
-                {currentLogs.length > 0 ? (
-                  currentLogs.map((log) => (
-                    <tr key={log.id} className="hover:bg-[#F4E7EA]/40 transition-colors">
-                      <td className="px-5 py-3.5 font-medium text-[#1D1A1B]">
-                        {log.user?.email || (
-                          <span className="text-[#5F5A5C] italic">System Auto</span>
-                        )}
-                      </td>
-                      <td className="px-5 py-3.5">
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#F4E7EA] text-[#6B1D2A] uppercase tracking-wide border border-[#E8E3E1]">
-                          {log.action}
-                        </span>
-                      </td>
-                      <td className="px-5 py-3.5 text-[#5F5A5C]">
-                        {log.description}
-                      </td>
-                      <td className="px-5 py-3.5 font-medium text-[#1D1A1B] whitespace-nowrap">
-                        {new Date(log.created_at).toLocaleDateString()}
-                      </td>
-                      <td className="px-5 py-3.5 text-[#5F5A5C] whitespace-nowrap">
-                        {new Date(log.created_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
+        <Card className="border border-[#E8E3E1] shadow-xs bg-[#FFFCF7] rounded-xl overflow-hidden">
+          <CardHeader className="border-b border-[#E8E3E1] py-3.5 px-6 flex flex-row items-center justify-between bg-[#FFFCF7]">
+            <div>
+              <CardTitle className="text-sm font-bold text-[#1D1A1B]">
+                Audit Trail Entries
+              </CardTitle>
+              <CardDescription className="text-xs text-[#5F5A5C]">
+                {filteredLogs.length} events logged in this verification cycle
+              </CardDescription>
+            </div>
+          </CardHeader>
+
+          <CardContent className="p-0">
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs text-left">
+                <thead className="text-[11px] text-[#5F5A5C] uppercase bg-[#FCFAF8] border-b border-[#E8E3E1]">
+                  <tr>
+                    <th className="px-5 py-3.5 font-bold tracking-wider">Timestamp</th>
+                    <th className="px-5 py-3.5 font-bold tracking-wider">Operator / User</th>
+                    <th className="px-5 py-3.5 font-bold tracking-wider">Action Type</th>
+                    <th className="px-5 py-3.5 font-bold tracking-wider">Activity Description</th>
+                    <th className="px-5 py-3.5 font-bold tracking-wider text-right">Source</th>
+                  </tr>
+                </thead>
+
+                <tbody className="divide-y divide-[#E8E3E1]">
+                  {paginatedLogs.length > 0 ? (
+                    paginatedLogs.map((log) => {
+                      const logDate = new Date(log.created_at);
+                      const userInitial = log.user?.name ? log.user.name.charAt(0).toUpperCase() : (log.user?.email ? log.user.email.charAt(0).toUpperCase() : "S");
+                      return (
+                        <tr key={log.id} className="hover:bg-[#F4E7EA]/30 transition-colors">
+                          {/* TIMESTAMP */}
+                          <td className="px-5 py-3.5 whitespace-nowrap">
+                            <div className="flex flex-col">
+                              <span className="font-semibold text-xs text-[#1D1A1B]">
+                                {logDate.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}
+                              </span>
+                              <span className="text-[10px] text-[#5F5A5C] font-mono mt-0.5">
+                                {logDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true })}
+                              </span>
+                            </div>
+                          </td>
+
+                          {/* OPERATOR / USER */}
+                          <td className="px-5 py-3.5 whitespace-nowrap">
+                            <div className="flex items-center gap-2.5">
+                              <div className="w-7 h-7 rounded-lg bg-[#F4E7EA] text-[#6B1D2A] border border-[#E8E3E1] flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs">
+                                {userInitial}
+                              </div>
+                              <div className="min-w-0 max-w-[200px]">
+                                <span className="font-bold text-xs text-[#1D1A1B] truncate block">
+                                  {log.user?.name || log.user?.email || "System Service"}
+                                </span>
+                                {log.user?.email && log.user?.name && (
+                                  <span className="text-[10px] text-[#5F5A5C] truncate block">
+                                    {log.user.email}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </td>
+
+                          {/* ACTION BADGE */}
+                          <td className="px-5 py-3.5 whitespace-nowrap">
+                            {renderActionBadge(log.action)}
+                          </td>
+
+                          {/* DESCRIPTION */}
+                          <td className="px-5 py-3.5 text-xs text-[#1D1A1B] leading-relaxed max-w-md">
+                            {renderFormattedDescription(log.description)}
+                          </td>
+
+                          {/* SOURCE / MODULE */}
+                          <td className="px-5 py-3.5 text-right whitespace-nowrap">
+                            <span className="font-mono text-[10px] text-[#5F5A5C] bg-[#FFFCF7] border border-[#E8E3E1] px-2 py-0.5 rounded shadow-2xs">
+                              {log.module || "Security"}
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  ) : (
+                    <tr>
+                      <td colSpan="5" className="px-5 py-12 text-center text-[#5F5A5C]">
+                        <div className="flex flex-col items-center justify-center space-y-2">
+                          <div className="w-10 h-10 rounded-xl bg-[#F4E7EA] border border-[#E8E3E1] flex items-center justify-center text-[#6B1D2A]">
+                            <History className="w-5 h-5" />
+                          </div>
+                          <span className="text-sm font-semibold text-[#1D1A1B]">No audit records found</span>
+                          <p className="text-xs text-[#5F5A5C] max-w-sm">
+                            {search || selectedAction 
+                              ? "No logged events match your filter criteria. Try clearing your filters." 
+                              : "No events recorded in the audit trail ledger."}
+                          </p>
+                          {(search || selectedAction) && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setSearch("");
+                                setSelectedAction("");
+                              }}
+                              className="mt-2 h-8 px-3 rounded-xl text-xs font-semibold text-[#1D1A1B] bg-[#FFFCF7] border-[#E8E3E1] hover:bg-[#F4E7EA] cursor-pointer"
+                            >
+                              Clear Search & Filters
+                            </Button>
+                          )}
+                        </div>
                       </td>
                     </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="5" className="h-48 text-center text-[#5F5A5C] italic">
-                      <div className="flex flex-col items-center justify-center text-[#5F5A5C]">
-                        <Activity className="w-10 h-10 mb-2 opacity-30 text-[#5F5A5C]" />
-                        <span className="font-medium text-xs">No activity logs found for your current filters.</span>
-                      </div>
-                    </td>
-                  </tr>
-                )}
-              </TableBody>
-            </Table>
-          </div>
-          {/* PAGINATION CONTROLS */}
-          {totalPages > 1 && (
-            <div className="flex flex-col sm:flex-row items-center justify-between px-5 py-3.5 border-t border-[#E8E3E1] bg-[#FFFCF7] gap-4 text-xs text-[#5F5A5C]">
-              <div>
-                Showing <span className="font-bold text-[#1D1A1B]">{indexOfFirstItem + 1}</span> to <span className="font-bold text-[#1D1A1B]">{Math.min(indexOfLastItem, filteredLogs.length)}</span> of <span className="font-bold text-[#1D1A1B]">{filteredLogs.length}</span> results
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* PAGINATION BAR */}
+            <div className="p-4 border-t border-[#E8E3E1] flex items-center justify-between bg-[#FFFCF7] text-xs text-[#5F5A5C]">
+              <span>
+                Showing {filteredLogs.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0} to{" "}
+                {Math.min(currentPage * itemsPerPage, filteredLogs.length)} of {filteredLogs.length} entries
+              </span>
+              <div className="flex items-center gap-1.5">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                   disabled={currentPage === 1}
-                  className="px-3 py-1.5 text-xs border border-[#E8E3E1] bg-[#FFFCF7] text-[#1D1A1B] rounded-lg disabled:opacity-50 hover:bg-[#F4E7EA] transition font-semibold cursor-pointer"
+                  className="h-8 px-3 text-xs bg-[#FFFCF7] border-[#E8E3E1] text-[#1D1A1B] hover:bg-[#F4E7EA] cursor-pointer disabled:opacity-40"
                 >
-                  Previous
-                </button>
-                <div className="text-xs text-[#1D1A1B] font-bold px-2">
-                  Page {currentPage} of {totalPages}
-                </div>
-                <button
-                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                  disabled={currentPage === totalPages}
-                  className="px-3 py-1.5 text-xs border border-[#E8E3E1] bg-[#FFFCF7] text-[#1D1A1B] rounded-lg disabled:opacity-50 hover:bg-[#F4E7EA] transition font-semibold cursor-pointer"
+                  <ChevronLeft className="w-3.5 h-3.5 mr-1" />
+                  <span>Prev</span>
+                </Button>
+                <span className="px-2 font-bold text-[#1D1A1B]">
+                  {currentPage} / {totalPages}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage >= totalPages}
+                  className="h-8 px-3 text-xs bg-[#FFFCF7] border-[#E8E3E1] text-[#1D1A1B] hover:bg-[#F4E7EA] cursor-pointer disabled:opacity-40"
                 >
-                  Next
-                </button>
+                  <span>Next</span>
+                  <ChevronRight className="w-3.5 h-3.5 ml-1" />
+                </Button>
               </div>
             </div>
-          )}
+          </CardContent>
         </Card>
+
+        {/* EXPORT LOGS MODAL */}
+        <ExportLogsModal
+          isOpen={isExportModalOpen}
+          onClose={() => setIsExportModalOpen(false)}
+          logs={logs}
+          uniqueUsers={uniqueUsers}
+          uniqueActions={uniqueActions}
+        />
       </div>
-
-      {/* EXPORT LOGS MODAL */}
-      <Dialog open={isExportModalOpen} onOpenChange={setIsExportModalOpen}>
-        <DialogContent className="sm:max-w-[460px] bg-[#FFFCF7] border-[#E8E3E1] shadow-lg rounded-2xl">
-          <DialogHeader>
-            <DialogTitle className="text-[#1D1A1B] font-bold text-lg flex items-center gap-2">
-              <FileSpreadsheet className="w-5 h-5 text-[#6B1D2A]" />
-              Export Audit & Activity Logs
-            </DialogTitle>
-            <DialogDescription className="text-[#5F5A5C] text-xs">
-              Download institutional activity trails formatted with professional Excel column widths and university styling.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="grid gap-5 py-4">
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-[#1D1A1B] uppercase">Search User / Email</label>
-              <select 
-                className="w-full h-10 px-3 rounded-xl border border-[#E8E3E1] bg-white text-xs font-medium text-[#1D1A1B] focus:outline-none focus:ring-2 focus:ring-[#6B1D2A]/20"
-                value={exportUserFilter}
-                onChange={(e) => setExportUserFilter(e.target.value)}
-              >
-                <option value="all">All Users</option>
-                {uniqueUsers.map(user => (
-                  <option key={user.email} value={user.email}>{user.label}</option>
-                ))}
-              </select>
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-[#1D1A1B] uppercase">Action Type</label>
-              <select 
-                className="w-full h-10 px-3 rounded-xl border border-[#E8E3E1] bg-white text-xs font-medium text-[#1D1A1B] focus:outline-none focus:ring-2 focus:ring-[#6B1D2A]/20"
-                value={exportActionType}
-                onChange={(e) => setExportActionType(e.target.value)}
-              >
-                <option value="all">All Actions</option>
-                {uniqueActions.map(action => (
-                  <option key={action} value={action}>{action}</option>
-                ))}
-              </select>
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-[#1D1A1B] uppercase">Date Range</label>
-              <select 
-                className="w-full h-10 px-3 rounded-xl border border-[#E8E3E1] bg-white text-xs font-medium text-[#1D1A1B] focus:outline-none focus:ring-2 focus:ring-[#6B1D2A]/20"
-                value={exportDateRange}
-                onChange={(e) => setExportDateRange(e.target.value)}
-              >
-                <option value="all">All Time</option>
-                <option value="today">Today</option>
-                <option value="7_days">Last 7 Days</option>
-                <option value="1_month">Last 1 Month</option>
-                <option value="custom">Custom Range</option>
-              </select>
-            </div>
-
-            {exportDateRange === "custom" && (
-              <div className="flex items-center gap-2">
-                <div className="space-y-1.5 flex-1">
-                  <label className="text-[10px] font-bold text-[#5F5A5C] uppercase">Start Date</label>
-                  <Input 
-                    type="date"
-                    className="h-10 bg-white border-[#E8E3E1] text-[#1D1A1B] text-xs rounded-xl focus-visible:ring-[#6B1D2A]"
-                    value={exportStartDate}
-                    onChange={(e) => setExportStartDate(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-1.5 flex-1">
-                  <label className="text-[10px] font-bold text-[#5F5A5C] uppercase">End Date</label>
-                  <Input 
-                    type="date"
-                    className="h-10 bg-white border-[#E8E3E1] text-[#1D1A1B] text-xs rounded-xl focus-visible:ring-[#6B1D2A]"
-                    value={exportEndDate}
-                    onChange={(e) => setExportEndDate(e.target.value)}
-                  />
-                </div>
-              </div>
-            )}
-          </div>
-
-          <DialogFooter className="sm:justify-end gap-2 flex-wrap pt-2">
-            <button
-              onClick={() => setIsExportModalOpen(false)}
-              className="h-10 px-4 rounded-xl border border-[#E8E3E1] bg-transparent text-[#1D1A1B] font-bold text-xs hover:bg-[#F4E7EA] transition cursor-pointer"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={() => handleExport("csv")}
-              className="h-10 px-3.5 rounded-xl border border-[#E8E3E1] bg-white text-[#5F5A5C] font-semibold text-xs hover:bg-[#F4E7EA] transition flex items-center justify-center gap-1.5 cursor-pointer"
-              title="Download unformatted comma-separated values"
-            >
-              <Download className="w-3.5 h-3.5" />
-              CSV
-            </button>
-            <button
-              onClick={() => handleExport("xlsx")}
-              className="h-10 px-5 rounded-xl bg-[#6B1D2A] text-[#FFFCF7] font-bold text-xs hover:bg-[#8B3545] transition flex items-center justify-center gap-2 cursor-pointer shadow-sm"
-              title="Download formatted Excel workbook (.xlsx)"
-            >
-              <FileSpreadsheet className="w-4 h-4 text-[#C99A2E]" />
-              Download Excel (.xlsx)
-            </button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </DashboardLayout>
   );
 }
-
-export default Logs;

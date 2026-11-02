@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Sparkles, Download, Copy, Check, FileText, ExternalLink, FileSpreadsheet } from "lucide-react";
+import { ScanText, Download, Copy, Check, FileText, ExternalLink, FileSpreadsheet } from "lucide-react";
 import ExcelJS from "exceljs";
 import { API_BASE_URL } from "../../services/api";
 import AccomplishmentReportTemplate from "./AccomplishmentReportTemplate";
@@ -391,10 +391,10 @@ function DocumentTemplateRenderer({ document }) {
           <div className="flex items-center justify-between border-b border-[#E8E3E1] pb-3">
             <div className="flex items-center gap-2">
               <div className="p-1.5 rounded-lg bg-[#F2DFB0] border border-[#C99A2E] text-[#A87818]">
-                <Sparkles className="w-3.5 h-3.5" />
+                <ScanText className="w-3.5 h-3.5" />
               </div>
               <div>
-                <h4 className="text-xs font-bold text-[#1D1A1B] uppercase tracking-wider">AI & OCR Extracted Content</h4>
+                <h4 className="text-xs font-bold text-[#1D1A1B] uppercase tracking-wider">OCR Extracted Content</h4>
                 <p className="text-[10px] text-[#5F5A5C]">Extracted textual content for semantic indexing</p>
               </div>
             </div>
@@ -402,7 +402,7 @@ function DocumentTemplateRenderer({ document }) {
               onClick={handleCopyOcr}
               className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-[#E8E3E1] bg-[#FFFCF7] text-[11px] font-semibold text-[#1D1A1B] hover:bg-[#F4E7EA] transition-colors cursor-pointer"
             >
-              {copied ? <Check className="w-3 h-3 text-[#16A34A]" /> : <Copy className="w-3 h-3 text-[#5F5A5C]" />}
+              {copied ? <Check className="w-3 h-3 text-[#6B1D2A]" /> : <Copy className="w-3 h-3 text-[#5F5A5C]" />}
               <span>{copied ? "Copied" : "Copy Text"}</span>
             </button>
           </div>

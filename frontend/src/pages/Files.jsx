@@ -1,64 +1,110 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import axios from "axios";
+import { Link } from "react-router-dom";
 import { 
-  FilePlus, 
   UploadCloud, 
-  CalendarIcon, 
-  Check, 
-  ChevronsUpDown, 
-  Archive, 
-  Box, 
-  FolderTree, 
+  FilePlus, 
+  X, 
+  FileText, 
   Loader2,
-  FileText,
-  ShieldCheck,
-  ChevronLeft,
-  ChevronRight
+  ArrowRight,
+  CheckCircle2,
+  FolderOpen
 } from "lucide-react";
-import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Input } from "@/components/ui/input";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { Input } from "@/components/ui/input";
+import ShadcnSelect from "@/components/ui/ShadcnSelect";
+import PhysicalStoragePlacementCard from "../components/files/PhysicalStoragePlacementCard";
+import RecentFiledDocumentsBar from "../components/files/RecentFiledDocumentsBar";
+import UploadDocumentSection from "../components/files/UploadDocumentSection";
 import { documentCategories, getFieldsForDocumentType } from "@/utils/documentConfigs";
-
 import { useToast } from "../context/ToastContext";
 
 function Files() {
   const toast = useToast();
+  const [mode, setMode] = useState("upload"); // "upload" | "register"
+  const [recentRecords, setRecentRecords] = useState([]);
+  const [inventories, setInventories] = useState([]);
+
+  // UPLOAD FORM STATE
+  const [file, setFile] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadCabinet, setUploadCabinet] = useState("");
+  const [uploadFileBox, setUploadFileBox] = useState("");
+
+  // REGISTER FORM STATE
   const [category, setCategory] = useState("");
   const [documentType, setDocumentType] = useState("");
   const [formData, setFormData] = useState({});
-  const [generatedRecords, setGeneratedRecords] = useState([]);
-  const [inventories, setInventories] = useState([]);
-  const [selectedInventory, setSelectedInventory] = useState({});
-  const [selectedFileBox, setSelectedFileBox] = useState({});
-  
-  // File upload state
-  const [legacyFile, setLegacyFile] = useState(null);
-  const [uploadingLegacy, setUploadingLegacy] = useState(false);
-  const [selectedUploadCabinet, setSelectedUploadCabinet] = useState("");
-  const [selectedUploadFileBox, setSelectedUploadFileBox] = useState("");
-  
-  // Pagination
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const [registerCabinet, setRegisterCabinet] = useState("");
+  const [registerFileBox, setRegisterFileBox] = useState("");
+  const [isRegistering, setIsRegistering] = useState(false);
+
+  // Derive all available document types with their parent category
+  const allDocumentTypeOptions = useMemo(() => {
+    const list = [];
+    Object.entries(documentCategories).forEach(([catName, docTypes]) => {
+      docTypes.forEach((docType) => {
+        list.push({
+          value: docType,
+          label: docType,
+          subtitle: catName,
+          category: catName,
+          searchKey: `${docType} ${catName}`,
+        });
+      });
+    });
+    return list;
+  }, []);
+
+  // Document types list: when a category is selected, prioritize that category's items first, while keeping all available
+  const documentTypeOptions = useMemo(() => {
+    if (!category) {
+      return allDocumentTypeOptions;
+    }
+    const matching = allDocumentTypeOptions.filter((opt) => opt.category === category);
+    const others = allDocumentTypeOptions.filter((opt) => opt.category !== category);
+    return [...matching, ...others];
+  }, [category, allDocumentTypeOptions]);
+
+  const handleDocumentTypeChange = (val) => {
+    setDocumentType(val);
+    setFormData({});
+    // Auto-detect and populate category if not set or mismatched
+    if (val) {
+      for (const [catName, docTypes] of Object.entries(documentCategories)) {
+        if (docTypes.includes(val)) {
+          setCategory(catName);
+          break;
+        }
+      }
+    }
+  };
+
+  const handleCategoryChange = (val) => {
+    setCategory(val);
+    // If the currently selected document type is not in the newly selected category, reset it
+    if (val && documentType) {
+      const allowed = documentCategories[val] || [];
+      if (!allowed.includes(documentType)) {
+        setDocumentType("");
+        setFormData({});
+      }
+    }
+  };
 
   const selectedFields = getFieldsForDocumentType(documentType);
 
   // FETCH RECORDS
-  const fetchFiles = async () => {
+  const fetchRecentFiles = async () => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.get("http://localhost:5000/api/files", {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setGeneratedRecords(response.data || []);
+      setRecentRecords(response.data || []);
     } catch (error) {
       console.error("FETCH FILES ERROR:", error);
     }
@@ -78,62 +124,27 @@ function Files() {
   };
 
   useEffect(() => {
-    fetchFiles();
+    fetchRecentFiles();
     fetchInventories();
   }, []);
 
-  const handleChange = (field, value) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
-
-  // GENERATE RECORD ENTRY
-  const handleGenerate = async (e) => {
-    e.preventDefault();
-    try {
-      const token = localStorage.getItem("token");
-      await axios.post(
-        "http://localhost:5000/api/files/generate",
-        {
-          ...formData,
-          title: formData.subject || formData.student_name || formData.program || "Untitled Record",
-          category,
-          access_code: formData.access_code,
-          subject: formData.subject || formData.title_of_thesis || formData.program || "",
-          document_type: documentType,
-          memo_date: new Date(),
-          received_date: new Date(),
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      toast.success("Document entry registered successfully!", "Record Filed");
-      setFormData({});
-      fetchFiles();
-    } catch (error) {
-      console.error("GENERATION ERROR:", error);
-      toast.error(error.response?.data?.message || "Generation failed", "Error");
-    }
-  };
-
-  // UPLOAD FILE & ATTACH STORAGE
-  const handleLegacyUpload = async () => {
-    if (!legacyFile) {
-      toast.warning("Please select a valid document file.", "File Required");
+  // HANDLE UPLOAD
+  const handleUpload = async (e) => {
+    if (e) e.preventDefault();
+    if (!file) {
+      toast.warning("Please choose a file to upload.", "File Required");
       return;
     }
+
     try {
-      setUploadingLegacy(true);
+      setIsUploading(true);
       const token = localStorage.getItem("token");
       const uploadData = new FormData();
-      uploadData.append("file", legacyFile);
-      if (selectedUploadFileBox) {
-        uploadData.append("file_box_id", selectedUploadFileBox);
+      uploadData.append("file", file);
+      if (uploadFileBox) {
+        uploadData.append("file_box_id", uploadFileBox);
       }
+
       await axios.post("http://localhost:5000/api/files/upload", uploadData, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -141,414 +152,272 @@ function Files() {
         },
       });
 
-      setLegacyFile(null);
-      setSelectedUploadCabinet("");
-      setSelectedUploadFileBox("");
-      fetchFiles();
+      toast.success(
+        uploadFileBox 
+          ? "Document uploaded and assigned to physical storage!" 
+          : "Document uploaded and indexed successfully!", 
+        "Filing Complete"
+      );
+      setFile(null);
+      setUploadCabinet("");
+      setUploadFileBox("");
+      fetchRecentFiles();
       fetchInventories();
-      toast.success("Document uploaded and indexed successfully!", "Document Uploaded");
     } catch (error) {
       console.error("UPLOAD ERROR:", error);
-      toast.error("Upload failed. Please check file format and try again.", "Upload Error");
+      toast.error(error.response?.data?.message || "Upload failed. Please try again.", "Error");
     } finally {
-      setUploadingLegacy(false);
+      setIsUploading(false);
     }
   };
 
-  // ASSIGN PHYSICAL STORAGE LOCATION
-  const assignFileBox = async (fileId, fileBoxId) => {
+  // HANDLE REGISTER
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    if (!category || !documentType) {
+      toast.warning("Please select Category and Document Type.", "Required Fields");
+      return;
+    }
+
     try {
+      setIsRegistering(true);
       const token = localStorage.getItem("token");
-      await axios.put(
-        `http://localhost:5000/api/files/assign/${fileId}`,
-        { file_box_id: fileBoxId },
+      await axios.post(
+        "http://localhost:5000/api/files/generate",
+        {
+          ...formData,
+          title: formData.subject || formData.student_name || formData.program || `Generated ${documentType}`,
+          category,
+          access_code: formData.access_code || "N/A",
+          subject: formData.subject || formData.title_of_thesis || formData.program || "",
+          document_type: documentType,
+          file_box_id: registerFileBox || undefined,
+          memo_date: new Date(),
+          received_date: new Date(),
+        },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      toast.success("Physical storage container assigned successfully!", "Location Assigned");
-      fetchFiles();
+
+      toast.success(
+        registerFileBox
+          ? "Document record registered and assigned to storage!"
+          : "Document record registered in central ledger!",
+        "Record Filed"
+      );
+      setFormData({});
+      setCategory("");
+      setDocumentType("");
+      setRegisterCabinet("");
+      setRegisterFileBox("");
+      fetchRecentFiles();
       fetchInventories();
     } catch (error) {
-      console.error("ASSIGN ERROR:", error);
-      toast.error(error.response?.data?.message || "Storage assignment failed", "Assignment Error");
+      console.error("REGISTRATION ERROR:", error);
+      toast.error(error.response?.data?.message || "Registration failed", "Error");
+    } finally {
+      setIsRegistering(false);
     }
   };
 
-  const totalPages = Math.ceil(generatedRecords.length / itemsPerPage) || 1;
-  const paginatedRecords = generatedRecords.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
-
   return (
-    <div className="space-y-6 font-sans">
+    <div className="space-y-6 font-sans max-w-5xl mx-auto">
       {/* PAGE HEADER */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-extrabold text-[#1D1A1B] tracking-tight">
-            Document Filing & Registration
+            Document Filing & Ingestion
           </h1>
           <p className="text-xs text-[#5F5A5C] mt-1">
-            Register automated metadata records or upload scanned files directly into physical cabinets.
+            Quickly ingest new records into the archive via direct document upload or official metadata registration.
           </p>
         </div>
+
+        {/* QUICK LINK TO DOCUMENT CENTER */}
+        <Link
+          to="/document-center"
+          className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#FFFCF7] border border-[#E8E3E1] text-xs font-bold text-[#6B1D2A] hover:bg-[#F4E7EA] transition-all shadow-xs self-start sm:self-auto cursor-pointer"
+        >
+          <FolderOpen className="w-4 h-4 text-[#6B1D2A]" />
+          <span>Document Center & Storage ({recentRecords.length})</span>
+          <ArrowRight className="w-3.5 h-3.5" />
+        </Link>
       </div>
 
-      {/* TOP SECTION: 2-COLUMN GRID (CREATE ENTRY + UPLOAD FILE) */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-        
-        {/* CARD 1: DOCUMENT METADATA GENERATOR */}
-        <Card className="border border-[#E8E3E1] shadow-xs bg-[#FFFCF7] rounded-xl flex flex-col">
-          <CardHeader className="border-b border-[#E8E3E1] pb-4">
-            <CardTitle className="text-base font-bold text-[#1D1A1B] flex items-center gap-2">
-              <div className="p-1.5 rounded-lg bg-[#F4E7EA] text-[#6B1D2A]">
-                <FilePlus className="w-4 h-4" />
-              </div>
-              <span>Register Document Entry</span>
-            </CardTitle>
-            <CardDescription className="text-xs text-[#5F5A5C]">
-              Categorize and record official document metadata in the central registry.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="p-5 flex-1 flex flex-col justify-between">
-            <form onSubmit={handleGenerate} className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {/* CATEGORY SELECT */}
-                <div className="space-y-1">
-                  <label className="text-xs font-bold text-[#1D1A1B] uppercase">Category</label>
-                  <Popover modal={true}>
-                    <PopoverTrigger
-                      className="flex h-10 w-full items-center justify-between rounded-xl border border-[#E8E3E1] bg-[#FFFCF7] px-3 py-2 text-xs font-medium text-[#1D1A1B] focus:ring-2 focus:ring-[#6B1D2A]/20 focus:border-[#6B1D2A]"
-                    >
-                      <span className="truncate">{category || "Select Classification"}</span>
-                      <ChevronsUpDown className="h-3.5 w-3.5 opacity-50 shrink-0 text-[#5F5A5C]" />
-                    </PopoverTrigger>
-                    <PopoverContent className="p-0 w-56 bg-[#FFFCF7] border border-[#E8E3E1]" align="start">
-                      <Command>
-                        <CommandList>
-                          <CommandGroup>
-                            {Object.keys(documentCategories).map((cat) => (
-                              <CommandItem
-                                key={cat}
-                                value={cat}
-                                onSelect={() => {
-                                  setCategory(cat);
-                                  setDocumentType("");
-                                  setFormData({});
-                                  document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
-                                }}
-                                className="text-xs cursor-pointer text-[#1D1A1B] hover:bg-[#F4E7EA]"
-                              >
-                                <Check className={cn("mr-2 h-3.5 w-3.5", category === cat ? "opacity-100 text-[#6B1D2A]" : "opacity-0")} />
-                                {cat}
-                              </CommandItem>
-                            ))}
-                          </CommandGroup>
-                        </CommandList>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
+      {/* SINGLE UNIFIED WORKFLOW CARD */}
+      <Card className="border border-[#E8E3E1] shadow-xs bg-[#FFFCF7] rounded-2xl overflow-hidden p-0 gap-0">
+        {/* CARD WORKFLOW HEADER & SWITCHER */}
+        <div className="p-6 border-b border-[#E8E3E1] bg-[#FFFCF7] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-1.5 text-[11px] font-bold text-[#6B1D2A] uppercase tracking-wider mb-1">
+              <FileText className="w-3.5 h-3.5" />
+              <span>Official Records Intake</span>
+            </div>
+            <h2 className="text-lg font-bold text-[#1D1A1B]">
+              {mode === "upload" ? "Upload Scanned / Digital Document" : "Register Document Metadata Record"}
+            </h2>
+            <p className="text-xs text-[#5F5A5C] mt-0.5">
+              {mode === "upload"
+                ? "Automatic OCR extracts text from PDF and images while storing the original file."
+                : "Fill out official institutional record details to create an indexed registry entry."}
+            </p>
+          </div>
+
+          {/* 1-TAP WORKFLOW SELECTOR */}
+          <div className="inline-flex p-1 bg-[#F4E7EA] rounded-xl border border-[#E8E3E1] self-start sm:self-auto shrink-0">
+            <button
+              type="button"
+              onClick={() => setMode("upload")}
+              className={cn(
+                "flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer",
+                mode === "upload"
+                  ? "bg-[#6B1D2A] text-[#FFFCF7] shadow-xs"
+                  : "text-[#5F5A5C] hover:text-[#1D1A1B]"
+              )}
+            >
+              <UploadCloud className="w-4 h-4" />
+              <span>Upload Document</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setMode("register")}
+              className={cn(
+                "flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer",
+                mode === "register"
+                  ? "bg-[#6B1D2A] text-[#FFFCF7] shadow-xs"
+                  : "text-[#5F5A5C] hover:text-[#1D1A1B]"
+              )}
+            >
+              <FilePlus className="w-4 h-4" />
+              <span>Register Entry</span>
+            </button>
+          </div>
+        </div>
+
+        {/* WORKFLOW BODY */}
+        <div className="p-6 sm:p-8">
+          {/* ================= MODE 1: UPLOAD ================= */}
+          {mode === "upload" && (
+            <UploadDocumentSection
+              file={file}
+              setFile={setFile}
+              uploadCabinet={uploadCabinet}
+              setUploadCabinet={setUploadCabinet}
+              uploadFileBox={uploadFileBox}
+              setUploadFileBox={setUploadFileBox}
+              inventories={inventories}
+              isUploading={isUploading}
+              onUpload={handleUpload}
+            />
+          )}
+
+          {/* ================= MODE 2: REGISTER METADATA ================= */}
+          {mode === "register" && (
+            <form onSubmit={handleRegister} className="space-y-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* CATEGORY SELECT (OPTIONAL QUICK FILTER) */}
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold text-[#1D1A1B] uppercase">Classification / Category</label>
+                    {category && (
+                      <span className="text-[10px] font-semibold text-[#6B1D2A] bg-[#F4E7EA] px-2 py-0.5 rounded-md">
+                        Filtered
+                      </span>
+                    )}
+                  </div>
+                  <ShadcnSelect
+                    value={category}
+                    onChange={handleCategoryChange}
+                    allowClear={true}
+                    clearLabel="All Classifications"
+                    options={Object.keys(documentCategories).map((cat) => ({
+                      value: cat,
+                      label: cat,
+                    }))}
+                    placeholder="All Classifications (Optional filter)"
+                    className="h-11"
+                  />
                 </div>
 
-                {/* DOCUMENT TYPE SELECT */}
-                <div className="space-y-1">
-                  <label className="text-xs font-bold text-[#1D1A1B] uppercase">Document Type</label>
-                  <Popover modal={true}>
-                    <PopoverTrigger
-                      disabled={!category}
-                      className="flex h-10 w-full items-center justify-between rounded-xl border border-[#E8E3E1] bg-[#FFFCF7] px-3 py-2 text-xs font-medium text-[#1D1A1B] focus:ring-2 focus:ring-[#6B1D2A]/20 focus:border-[#6B1D2A] disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      <span className="truncate">{documentType || "Select Document Type"}</span>
-                      <ChevronsUpDown className="h-3.5 w-3.5 opacity-50 shrink-0 text-[#5F5A5C]" />
-                    </PopoverTrigger>
-                    <PopoverContent className="p-0 max-h-60 overflow-y-auto w-64 bg-[#FFFCF7] border border-[#E8E3E1]" align="start">
-                      <Command>
-                        <CommandInput placeholder="Filter types..." className="text-xs" />
-                        <CommandList>
-                          <CommandEmpty className="text-xs p-2 text-center text-[#5F5A5C]">No type found.</CommandEmpty>
-                          <CommandGroup>
-                            {category && documentCategories[category]?.map((doc) => (
-                              <CommandItem
-                                key={doc}
-                                value={doc}
-                                onSelect={() => {
-                                  setDocumentType(doc);
-                                  setFormData({});
-                                  document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
-                                }}
-                                className="text-xs cursor-pointer text-[#1D1A1B] hover:bg-[#F4E7EA]"
-                              >
-                                <Check className={cn("mr-2 h-3.5 w-3.5", documentType === doc ? "opacity-100 text-[#6B1D2A]" : "opacity-0")} />
-                                {doc}
-                              </CommandItem>
-                            ))}
-                          </CommandGroup>
-                        </CommandList>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
+                {/* DOCUMENT TYPE SELECT (ALWAYS SCROLLABLE & SEARCHABLE ACROSS ALL 60+ TYPES) */}
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold text-[#1D1A1B] uppercase">Document Type</label>
+                    <span className="text-[10px] text-[#5F5A5C]">
+                      {category ? `${documentCategories[category]?.length || 0} in ${category} • 63 total` : `All ${documentTypeOptions.length} available`}
+                    </span>
+                  </div>
+                  <ShadcnSelect
+                    value={documentType}
+                    onChange={handleDocumentTypeChange}
+                    options={documentTypeOptions}
+                    placeholder={category ? `Select Document Type (${category})...` : "Select or search Document Type (all 63 types)..."}
+                    searchable={true}
+                    searchPlaceholder="Search document type or classification..."
+                    popoverWidth="w-80 sm:w-96"
+                    className="h-11"
+                  />
                 </div>
               </div>
 
-              {/* DYNAMIC FORM FIELDS */}
+              {/* PHYSICAL STORAGE PLACEMENT (CUSTOMIZABLE CABINET / STEEL / SHELVES / ARCHFILE) */}
+              <PhysicalStoragePlacementCard
+                selectedCabinetId={registerCabinet}
+                onCabinetChange={setRegisterCabinet}
+                selectedBoxId={registerFileBox}
+                onBoxChange={setRegisterFileBox}
+                cabinets={inventories}
+              />
+
+              {/* DYNAMIC FIELDS */}
               {selectedFields.length > 0 && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-                  {selectedFields.map((field) => (
-                    <div key={field} className="space-y-1">
-                      <label className="text-[11px] font-bold text-[#5F5A5C] uppercase">
-                        {field.replaceAll("_", " ")}
-                      </label>
-                      <Input
-                        type="text"
-                        placeholder={`Enter ${field.replaceAll("_", " ")}`}
-                        value={formData[field] || ""}
-                        onChange={(e) => handleChange(field, e.target.value)}
-                        className="h-10 text-xs rounded-xl border-[#E8E3E1] bg-[#FFFCF7] text-[#1D1A1B]"
-                        required={field === "access_code"}
-                      />
-                    </div>
-                  ))}
+                <div className="pt-2 border-t border-[#E8E3E1] space-y-3">
+                  <span className="text-[11px] font-bold text-[#5F5A5C] uppercase tracking-wider block">
+                    Document Required Details
+                  </span>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {selectedFields.map((field) => (
+                      <div key={field} className="space-y-1">
+                        <label className="text-[11px] font-bold text-[#5F5A5C] uppercase">
+                          {field.replaceAll("_", " ")}
+                        </label>
+                        <Input
+                          type="text"
+                          placeholder={`Enter ${field.replaceAll("_", " ")}`}
+                          value={formData[field] || ""}
+                          onChange={(e) => setFormData((prev) => ({ ...prev, [field]: e.target.value }))}
+                          className="h-10 text-xs rounded-xl border-[#E8E3E1] bg-[#FFFCF7] text-[#1D1A1B]"
+                          required={field === "access_code"}
+                        />
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
 
+              {/* ACTION BUTTON */}
               <Button
                 type="submit"
-                disabled={!documentType}
-                className="w-full bg-[#6B1D2A] text-[#FFFCF7] hover:bg-[#8B3545] py-5 rounded-xl font-bold text-xs shadow-xs transition-all flex items-center justify-center gap-2 mt-4 cursor-pointer"
+                disabled={!documentType || isRegistering}
+                className="w-full bg-[#6B1D2A] text-[#FFFCF7] hover:bg-[#8B3545] py-6 rounded-xl font-bold text-sm shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
               >
-                <FilePlus className="w-4 h-4" />
-                <span>Register Document Entry</span>
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
-
-        {/* CARD 2: DIRECT SMART DOCUMENT UPLOAD */}
-        <Card className="border border-[#E8E3E1] shadow-xs bg-[#FFFCF7] rounded-xl flex flex-col">
-          <CardHeader className="border-b border-[#E8E3E1] pb-4">
-            <CardTitle className="text-base font-bold text-[#1D1A1B] flex items-center gap-2">
-              <div className="p-1.5 rounded-lg bg-[#F4E7EA] text-[#6B1D2A]">
-                <UploadCloud className="w-4 h-4" />
-              </div>
-              <span>Upload Document & Assign Storage</span>
-            </CardTitle>
-            <CardDescription className="text-xs text-[#5F5A5C]">
-              Upload PDF, DOCX, or PPTX. Automatic OCR extracts text from scanned records.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="p-5 flex-1 flex flex-col justify-center">
-            <div className="border-2 border-dashed border-[#E8E3E1] rounded-2xl p-6 bg-[#FFFCF7] flex flex-col items-center justify-center text-center space-y-4">
-              <div className="w-12 h-12 rounded-xl bg-[#F4E7EA] border border-[#E8E3E1] flex items-center justify-center text-[#6B1D2A] shadow-xs">
-                <UploadCloud className="w-6 h-6 stroke-[2]" />
-              </div>
-              <div>
-                <p className="text-sm font-bold text-[#1D1A1B]">Choose document to upload</p>
-                <p className="text-xs text-[#5F5A5C] mt-0.5">PDF, DOCX, PPTX, JPG up to 10MB</p>
-              </div>
-
-              {/* CABINET & FILE BOX DROPDOWNS */}
-              <div className="w-full max-w-sm grid grid-cols-1 sm:grid-cols-2 gap-2 text-left">
-                <select
-                  value={selectedUploadCabinet}
-                  onChange={(e) => {
-                    setSelectedUploadCabinet(e.target.value);
-                    setSelectedUploadFileBox("");
-                  }}
-                  className="h-9 w-full rounded-xl border border-[#E8E3E1] bg-[#FFFCF7] px-3 text-xs font-medium text-[#1D1A1B] focus:ring-2 focus:ring-[#6B1D2A]/20"
-                >
-                  <option value="">Cabinet (Optional)</option>
-                  {inventories.map((inv) => (
-                    <option key={inv.id} value={inv.id}>
-                      {inv.name || inv.cabinet_name || `Cabinet ${inv.id}`}
-                    </option>
-                  ))}
-                </select>
-
-                <select
-                  value={selectedUploadFileBox}
-                  onChange={(e) => setSelectedUploadFileBox(e.target.value)}
-                  disabled={!selectedUploadCabinet}
-                  className="h-9 w-full rounded-xl border border-[#E8E3E1] bg-[#FFFCF7] px-3 text-xs font-medium text-[#1D1A1B] focus:ring-2 focus:ring-[#6B1D2A]/20 disabled:opacity-50"
-                >
-                  <option value="">File Box (Optional)</option>
-                  {inventories.find((inv) => String(inv.id) === String(selectedUploadCabinet))?.file_boxes?.map((box) => (
-                    <option key={box.id} value={box.id}>{box.name}</option>
-                  ))}
-                </select>
-              </div>
-
-              <input
-                type="file"
-                accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png"
-                onChange={(e) => setLegacyFile(e.target.files[0] || null)}
-                className="w-full max-w-sm text-xs file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-[#6B1D2A] file:text-[#FFFCF7] hover:file:bg-[#8B3545] cursor-pointer"
-              />
-
-              <Button
-                onClick={handleLegacyUpload}
-                disabled={!legacyFile || uploadingLegacy}
-                className="w-full max-w-sm bg-[#6B1D2A] text-[#FFFCF7] hover:bg-[#8B3545] py-5 rounded-xl font-bold text-xs shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
-              >
-                {uploadingLegacy ? (
+                {isRegistering ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Processing & Indexing...</span>
+                    <span>Registering Record in Ledger...</span>
                   </>
                 ) : (
                   <>
-                    <UploadCloud className="w-4 h-4" />
-                    <span>Upload & File Document</span>
+                    <FilePlus className="w-5 h-5" />
+                    <span>Register Document Entry</span>
                   </>
                 )}
               </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+            </form>
+          )}
+        </div>
 
-      {/* PHYSICAL STORAGE ASSIGNMENT TABLE */}
-      <Card className="border border-[#E8E3E1] shadow-xs bg-[#FFFCF7] rounded-xl overflow-hidden">
-        <CardHeader className="border-b border-[#E8E3E1] pb-4 flex flex-row items-center justify-between bg-[#FFFCF7]">
-          <div>
-            <CardTitle className="text-base font-bold text-[#1D1A1B] flex items-center gap-2">
-              <Box className="w-4 h-4 text-[#6B1D2A]" />
-              <span>Physical Storage Assignments</span>
-            </CardTitle>
-            <CardDescription className="text-xs text-[#5F5A5C]">
-              Assign or update physical cabinet and file box locations for registered records.
-            </CardDescription>
-          </div>
-        </CardHeader>
-        <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <table className="w-full text-xs text-left">
-              <thead className="text-[11px] text-[#5F5A5C] uppercase bg-[#F4E7EA] border-b border-[#E8E3E1]">
-                <tr>
-                  <th className="px-5 py-3 font-bold">Document Type</th>
-                  <th className="px-5 py-3 font-bold">Access Code</th>
-                  <th className="px-5 py-3 font-bold">Subject / Title</th>
-                  <th className="px-5 py-3 font-bold">Status</th>
-                  <th className="px-5 py-3 font-bold">Physical Storage Location</th>
-                  <th className="px-5 py-3 font-bold text-right">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#E8E3E1]">
-                {paginatedRecords.length > 0 ? (
-                  paginatedRecords.map((record) => {
-                    const currentCabId = selectedInventory[record.id] || record.file_box?.cabinet?.id || "";
-                    const currentBoxId = selectedFileBox[record.id] || record.file_box_id || "";
-
-                    return (
-                      <tr key={record.id} className="hover:bg-[#F4E7EA]/40 transition-colors">
-                        <td className="px-5 py-3.5 font-bold text-[#6B1D2A]">{record.document_type}</td>
-                        <td className="px-5 py-3.5 font-mono text-[#1D1A1B]">{record.access_code || "—"}</td>
-                        <td className="px-5 py-3.5 font-medium text-[#1D1A1B] max-w-xs truncate">
-                          {record.subject || record.title || "—"}
-                        </td>
-                        <td className="px-5 py-3.5">
-                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold inline-block
-                            ${record.status === "Active" ? "bg-[#F4E7EA] text-[#6B1D2A] border border-[#E8E3E1]" :
-                              record.status === "Archived" ? "bg-[#FFFCF7] text-[#5F5A5C] border border-[#E8E3E1]" :
-                              "bg-[#F2DFB0] text-[#A87818] border border-[#C99A2E]"}`}
-                          >
-                            {record.status || "Active"}
-                          </span>
-                        </td>
-                        <td className="px-5 py-3.5">
-                          <div className="flex gap-2 max-w-xs">
-                            <select
-                              value={currentCabId}
-                              onChange={(e) => {
-                                setSelectedInventory({
-                                  ...selectedInventory,
-                                  [record.id]: e.target.value,
-                                });
-                                setSelectedFileBox({
-                                  ...selectedFileBox,
-                                  [record.id]: "",
-                                });
-                              }}
-                              className="h-8 w-full rounded-lg border border-[#E8E3E1] bg-[#FFFCF7] px-2 text-xs font-medium text-[#1D1A1B] focus:ring-1 focus:ring-[#6B1D2A]"
-                            >
-                              <option value="">Select Cabinet</option>
-                              {inventories.map((inv) => (
-                                <option key={inv.id} value={inv.id}>
-                                  {inv.name || inv.cabinet_name || `Cabinet ${inv.id}`}
-                                </option>
-                              ))}
-                            </select>
-
-                            <select
-                              value={currentBoxId}
-                              onChange={(e) =>
-                                setSelectedFileBox({
-                                  ...selectedFileBox,
-                                  [record.id]: e.target.value,
-                                })
-                              }
-                              disabled={!currentCabId}
-                              className="h-8 w-full rounded-lg border border-[#E8E3E1] bg-[#FFFCF7] px-2 text-xs font-medium text-[#1D1A1B] focus:ring-1 focus:ring-[#6B1D2A] disabled:opacity-50"
-                            >
-                              <option value="">Select Box</option>
-                              {inventories.find((inv) => String(inv.id) === String(currentCabId))?.file_boxes?.map((box) => (
-                                <option key={box.id} value={box.id}>{box.name}</option>
-                              ))}
-                            </select>
-                          </div>
-                        </td>
-                        <td className="px-5 py-3.5 text-right">
-                          <Button
-                            size="sm"
-                            onClick={() => assignFileBox(record.id, currentBoxId)}
-                            disabled={!currentBoxId}
-                            className="bg-[#6B1D2A] text-[#FFFCF7] hover:bg-[#8B3545] h-8 px-3 rounded-lg text-xs font-bold shadow-xs disabled:opacity-40 cursor-pointer"
-                          >
-                            {record.file_box_id ? "Reassign" : "Assign"}
-                          </Button>
-                        </td>
-                      </tr>
-                    );
-                  })
-                ) : (
-                  <tr>
-                    <td colSpan="6" className="px-5 py-8 text-center text-[#5F5A5C] italic">
-                      No records awaiting physical filing
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-
-          {/* PAGINATION BAR */}
-          <div className="p-4 border-t border-[#E8E3E1] flex items-center justify-between bg-[#FFFCF7] text-xs text-[#5F5A5C]">
-            <span>
-              Showing {generatedRecords.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0} to{" "}
-              {Math.min(currentPage * itemsPerPage, generatedRecords.length)} of {generatedRecords.length} records
-            </span>
-            <div className="flex items-center gap-1.5">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                disabled={currentPage === 1}
-                className="h-8 px-3 text-xs bg-[#FFFCF7] border-[#E8E3E1] text-[#1D1A1B] hover:bg-[#F4E7EA] cursor-pointer"
-              >
-                <ChevronLeft className="w-3.5 h-3.5 mr-1" />
-                <span>Prev</span>
-              </Button>
-              <span className="px-2 font-bold text-[#1D1A1B]">
-                {currentPage} / {totalPages}
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                disabled={currentPage >= totalPages}
-                className="h-8 px-3 text-xs bg-[#FFFCF7] border-[#E8E3E1] text-[#1D1A1B] hover:bg-[#F4E7EA] cursor-pointer"
-              >
-                <span>Next</span>
-                <ChevronRight className="w-3.5 h-3.5 ml-1" />
-              </Button>
-            </div>
-          </div>
-        </CardContent>
+        {/* RECENTLY FILED DOCUMENTS ACTIVITY BAR */}
+        <RecentFiledDocumentsBar recentRecords={recentRecords} />
       </Card>
     </div>
   );

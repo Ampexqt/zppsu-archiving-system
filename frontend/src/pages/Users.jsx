@@ -1,553 +1,290 @@
-import { useEffect, useState } from "react";
-
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-
+import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { ArrowUpToLine, ArrowDownToLine, Trash2, Plus, Eye, EyeOff, Wand2, Copy, Check, Key } from "lucide-react";
-
+import { Search, Plus, FilterX } from "lucide-react";
 import DashboardLayout from "../components/layout/DashboardLayout";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import ShadcnSelect from "@/components/ui/ShadcnSelect";
+import UserSummaryCards from "../components/users/UserSummaryCards";
+import UsersTable from "../components/users/UsersTable";
+import CreateUserModal from "../components/users/CreateUserModal";
+import ResetPasswordModal from "../components/users/ResetPasswordModal";
+import { useToast } from "../context/ToastContext";
 import { useModal } from "../context/ModalContext";
 
-function Users() {
-
-  const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
+export default function Users() {
+  const toast = useToast();
   const modal = useModal();
 
-  const [users, setUsers] = useState([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [isCopied, setIsCopied] = useState(false);
-  
-  const [resetModalOpen, setResetModalOpen] = useState(false);
-  const [userToReset, setUserToReset] = useState(null);
-  const [resetPasswordValue, setResetPasswordValue] = useState("");
-  const [showResetPassword, setShowResetPassword] = useState(false);
-  const [isResetCopied, setIsResetCopied] = useState(false);
-
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
+  const [currentUser] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("user") || "{}");
+    } catch {
+      return {};
+    }
   });
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  const [users, setUsers] = useState([]);
+  const [search, setSearch] = useState("");
+  const [roleFilter, setRoleFilter] = useState("");
+  
+  // Modals state
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isResetModalOpen, setIsResetModalOpen] = useState(false);
+  const [userToReset, setUserToReset] = useState(null);
+  const [isSaving, setIsSaving] = useState(false);
 
-  const generatePassword = () => {
-    const colors = ["Red", "Blue", "Green", "Gold", "Pink", "Dark", "Nova", "Star", "Neon", "Cyber"];
-    const nouns = ["Lion", "Bear", "Wolf", "Hawk", "Fox", "Bird", "Fish", "Cat", "Moon", "Sun"];
-    const syms = "!@#$%^&*";
-    
-    const randomColor = colors[Math.floor(Math.random() * colors.length)];
-    const randomNoun = nouns[Math.floor(Math.random() * nouns.length)];
-    const randomNumber = Math.floor(Math.random() * 90) + 10; // 10-99
-    const randomSym = syms[Math.floor(Math.random() * syms.length)];
-    
-    const newPass = `${randomColor}${randomNoun}${randomSym}${randomNumber}`;
-    
-    setFormData((prev) => ({ ...prev, password: newPass }));
-    setShowPassword(true);
-  };
-
-  const copyPassword = () => {
-    if (formData.password) {
-      navigator.clipboard.writeText(formData.password);
-      setIsCopied(true);
-      setTimeout(() => setIsCopied(false), 2000);
-    }
-  };
-
-  const handleCreateUser = async (e) => {
-    e.preventDefault();
+  const fetchUsers = async () => {
     try {
       const token = localStorage.getItem("token");
-      await axios.post("http://localhost:5000/api/auth/register", formData, {
+      const response = await axios.get("http://localhost:5000/api/users", {
         headers: { Authorization: `Bearer ${token}` }
       });
-      await modal.alert({ title: "Success", message: "User created successfully!", variant: "success" });
-      setIsModalOpen(false);
-      setFormData({ name: "", email: "", password: "" });
-      fetchUsers();
+      setUsers(response.data || []);
     } catch (error) {
-      console.error(error);
-      await modal.alert({ title: "Error", message: error.response?.data?.message || "Failed to create user", variant: "danger" });
+      console.error("FETCH USERS ERROR:", error);
     }
   };
 
-  const generateResetPassword = () => {
-    const colors = ["Red", "Blue", "Green", "Gold", "Pink", "Dark", "Nova", "Star", "Neon", "Cyber"];
-    const nouns = ["Lion", "Bear", "Wolf", "Hawk", "Fox", "Bird", "Fish", "Cat", "Moon", "Sun"];
-    const syms = "!@#$%^&*";
-    
-    const randomColor = colors[Math.floor(Math.random() * colors.length)];
-    const randomNoun = nouns[Math.floor(Math.random() * nouns.length)];
-    const randomNumber = Math.floor(Math.random() * 90) + 10;
-    const randomSym = syms[Math.floor(Math.random() * syms.length)];
-    
-    const newPass = `${randomColor}${randomNoun}${randomSym}${randomNumber}`;
-    
-    setResetPasswordValue(newPass);
-    setShowResetPassword(true);
-  };
-
-  const copyResetPassword = () => {
-    if (resetPasswordValue) {
-      navigator.clipboard.writeText(resetPasswordValue);
-      setIsResetCopied(true);
-      setTimeout(() => setIsResetCopied(false), 2000);
-    }
-  };
-
-  const handleResetPasswordSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const token = localStorage.getItem("token");
-      await axios.put(`http://localhost:5000/api/users/reset-password/${userToReset.id}`, 
-        { password: resetPasswordValue }, 
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      await modal.alert({ title: "Success", message: "Password reset successfully!", variant: "success" });
-      setResetModalOpen(false);
-      setUserToReset(null);
-      setResetPasswordValue("");
-    } catch (error) {
-      console.error(error);
-      await modal.alert({ title: "Error", message: error.response?.data?.message || "Failed to reset password", variant: "danger" });
-    }
-  };
-
-  // FETCH USERS
-  const fetchUsers = async () => {
-
-    try {
-      const token = localStorage.getItem("token");
-      const response =
-        await axios.get(
-          "http://localhost:5000/api/users",
-          {
-            headers: { Authorization: `Bearer ${token}` }
-          }
-        );
-
-      setUsers(response.data);
-
-    } catch (error) {
-
-      console.error(error);
-    }
-  };
-
-  // LOAD USERS
   useEffect(() => {
-
     fetchUsers();
-
   }, []);
 
-  // DELETE USER
-  const handleDelete = async (id) => {
-    const confirmDelete = await modal.confirm({
-      title: "Delete User",
-      message: "Are you sure you want to delete this user? This action cannot be undone.",
-      confirmText: "Delete",
+  const handleCreateUser = async ({ name, email, password }) => {
+    setIsSaving(true);
+    try {
+      const token = localStorage.getItem("token");
+      await axios.post(
+        "http://localhost:5000/api/auth/register", 
+        { name, email, password }, 
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      toast.success("User account registered successfully!", "Account Created");
+      setIsCreateModalOpen(false);
+      fetchUsers();
+    } catch (error) {
+      console.error(error);
+      toast.error(error.response?.data?.message || "Failed to create user", "Error");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleResetPassword = async (newPassword) => {
+    if (!userToReset) return;
+    setIsSaving(true);
+    try {
+      const token = localStorage.getItem("token");
+      await axios.put(
+        `http://localhost:5000/api/users/reset-password/${userToReset.id}`, 
+        { password: newPassword }, 
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      toast.success(`Password reset successfully for ${userToReset.name}!`, "Password Updated");
+      setIsResetModalOpen(false);
+      setUserToReset(null);
+    } catch (error) {
+      console.error(error);
+      toast.error(error.response?.data?.message || "Failed to reset password", "Error");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handlePromote = async (user) => {
+    const confirmed = await modal.confirm({
+      title: "Promote to Administrator",
+      message: `Are you sure you want to promote "${user.name}" to System Administrator? They will be granted full administrative authority.`,
+      confirmText: "Promote to Admin",
       cancelText: "Cancel",
-      variant: "danger"
+      variant: "warning",
     });
-
-    if (!confirmDelete) return;
-
-  try {
-
-    const token =
-      localStorage.getItem(
-        "token"
-      );
-
-    await axios.delete(
-
-      `http://localhost:5000/api/users/${id}`,
-
-      {
-
-        headers: {
-
-          Authorization:
-            `Bearer ${token}`,
-
-        },
-
-      }
-
-    );
-
-    await modal.alert({ title: "Success", message: "User deleted successfully!", variant: "success" });
-
-    fetchUsers();
-
-  } catch (error) {
-
-    console.error(error);
-
-    await modal.alert({ title: "Error", message: error.response?.data?.message || "Failed to delete user", variant: "danger" });
-  }
-};
-
-  // PROMOTE USER
-const handlePromote =
-  async (id) => {
+    if (!confirmed) return;
 
     try {
-
-      const token =
-        localStorage.getItem(
-          "token"
-        );
-
+      const token = localStorage.getItem("token");
       await axios.put(
-
-        `http://localhost:5000/api/users/promote/${id}`,
-
+        `http://localhost:5000/api/users/promote/${user.id}`,
         {},
-
-        {
-
-          headers: {
-
-            Authorization:
-              `Bearer ${token}`,
-
-          },
-
-        }
-
+        { headers: { Authorization: `Bearer ${token}` } }
       );
-
-      await modal.alert({ title: "Success", message: "User promoted successfully!", variant: "success" });
-
+      toast.success(`${user.name} promoted to Administrator.`, "Role Updated");
       fetchUsers();
-
     } catch (error) {
-
       console.error(error);
-
-      await modal.alert({ title: "Error", message: "Promotion failed", variant: "danger" });
-
+      toast.error(error.response?.data?.message || "Promotion failed", "Error");
     }
-
   };
 
-// DEMOTE USER
-const handleDemote =
-  async (id) => {
+  const handleDemote = async (user) => {
+    const confirmed = await modal.confirm({
+      title: "Demote to Staff",
+      message: `Are you sure you want to demote "${user.name}" to Staff? They will lose access to system administration and audit logs.`,
+      confirmText: "Demote to Staff",
+      cancelText: "Cancel",
+      variant: "warning",
+    });
+    if (!confirmed) return;
 
     try {
-
-      const token =
-        localStorage.getItem(
-          "token"
-        );
-
+      const token = localStorage.getItem("token");
       await axios.put(
-
-        `http://localhost:5000/api/users/demote/${id}`,
-
+        `http://localhost:5000/api/users/demote/${user.id}`,
         {},
-
-        {
-
-          headers: {
-
-            Authorization:
-              `Bearer ${token}`,
-
-          },
-
-        }
-
+        { headers: { Authorization: `Bearer ${token}` } }
       );
-
-      await modal.alert({ title: "Success", message: "User demoted successfully!", variant: "success" });
-
+      toast.success(`${user.name} demoted to Staff.`, "Role Updated");
       fetchUsers();
-
     } catch (error) {
-
       console.error(error);
-
-      await modal.alert({ title: "Error", message: "Demotion failed", variant: "danger" });
-
+      toast.error(error.response?.data?.message || "Demotion failed", "Error");
     }
-
   };
 
+  const handleDelete = async (user) => {
+    const confirmed = await modal.confirm({
+      title: "Delete User Account",
+      message: `Are you sure you want to permanently delete the account for "${user.name}" (${user.email})? This action cannot be undone.`,
+      confirmText: "Delete Account",
+      cancelText: "Cancel",
+      variant: "danger",
+    });
+    if (!confirmed) return;
 
+    try {
+      const token = localStorage.getItem("token");
+      await axios.delete(`http://localhost:5000/api/users/${user.id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      toast.success("User account deleted successfully.", "Deleted");
+      fetchUsers();
+    } catch (error) {
+      console.error(error);
+      toast.error(error.response?.data?.message || "Failed to delete user", "Error");
+    }
+  };
+
+  // Filtered users (excluding current active user from management row)
+  const displayableUsers = users.filter((u) => u.id !== currentUser.id);
+  const filteredUsers = displayableUsers.filter((u) => {
+    const term = search.toLowerCase().trim();
+    const matchesSearch =
+      !term ||
+      u.name?.toLowerCase().includes(term) ||
+      u.email?.toLowerCase().includes(term) ||
+      String(u.id).includes(term);
+
+    const matchesRole =
+      !roleFilter ||
+      (roleFilter === "Admin" && u.role === "Admin") ||
+      (roleFilter === "Staff" && u.role !== "Admin");
+
+    return matchesSearch && matchesRole;
+  });
+
+  const totalAdmins = users.filter((u) => u.role === "Admin").length;
+  const totalStaff = users.filter((u) => u.role !== "Admin").length;
 
   return (
     <DashboardLayout>
-      <div className="space-y-6 font-sans">
-        {/* HEADER */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-extrabold text-[#1D1A1B] tracking-tight">User Management</h1>
-            <p className="text-xs text-[#5F5A5C] mt-0.5">Manage system staff and administrator accounts</p>
-          </div>
-          
-          <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-            <DialogTrigger className="flex items-center justify-center gap-2 bg-[#6B1D2A] text-[#FFFCF7] hover:bg-[#8B3545] px-4 h-9 rounded-xl font-bold text-xs transition shadow-xs cursor-pointer">
-              <Plus className="w-4 h-4" />
-              Create User
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px] p-6 bg-[#FFFCF7] border border-[#E8E3E1] rounded-2xl shadow-xl">
-              <DialogHeader className="mb-4">
-                <DialogTitle className="text-base font-bold text-[#1D1A1B]">Create New User</DialogTitle>
-                <DialogDescription className="text-[#5F5A5C] text-xs mt-1">
-                  Add a new staff account to the system.
-                </DialogDescription>
-              </DialogHeader>
-              <form onSubmit={handleCreateUser} className="flex flex-col gap-4">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-[#1D1A1B] uppercase">Full Name</label>
-                  <Input
-                    type="text"
-                    name="name"
-                    placeholder="e.g. Jane Doe"
-                    value={formData.name}
-                    onChange={handleChange}
-                    required
-                    className="border-[#E8E3E1] bg-[#FFFCF7] text-[#1D1A1B] h-10 px-3 rounded-xl text-xs"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-[#1D1A1B] uppercase">Email Address</label>
-                  <Input
-                    type="email"
-                    name="email"
-                    placeholder="e.g. staff@zppsu.edu.ph"
-                    value={formData.email}
-                    onChange={handleChange}
-                    required
-                    className="border-[#E8E3E1] bg-[#FFFCF7] text-[#1D1A1B] h-10 px-3 rounded-xl text-xs"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <label className="text-xs font-bold text-[#1D1A1B] uppercase">Password</label>
-                    <div className="flex items-center gap-3">
-                      <button
-                        type="button"
-                        onClick={copyPassword}
-                        className={`text-[10px] font-bold flex items-center gap-1 cursor-pointer transition-colors ${
-                          isCopied ? "text-green-600" : "text-[#5F5A5C] hover:text-[#1D1A1B]"
-                        }`}
-                        disabled={!formData.password}
-                      >
-                        {isCopied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-                        {isCopied ? "Copied" : "Copy"}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={generatePassword}
-                        className="text-[10px] text-[#6B1D2A] hover:underline font-bold flex items-center gap-1 cursor-pointer"
-                      >
-                        <Wand2 className="w-3 h-3" />
-                        Generate
-                      </button>
-                    </div>
-                  </div>
-                  <div className="relative">
-                    <Input
-                      type={showPassword ? "text" : "password"}
-                      name="password"
-                      placeholder="••••••••"
-                      value={formData.password}
-                      onChange={handleChange}
-                      required
-                      className="border-[#E8E3E1] bg-[#FFFCF7] text-[#1D1A1B] h-10 px-3 pr-10 rounded-xl text-xs"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-[#5F5A5C] hover:text-[#1D1A1B] transition-colors"
-                      aria-label={showPassword ? "Hide password" : "Show password"}
-                    >
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </button>
-                  </div>
-                </div>
+      <div className="space-y-6">
+        {/* SUMMARY METRIC CARDS */}
+        <UserSummaryCards
+          totalUsers={users.length}
+          totalAdmins={totalAdmins}
+          totalStaff={totalStaff}
+        />
+
+        {/* SEARCH & FILTERS BAR */}
+        <Card className="border border-[#E8E3E1] shadow-xs bg-[#FFFCF7] rounded-xl">
+          <CardContent className="p-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="relative flex-1 w-full">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#5F5A5C]" />
+              <Input
+                type="text"
+                placeholder="Search staff accounts by name or email..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-10 pr-10 h-10 text-xs rounded-xl border-[#E8E3E1] bg-[#FFFCF7] text-[#1D1A1B] placeholder-[#5F5A5C]/60 focus:border-[#6B1D2A]"
+              />
+              {search && (
                 <button
-                  type="submit"
-                  className="w-full flex items-center justify-center gap-2 bg-[#6B1D2A] text-[#FFFCF7] hover:bg-[#8B3545] h-10 rounded-xl font-bold text-xs transition shadow-xs mt-2 cursor-pointer"
+                  type="button"
+                  onClick={() => setSearch("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#5F5A5C] hover:text-[#1D1A1B] p-1 rounded-md cursor-pointer"
+                  aria-label="Clear search"
                 >
-                  <Plus className="w-4 h-4" />
-                  Create User
+                  <FilterX className="w-3.5 h-3.5" />
                 </button>
-              </form>
-            </DialogContent>
-          </Dialog>
+              )}
+            </div>
 
-          <Dialog open={resetModalOpen} onOpenChange={setResetModalOpen}>
-            <DialogContent className="sm:max-w-[425px] p-6 bg-[#FFFCF7] border border-[#E8E3E1] rounded-2xl shadow-xl">
-              <DialogHeader className="mb-4">
-                <DialogTitle className="text-base font-bold text-[#1D1A1B]">Reset Password</DialogTitle>
-                <DialogDescription className="text-[#5F5A5C] text-xs mt-1">
-                  Generate or set a new password for {userToReset?.name}.
-                </DialogDescription>
-              </DialogHeader>
-              <form onSubmit={handleResetPasswordSubmit} className="flex flex-col gap-4">
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <label className="text-xs font-bold text-[#1D1A1B] uppercase">New Password</label>
-                    <div className="flex items-center gap-3">
-                      <button
-                        type="button"
-                        onClick={copyResetPassword}
-                        className={`text-[10px] font-bold flex items-center gap-1 cursor-pointer transition-colors ${
-                          isResetCopied ? "text-green-600" : "text-[#5F5A5C] hover:text-[#1D1A1B]"
-                        }`}
-                        disabled={!resetPasswordValue}
-                      >
-                        {isResetCopied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-                        {isResetCopied ? "Copied" : "Copy"}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={generateResetPassword}
-                        className="text-[10px] text-[#6B1D2A] hover:underline font-bold flex items-center gap-1 cursor-pointer"
-                      >
-                        <Wand2 className="w-3 h-3" />
-                        Generate
-                      </button>
-                    </div>
-                  </div>
-                  <div className="relative">
-                    <Input
-                      type={showResetPassword ? "text" : "password"}
-                      name="resetPassword"
-                      placeholder="••••••••"
-                      value={resetPasswordValue}
-                      onChange={(e) => setResetPasswordValue(e.target.value)}
-                      required
-                      className="border-[#E8E3E1] bg-[#FFFCF7] text-[#1D1A1B] h-10 px-3 pr-10 rounded-xl text-xs"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowResetPassword(!showResetPassword)}
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-[#5F5A5C] hover:text-[#1D1A1B] transition-colors"
-                      aria-label={showResetPassword ? "Hide password" : "Show password"}
-                    >
-                      {showResetPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </button>
-                  </div>
-                </div>
-                <button
-                  type="submit"
-                  className="w-full flex items-center justify-center gap-2 bg-[#6B1D2A] text-[#FFFCF7] hover:bg-[#8B3545] h-10 rounded-xl font-bold text-xs transition shadow-xs mt-2 cursor-pointer"
-                >
-                  <Key className="w-4 h-4" />
-                  Reset Password
-                </button>
-              </form>
-            </DialogContent>
-          </Dialog>
-        </div>
+            <div className="flex items-center gap-2.5 w-full sm:w-auto justify-end">
+              <div className="w-36">
+                <ShadcnSelect
+                  value={roleFilter}
+                  onChange={setRoleFilter}
+                  options={[
+                    { value: "", label: "All Roles" },
+                    { value: "Admin", label: "Administrators" },
+                    { value: "Staff", label: "Staff Members" },
+                  ]}
+                  placeholder="All Roles"
+                  popoverWidth="w-40"
+                  className="h-10"
+                />
+              </div>
 
-        {/* USERS TABLE */}
-        <Card className="border border-[#E8E3E1] shadow-xs overflow-hidden rounded-xl bg-[#FFFCF7]">
-          <div className="overflow-x-auto">
-            <Table className="w-full text-xs">
-              <TableHeader className="bg-[#F4E7EA] border-b border-[#E8E3E1]">
-                <TableRow className="border-b border-[#E8E3E1]">
-                  <TableHead className="text-left font-bold text-[#5F5A5C] p-4 text-xs uppercase">Full Name</TableHead>
-                  <TableHead className="text-left font-bold text-[#5F5A5C] p-4 text-xs uppercase">Email</TableHead>
-                  <TableHead className="text-left font-bold text-[#5F5A5C] p-4 text-xs uppercase">Role</TableHead>
-                  <TableHead className="text-left font-bold text-[#5F5A5C] p-4 text-xs uppercase">Created At</TableHead>
-                  <TableHead className="text-right font-bold text-[#5F5A5C] p-4 text-xs uppercase">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody className="divide-y divide-[#E8E3E1]">
-                {users.filter(u => u.id !== currentUser.id).map((user) => (
-                  <TableRow key={user.id} className="border-b border-[#E8E3E1] hover:bg-[#F4E7EA]/40 transition-colors">
-                    {/* NAME */}
-                    <TableCell className="p-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-[#F4E7EA] text-[#6B1D2A] flex items-center justify-center font-bold text-xs shadow-xs">
-                          {user.name ? user.name.charAt(0).toUpperCase() : "U"}
-                        </div>
-                        <span className="font-semibold text-[#1D1A1B] text-xs">{user.name}</span>
-                      </div>
-                    </TableCell>
-
-                    {/* EMAIL */}
-                    <TableCell className="p-4 text-[#5F5A5C] text-xs">
-                      {user.email}
-                    </TableCell>
-
-                    {/* ROLE */}
-                    <TableCell className="p-4">
-                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wide ${
-                        user.role === "Admin" ? "bg-[#F2DFB0] text-[#A87818] border border-[#C99A2E]" : "bg-[#F4E7EA] text-[#6B1D2A] border border-[#E8E3E1]"
-                      }`}>
-                        {user.role === "Admin" ? "Admin" : "Staff"} 
-                      </span>
-                    </TableCell>
-
-                    {/* CREATED AT */}
-                    <TableCell className="p-4 text-[#5F5A5C] text-xs">
-                      {new Date(user.created_at).toLocaleDateString("en-US", { year: 'numeric', month: 'short', day: 'numeric' })}
-                    </TableCell>
-
-                    {/* ACTIONS */}
-                    <TableCell className="p-4 text-right">
-                      <div className="flex justify-end gap-1.5">
-                        {user.role !== "Admin" && (
-                          <button
-                            onClick={() => {
-                              setUserToReset(user);
-                              setResetPasswordValue("");
-                              setResetModalOpen(true);
-                            }}
-                            className="p-1.5 text-[#5F5A5C] hover:text-[#A87818] hover:bg-[#F2DFB0] rounded-lg transition-all cursor-pointer"
-                            title="Reset Password"
-                          >
-                            <Key className="w-4 h-4" />
-                          </button>
-                        )}
-
-                        {user.role !== "Admin" && (
-                          <button
-                            onClick={() => handlePromote(user.id)}
-                            className="p-1.5 text-[#5F5A5C] hover:text-[#6B1D2A] hover:bg-[#F4E7EA] rounded-lg transition-all cursor-pointer"
-                            title="Promote to Admin"
-                          >
-                            <ArrowUpToLine className="w-4 h-4" />
-                          </button>
-                        )}
-
-                        {user.role !== "Admin" && (
-                          <button
-                            onClick={() => handleDelete(user.id)}
-                            className="p-1.5 text-[#5F5A5C] hover:text-[#4A0E1C] hover:bg-[#F4E7EA] rounded-lg transition-all cursor-pointer"
-                            title="Delete User"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        )}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+              <Button
+                onClick={() => setIsCreateModalOpen(true)}
+                className="h-10 px-4 rounded-xl text-xs font-bold text-[#FFFCF7] bg-[#6B1D2A] hover:bg-[#8B3545] cursor-pointer shadow-xs inline-flex items-center gap-1.5 shrink-0"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Create User</span>
+              </Button>
+            </div>
+          </CardContent>
         </Card>
+
+        {/* USERS DATA TABLE */}
+        <UsersTable
+          users={filteredUsers}
+          onResetPassword={(u) => {
+            setUserToReset(u);
+            setIsResetModalOpen(true);
+          }}
+          onPromote={handlePromote}
+          onDemote={handleDemote}
+          onDelete={handleDelete}
+          search={search}
+          roleFilter={roleFilter}
+          onClearFilters={() => {
+            setSearch("");
+            setRoleFilter("");
+          }}
+        />
+
+        {/* CREATE USER MODAL */}
+        <CreateUserModal
+          isOpen={isCreateModalOpen}
+          onClose={() => setIsCreateModalOpen(false)}
+          onCreateUser={handleCreateUser}
+          isSaving={isSaving}
+        />
+
+        {/* RESET PASSWORD MODAL */}
+        <ResetPasswordModal
+          isOpen={isResetModalOpen}
+          user={userToReset}
+          onClose={() => {
+            setIsResetModalOpen(false);
+            setUserToReset(null);
+          }}
+          onResetPassword={handleResetPassword}
+          isSaving={isSaving}
+        />
       </div>
     </DashboardLayout>
   );
 }
-
-export default Users;

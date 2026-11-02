@@ -6,7 +6,7 @@ import {
   Tags, 
   Box, 
   Users, 
-  Activity, 
+  History, 
   FileText, 
   FileBarChart,
   LogOut,
@@ -70,7 +70,7 @@ function DashboardLayout({ children }) {
     { name: "Inventory", path: "/inventory", icon: Box },
     ...(isAdmin ? [
       { name: "Users", path: "/users", icon: Users },
-      { name: "Audits & Trails", path: "/logs", icon: Activity },
+      { name: "Audits & Trails", path: "/logs", icon: History },
       { name: "Masterlist Reports", path: "/masterlist-reports", icon: FileBarChart },
     ] : []),
   ];

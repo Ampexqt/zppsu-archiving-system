@@ -1,11 +1,13 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import axios from "axios";
 import ExcelJS from "exceljs";
-import { Download, Search, FileSpreadsheet, Calendar } from "lucide-react";
+import { Search, FileSpreadsheet, Calendar, RotateCcw, X, Loader2 } from "lucide-react";
 import DashboardLayout from "../components/layout/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import ShadcnSelect from "@/components/ui/ShadcnSelect";
+import MasterlistSummaryCards from "../components/reports/MasterlistSummaryCards";
 import { templateConfig } from "./templateConfig";
 
 function MasterlistReports() {
@@ -13,6 +15,8 @@ function MasterlistReports() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDocType, setSelectedDocType] = useState("ACCOMPLISHMENT REPORTS");
   const [documentTypes, setDocumentTypes] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isExporting, setIsExporting] = useState(false);
   
   // Date Filtering State
   const [dateFilter, setDateFilter] = useState("all");
@@ -21,6 +25,7 @@ function MasterlistReports() {
 
   const fetchReports = async () => {
     try {
+      setIsLoading(true);
       const token = localStorage.getItem("token");
       const response = await axios.get("http://localhost:5000/api/files", {
         headers: { Authorization: `Bearer ${token}` },
@@ -40,6 +45,8 @@ function MasterlistReports() {
       }
     } catch (error) {
       console.error("FETCH REPORTS ERROR:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -82,116 +89,167 @@ function MasterlistReports() {
   const headers = getTableHeaders(selectedDocType);
 
   // Filter based on selected type, search query, and date range
-  const filteredReports = allFiles.filter((file) => {
-    // 1. Filter by Document Type
-    if (file.document_type !== selectedDocType && selectedDocType !== "ALL") {
-      return false;
-    }
+  const filteredReports = useMemo(() => {
+    return allFiles.filter((file) => {
+      // 1. Filter by Document Type
+      if (file.document_type !== selectedDocType && selectedDocType !== "ALL") {
+        return false;
+      }
 
-    // 2. Filter by Date
-    const fileDate = new Date(file.created_at);
-    const today = new Date();
-    
-    if (dateFilter === "today") {
-      if (fileDate.toDateString() !== today.toDateString()) return false;
-    } else if (dateFilter === "7days") {
-      const sevenDaysAgo = new Date(today);
-      sevenDaysAgo.setDate(today.getDate() - 7);
-      if (fileDate < sevenDaysAgo) return false;
-    } else if (dateFilter === "1month") {
-      const oneMonthAgo = new Date(today);
-      oneMonthAgo.setMonth(today.getMonth() - 1);
-      if (fileDate < oneMonthAgo) return false;
-    } else if (dateFilter === "custom") {
-      if (customStartDate && new Date(fileDate).setHours(0,0,0,0) < new Date(customStartDate).setHours(0,0,0,0)) return false;
-      if (customEndDate && new Date(fileDate).setHours(23,59,59,999) > new Date(customEndDate).setHours(23,59,59,999)) return false;
-    }
+      // 2. Filter by Date
+      const fileDate = new Date(file.created_at);
+      const today = new Date();
+      
+      if (dateFilter === "today") {
+        if (fileDate.toDateString() !== today.toDateString()) return false;
+      } else if (dateFilter === "7days") {
+        const sevenDaysAgo = new Date(today);
+        sevenDaysAgo.setDate(today.getDate() - 7);
+        if (fileDate < sevenDaysAgo) return false;
+      } else if (dateFilter === "1month") {
+        const oneMonthAgo = new Date(today);
+        oneMonthAgo.setMonth(today.getMonth() - 1);
+        if (fileDate < oneMonthAgo) return false;
+      } else if (dateFilter === "custom") {
+        if (customStartDate && new Date(fileDate).setHours(0,0,0,0) < new Date(customStartDate).setHours(0,0,0,0)) return false;
+        if (customEndDate && new Date(fileDate).setHours(23,59,59,999) > new Date(customEndDate).setHours(23,59,59,999)) return false;
+      }
 
-    // 3. Filter by Search Query
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      const data = file.dynamic_data || {};
-      const matchesSearch = (
-        (data.subject && data.subject.toLowerCase().includes(query)) ||
-        (data.access_code && data.access_code.toLowerCase().includes(query)) ||
-        (data.file_location && data.file_location.toLowerCase().includes(query)) ||
-        (file.subject && file.subject.toLowerCase().includes(query)) ||
-        (file.access_code && file.access_code.toLowerCase().includes(query))
-      );
-      if (!matchesSearch) return false;
-    }
+      // 3. Filter by Search Query
+      if (searchQuery.trim()) {
+        const query = searchQuery.toLowerCase().trim();
+        const data = file.dynamic_data || {};
+        const matchesSearch = (
+          (data.subject && data.subject.toLowerCase().includes(query)) ||
+          (data.access_code && data.access_code.toLowerCase().includes(query)) ||
+          (data.file_location && data.file_location.toLowerCase().includes(query)) ||
+          (file.subject && file.subject.toLowerCase().includes(query)) ||
+          (file.access_code && file.access_code.toLowerCase().includes(query))
+        );
+        if (!matchesSearch) return false;
+      }
 
-    return true;
-  });
+      return true;
+    });
+  }, [allFiles, selectedDocType, dateFilter, customStartDate, customEndDate, searchQuery]);
+
+  // Metric counts
+  const assignedCount = useMemo(() => {
+    return filteredReports.filter(f => 
+      f.file_box || 
+      f.file_box_id || 
+      (f.dynamic_data?.file_location && !f.dynamic_data.file_location.toLowerCase().includes("unassigned"))
+    ).length;
+  }, [filteredReports]);
+
+  const unassignedCount = useMemo(() => {
+    return filteredReports.length - assignedCount;
+  }, [filteredReports, assignedCount]);
+
+  // Dropdown options
+  const docTypeOptions = useMemo(() => {
+    return documentTypes.map(type => {
+      const count = allFiles.filter(f => f.document_type === type).length;
+      return {
+        value: type,
+        label: type,
+        subtitle: `${count} record${count === 1 ? '' : 's'}`
+      };
+    });
+  }, [documentTypes, allFiles]);
+
+  const dateFilterOptions = [
+    { value: "all", label: "All Time" },
+    { value: "today", label: "Today" },
+    { value: "7days", label: "Last 7 Days" },
+    { value: "1month", label: "Last 1 Month" },
+    { value: "custom", label: "Custom Range..." },
+  ];
+
+  const hasActiveFilters = searchQuery.trim() !== "" || dateFilter !== "all";
+
+  const handleResetFilters = () => {
+    setSearchQuery("");
+    setDateFilter("all");
+    setCustomStartDate("");
+    setCustomEndDate("");
+  };
 
   const handleExportExcel = async () => {
-    if (filteredReports.length === 0) return;
+    if (filteredReports.length === 0 || isExporting) return;
 
-    const workbook = new ExcelJS.Workbook();
-    const sheet = workbook.addWorksheet("Masterlist");
+    try {
+      setIsExporting(true);
+      const workbook = new ExcelJS.Workbook();
+      const sheet = workbook.addWorksheet("Masterlist");
 
-    const titleStr = `ZPPSU MASTERLIST OF RECORDS - ${selectedDocType}`;
+      const titleStr = `ZPPSU MASTERLIST OF RECORDS - ${selectedDocType}`;
 
-    // Add Title Row
-    const lastColLetter = String.fromCharCode(65 + headers.length - 1);
-    sheet.mergeCells(`A1:${lastColLetter}1`);
-    const titleCell = sheet.getCell("A1");
-    titleCell.value = titleStr;
-    titleCell.font = { bold: true, size: 14 };
-    titleCell.alignment = { horizontal: "center", vertical: "middle" };
+      // Add Title Row
+      const lastColLetter = String.fromCharCode(65 + headers.length - 1);
+      sheet.mergeCells(`A1:${lastColLetter}1`);
+      const titleCell = sheet.getCell("A1");
+      titleCell.value = titleStr;
+      titleCell.font = { bold: true, size: 14 };
+      titleCell.alignment = { horizontal: "center", vertical: "middle" };
 
-    // Add Headers
-    const headerRow = sheet.addRow(headers);
-    headerRow.eachCell((cell) => {
-      cell.font = { bold: true };
-      cell.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
-      cell.border = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
-    });
-
-    // Add Data
-    filteredReports.forEach(file => {
-      const rowData = getRowData(file, headers);
-      // Clean undefined to empty string
-      const cleanRowData = rowData.map(v => v === undefined || v === null ? "" : v);
-      const dataRow = sheet.addRow(cleanRowData);
-      dataRow.eachCell((cell) => {
+      // Add Headers
+      const headerRow = sheet.addRow(headers);
+      headerRow.eachCell((cell) => {
+        cell.font = { bold: true };
         cell.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
         cell.border = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
       });
-    });
 
-    // Set Column Widths based on header name
-    sheet.columns = headers.map(header => {
-      let width = 30; // default wider
-      const hUpper = header.toUpperCase();
-      if (hUpper.includes("FILE LOCATION")) width = 35;
-      else if (hUpper.includes("SUBJECT") || hUpper.includes("DESCRIPTION") || hUpper.includes("TITLE")) width = 45;
-      else if (hUpper.includes("DATE") || hUpper.includes("STATUS") || hUpper.includes("ACTION")) width = 20;
-      return { width };
-    });
+      // Add Data
+      filteredReports.forEach(file => {
+        const rowData = getRowData(file, headers);
+        // Clean undefined to empty string
+        const cleanRowData = rowData.map(v => v === undefined || v === null ? "" : v);
+        const dataRow = sheet.addRow(cleanRowData);
+        dataRow.eachCell((cell) => {
+          cell.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
+          cell.border = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
+        });
+      });
 
-    const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `ZPPSU_${selectedDocType.replace(/\s+/g, '_')}_Masterlist.xlsx`;
-    link.click();
-    window.URL.revokeObjectURL(url);
+      // Set Column Widths based on header name
+      sheet.columns = headers.map(header => {
+        let width = 30; // default wider
+        const hUpper = header.toUpperCase();
+        if (hUpper.includes("FILE LOCATION")) width = 35;
+        else if (hUpper.includes("SUBJECT") || hUpper.includes("DESCRIPTION") || hUpper.includes("TITLE")) width = 45;
+        else if (hUpper.includes("DATE") || hUpper.includes("STATUS") || hUpper.includes("ACTION")) width = 20;
+        return { width };
+      });
 
-    try {
-      const token = localStorage.getItem("token");
-      await axios.post(
-        "http://localhost:5000/api/logs/track",
-        {
-          action: "EXPORT MASTERLIST",
-          description: `Exported Excel masterlist for ${selectedDocType} (${filteredReports.length} records)`,
-          module: "reports"
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-    } catch (trackErr) {
-      console.error("Export tracking error:", trackErr);
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `ZPPSU_${selectedDocType.replace(/\s+/g, '_')}_Masterlist.xlsx`;
+      link.click();
+      window.URL.revokeObjectURL(url);
+
+      try {
+        const token = localStorage.getItem("token");
+        await axios.post(
+          "http://localhost:5000/api/logs/track",
+          {
+            action: "EXPORT MASTERLIST",
+            description: `Exported Excel masterlist for ${selectedDocType} (${filteredReports.length} records)`,
+            module: "reports"
+          },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+      } catch (trackErr) {
+        console.error("Export tracking error:", trackErr);
+      }
+    } catch (err) {
+      console.error("Excel generation error:", err);
+    } finally {
+      setIsExporting(false);
     }
   };
 
@@ -201,77 +259,145 @@ function MasterlistReports() {
         {/* HEADER */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-[10px] font-bold text-[#A87818] uppercase tracking-wider bg-[#F2DFB0]/50 px-2 py-0.5 rounded-md border border-[#C99A2E]/30">
+                Institutional Records
+              </span>
+            </div>
             <h1 className="text-2xl font-extrabold tracking-tight text-[#1D1A1B]">
               Masterlist Reports Registry
             </h1>
             <p className="text-xs text-[#5F5A5C] mt-0.5">
-              Generate and export an Excel masterlist for any specific document type.
+              Generate and export verified Excel masterlists for any university document classification.
             </p>
           </div>
           
           <div className="flex items-center gap-2.5">
             <Button 
               onClick={handleExportExcel}
-              disabled={filteredReports.length === 0}
-              className="h-9 px-4 rounded-xl bg-[#6B1D2A] text-[#FFFCF7] hover:bg-[#8B3545] font-bold text-xs shadow-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+              disabled={filteredReports.length === 0 || isExporting}
+              className="h-10 px-4 rounded-xl bg-[#6B1D2A] text-[#FFFCF7] hover:bg-[#8B3545] font-bold text-xs shadow-xs flex items-center gap-2 cursor-pointer disabled:opacity-50 transition-colors"
             >
-              <FileSpreadsheet className="w-3.5 h-3.5" />
-              <span>Export Excel</span>
+              {isExporting ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin text-[#FFFCF7]" />
+                  <span>Generating Excel...</span>
+                </>
+              ) : (
+                <>
+                  <FileSpreadsheet className="w-4 h-4 text-[#F2DFB0]" />
+                  <span>Export Excel ({filteredReports.length})</span>
+                </>
+              )}
             </Button>
           </div>
         </div>
 
-        {/* FILTERS */}
+        {/* SUMMARY CARDS */}
+        <MasterlistSummaryCards 
+          totalEntries={filteredReports.length}
+          assignedCount={assignedCount}
+          unassignedCount={unassignedCount}
+          selectedDocType={selectedDocType}
+          totalDocTypes={documentTypes.length}
+        />
+
+        {/* FILTERS TOOLBAR */}
         <Card className="border border-[#E8E3E1] shadow-xs bg-[#FFFCF7] rounded-xl">
-          <CardContent className="p-4 flex flex-col md:flex-row gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#5F5A5C]" />
-              <Input 
-                placeholder="Search access code, subject, or location..." 
-                className="pl-10 h-10 text-xs bg-[#FFFCF7] border-[#E8E3E1] text-[#1D1A1B] rounded-xl focus-visible:ring-[#6B1D2A]"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
+          <CardContent className="p-4 space-y-4">
+            <div className="flex flex-col md:flex-row gap-3">
+              {/* Search Field */}
+              <div className="relative flex-1">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#5F5A5C]" />
+                <Input 
+                  placeholder="Search access code, subject, or location..." 
+                  className="pl-10 pr-9 h-10 text-xs bg-[#FFFCF7] border-[#E8E3E1] text-[#1D1A1B] rounded-xl focus-visible:ring-[#6B1D2A]"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+                {searchQuery && (
+                  <button 
+                    onClick={() => setSearchQuery("")}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#5F5A5C] hover:text-[#1D1A1B] p-0.5"
+                    title="Clear search"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+
+              {/* Document Type Dropdown */}
+              <div className="w-full md:w-72">
+                <ShadcnSelect
+                  value={selectedDocType}
+                  onChange={(val) => setSelectedDocType(val)}
+                  options={docTypeOptions}
+                  searchable={true}
+                  searchPlaceholder="Search template schema..."
+                  popoverWidth="w-72"
+                  placeholder="Select document type..."
+                />
+              </div>
+
+              {/* Date Filter Dropdown */}
+              <div className="w-full md:w-52">
+                <ShadcnSelect
+                  value={dateFilter}
+                  onChange={(val) => setDateFilter(val)}
+                  options={dateFilterOptions}
+                  popoverWidth="w-52"
+                  placeholder="Filter by date..."
+                />
+              </div>
+
+              {/* Reset Filters Button */}
+              {hasActiveFilters && (
+                <Button
+                  variant="outline"
+                  onClick={handleResetFilters}
+                  className="h-10 px-3 border border-[#E8E3E1] text-[#5F5A5C] hover:text-[#6B1D2A] hover:bg-[#F4E7EA] rounded-xl text-xs font-semibold cursor-pointer shrink-0 transition-colors flex items-center gap-1.5"
+                  title="Reset all active filters"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span>Reset</span>
+                </Button>
+              )}
             </div>
-            <div className="w-full md:w-64">
-              <select
-                className="w-full h-10 text-xs bg-[#FFFCF7] border border-[#E8E3E1] text-[#1D1A1B] rounded-xl focus:ring-[#6B1D2A] focus:border-[#6B1D2A] px-3 font-semibold cursor-pointer"
-                value={selectedDocType}
-                onChange={(e) => setSelectedDocType(e.target.value)}
-              >
-                {documentTypes.map(type => (
-                  <option key={type} value={type}>{type}</option>
-                ))}
-              </select>
-            </div>
-            <div className="w-full md:w-48 flex items-center gap-2">
-              <select
-                className="w-full h-10 text-xs bg-[#FFFCF7] border border-[#E8E3E1] text-[#1D1A1B] rounded-xl focus:ring-[#6B1D2A] focus:border-[#6B1D2A] px-3 font-semibold cursor-pointer"
-                value={dateFilter}
-                onChange={(e) => setDateFilter(e.target.value)}
-              >
-                <option value="all">All Time</option>
-                <option value="today">Today</option>
-                <option value="7days">Last 7 Days</option>
-                <option value="1month">Last 1 Month</option>
-                <option value="custom">Custom Range</option>
-              </select>
-            </div>
+
+            {/* Custom Date Pickers */}
+            {dateFilter === "custom" && (
+              <div className="pt-3 border-t border-[#E8E3E1] flex flex-col sm:flex-row gap-4 items-center">
+                <div className="flex items-center gap-2 w-full sm:w-auto">
+                  <Calendar className="w-4 h-4 text-[#A87818] shrink-0" />
+                  <span className="text-xs font-bold text-[#1D1A1B] shrink-0">From:</span>
+                  <Input 
+                    type="date" 
+                    className="h-9 text-xs rounded-xl bg-[#FFFCF7] border-[#E8E3E1] text-[#1D1A1B] focus-visible:ring-[#6B1D2A]" 
+                    value={customStartDate} 
+                    onChange={(e) => setCustomStartDate(e.target.value)} 
+                  />
+                </div>
+                <div className="flex items-center gap-2 w-full sm:w-auto">
+                  <span className="text-xs font-bold text-[#1D1A1B] shrink-0">To:</span>
+                  <Input 
+                    type="date" 
+                    className="h-9 text-xs rounded-xl bg-[#FFFCF7] border-[#E8E3E1] text-[#1D1A1B] focus-visible:ring-[#6B1D2A]" 
+                    value={customEndDate} 
+                    onChange={(e) => setCustomEndDate(e.target.value)} 
+                  />
+                </div>
+                {(customStartDate || customEndDate) && (
+                  <Button
+                    variant="ghost"
+                    onClick={() => { setCustomStartDate(""); setCustomEndDate(""); }}
+                    className="h-8 px-2 text-[11px] text-[#5F5A5C] hover:text-[#6B1D2A] cursor-pointer"
+                  >
+                    Clear dates
+                  </Button>
+                )}
+              </div>
+            )}
           </CardContent>
-          
-          {/* Custom Date Pickers */}
-          {dateFilter === "custom" && (
-            <div className="px-4 pb-4 flex flex-col md:flex-row gap-4 items-center border-t border-[#E8E3E1] pt-4 mt-2">
-              <div className="flex items-center gap-2 w-full md:w-auto">
-                <span className="text-xs font-semibold text-[#5F5A5C]">Start Date:</span>
-                <Input type="date" className="h-9 text-xs rounded-lg bg-[#FFFCF7] border-[#E8E3E1]" value={customStartDate} onChange={(e) => setCustomStartDate(e.target.value)} />
-              </div>
-              <div className="flex items-center gap-2 w-full md:w-auto">
-                <span className="text-xs font-semibold text-[#5F5A5C]">End Date:</span>
-                <Input type="date" className="h-9 text-xs rounded-lg bg-[#FFFCF7] border-[#E8E3E1]" value={customEndDate} onChange={(e) => setCustomEndDate(e.target.value)} />
-              </div>
-            </div>
-          )}
         </Card>
 
         {/* MASTERLIST TABLE */}
@@ -317,7 +443,7 @@ function MasterlistReports() {
                   ) : (
                     <tr>
                       <td colSpan={headers.length} className="border border-[#1D1A1B] p-8 text-center text-[#5F5A5C] italic">
-                        No records found matching your filters.
+                        {isLoading ? "Loading masterlist records..." : "No records found matching your filters."}
                       </td>
                     </tr>
                   )}

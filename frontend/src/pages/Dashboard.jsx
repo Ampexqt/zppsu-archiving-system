@@ -5,7 +5,7 @@ import DashboardLayout from "../components/layout/DashboardLayout";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { FileText, Archive, Clock, Files, TrendingUp, Users, FolderTree, Activity, Box, ArrowUpRight, Plus, FolderSearch } from "lucide-react";
+import { FileText, Archive, Clock, Files, TrendingUp, Users, FolderTree, History, Box, ArrowUpRight, Plus, FolderSearch } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 function Dashboard() {
@@ -223,7 +223,7 @@ function Dashboard() {
                   ))
                 ) : (
                   <div className="flex flex-col items-center justify-center py-6 text-[#5F5A5C]">
-                    <Activity className="w-8 h-8 mb-1.5 opacity-30" />
+                    <History className="w-8 h-8 mb-1.5 opacity-30" />
                     <span className="text-xs font-medium">No recent user activity recorded.</span>
                   </div>
                 )}

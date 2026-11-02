@@ -2,10 +2,11 @@ import React, { useState, useMemo } from "react";
 import {
   Archive,
   Box,
-  BookOpen,
+  FolderClosed,
   ChevronRight,
-  Shield,
-  Grid3X3,
+  FolderArchive,
+  Layers,
+  FileBox,
   Search,
   Plus,
 } from "lucide-react";
@@ -79,6 +80,7 @@ export default function StorageExplorer({
         boxMap.get(parentName).archfiles.push({
           ...container,
           displayName: parsed.archfileName,
+          color: parsed.color,
         });
       } else {
         const boxName = parsed.boxName;
@@ -166,11 +168,11 @@ export default function StorageExplorer({
                 }`}
               >
                 {detectUnitType(currentCabinet.name).id === "steel_cabinet" ? (
-                  <Shield className="w-3.5 h-3.5" />
+                  <FolderArchive className="w-3.5 h-3.5" />
                 ) : detectUnitType(currentCabinet.name).id === "shelves" ? (
-                  <Grid3X3 className="w-3.5 h-3.5" />
+                  <Layers className="w-3.5 h-3.5" />
                 ) : (
-                  <Archive className="w-3.5 h-3.5" />
+                  <FileBox className="w-3.5 h-3.5" />
                 )}
                 <span className="truncate max-w-[160px]">{currentCabinet.name}</span>
               </button>
@@ -195,12 +197,15 @@ export default function StorageExplorer({
             </>
           )}
 
-          {/* ARCHFILE SEGMENT (BLUE) */}
+          {/* ARCHFILE SEGMENT (CUSTOM COLOR) */}
           {selectedArchfile && (
             <>
               <ChevronRight className="w-3.5 h-3.5 text-[#5F5A5C] shrink-0" />
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#1E40AF] text-[#FFFCF7] font-bold shadow-xs">
-                <BookOpen className="w-3.5 h-3.5" />
+              <div
+                style={{ backgroundColor: selectedArchfile.color || "#6B1D2A" }}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[#FFFCF7] font-bold shadow-xs transition-colors"
+              >
+                <FolderClosed className="w-3.5 h-3.5" />
                 <span className="truncate max-w-[160px]">
                   {selectedArchfile.displayName || selectedArchfile.name}
                 </span>
@@ -231,10 +236,10 @@ export default function StorageExplorer({
             ) : !selectedArchfile ? (
               <Button
                 onClick={() => onOpenCreateArchfile(currentCabinet, currentBox.name)}
-                className="h-9 px-4 rounded-xl bg-[#1E40AF] text-[#FFFCF7] hover:bg-[#1D4ED8] text-xs font-bold shadow-xs flex items-center gap-1.5 cursor-pointer"
+                className="h-9 px-4 rounded-xl bg-[#6B1D2A] text-[#FFFCF7] hover:bg-[#8B3545] text-xs font-bold shadow-xs flex items-center gap-1.5 cursor-pointer"
               >
                 <Plus className="w-3.5 h-3.5" />
-                <span>New Archfile (Blue)</span>
+                <span>New Archfile</span>
               </Button>
             ) : null}
           </div>

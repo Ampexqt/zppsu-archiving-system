@@ -40,7 +40,7 @@ export default function CabinetBoxesView({
                 {typeInfo.label}
               </span>
               <span className="text-xs text-[#5F5A5C]">
-                Capacity: {cabinet?.capacity || 20} Boxes Limit
+                Stored: {boxes.length} {boxes.length === 1 ? "Box" : "Boxes"}
               </span>
             </div>
             <h2 className="text-lg font-bold text-[#1D1A1B] mt-0.5">

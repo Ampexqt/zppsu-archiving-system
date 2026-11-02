@@ -239,7 +239,7 @@ function Inventory() {
               Physical Storage & Inventory
             </h1>
             <p className="text-xs text-[#5F5A5C] mt-0.5">
-              Interactive folder explorer: Navigate directly from Cabinet &rarr; File Box &rarr; Archfile (Blue Binders).
+              Interactive folder explorer: Navigate directly from Cabinet &rarr; File Box &rarr; Archfile Binders.
             </p>
           </div>
 

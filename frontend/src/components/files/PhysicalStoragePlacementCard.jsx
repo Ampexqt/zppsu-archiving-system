@@ -1,12 +1,12 @@
 import React, { useState, useMemo } from "react";
-import { Box, Layers, BookOpen, Archive, CheckCircle2, RotateCcw } from "lucide-react";
+import { Box, FolderClosed, FolderArchive, CheckCircle2, RotateCcw } from "lucide-react";
 import ShadcnSelect from "@/components/ui/ShadcnSelect";
 import { detectUnitType, detectContainerType, parseBoxHierarchy } from "../inventory/storageTaxonomy";
 
 /**
  * PhysicalStoragePlacementCard
  * Reusable, customizable physical storage placement selector.
- * Supports Cabinet, Steel Cabinet, Shelves, Archfiles (Blue), and File Boxes
+ * Supports Cabinet, Steel Cabinet, Shelves, Archfiles, and File Boxes
  * with container type toggles and live breadcrumb location tracking.
  */
 export default function PhysicalStoragePlacementCard({
@@ -70,7 +70,7 @@ export default function PhysicalStoragePlacementCard({
         value: String(box.id),
         label: isArch ? `${parsed.archfileName} (Archfile)` : box.name,
         subtitle: isArch
-          ? `Blue Archfile • Inside ${parsed.parentBoxName || "Box"}`
+          ? `Archfile Binder • Inside ${parsed.parentBoxName || "Box"}`
           : `File Box • (${box.used_space || 0}/${box.capacity || 0})`,
       };
     });
@@ -108,7 +108,7 @@ export default function PhysicalStoragePlacementCard({
               Physical Storage Placement (Optional)
             </h4>
             <p className="text-[11px] text-[#5F5A5C]">
-              Specify cabinet, file box, or blue archfile binder for physical paper copy tracking
+              Specify cabinet, file box, or archfile binder for physical paper copy tracking
             </p>
           </div>
         </div>
@@ -132,7 +132,7 @@ export default function PhysicalStoragePlacementCard({
         )}
       </div>
 
-      {/* CONTAINER TYPE TOGGLE (IF CABINET HAS MULTIPLE TYPES) */}
+      {/* CONTAINER TYPE TOGGLE (IF CABINET HAS MULTIPLE CONTAINERS) */}
       {activeCabinet && rawBoxes.length > 0 && (
         <div className="flex items-center justify-between flex-wrap gap-2 pt-1">
           <div className="flex items-center gap-1.5">
@@ -167,11 +167,11 @@ export default function PhysicalStoragePlacementCard({
                 onClick={() => setContainerFilter("archfile")}
                 className={`px-2 py-0.5 text-[10px] font-bold rounded-md transition-all cursor-pointer ${
                   containerFilter === "archfile"
-                    ? "bg-[#1E40AF] text-[#FFFCF7]"
-                    : "text-[#1E40AF] hover:bg-[#DBEAFE]"
+                    ? "bg-[#6B1D2A] text-[#FFFCF7]"
+                    : "text-[#5F5A5C] hover:text-[#1D1A1B]"
                 }`}
               >
-                Archfiles (Blue) ({archfileCount})
+                Archfiles ({archfileCount})
               </button>
             </div>
           </div>
@@ -198,7 +198,7 @@ export default function PhysicalStoragePlacementCard({
         <div className="space-y-1.5">
           <label className="text-[10px] font-bold uppercase text-[#5F5A5C] flex items-center justify-between">
             <span className="flex items-center gap-1">
-              <Archive className="w-3.5 h-3.5 text-[#6B1D2A]" />
+              <FolderArchive className="w-3.5 h-3.5 text-[#6B1D2A]" />
               Cabinet / Storage Unit
             </span>
             {activeCabinet && (
@@ -227,7 +227,7 @@ export default function PhysicalStoragePlacementCard({
         <div className="space-y-1.5">
           <label className="text-[10px] font-bold uppercase text-[#5F5A5C] flex items-center justify-between">
             <span className="flex items-center gap-1">
-              <BookOpen className="w-3.5 h-3.5 text-[#1E40AF]" />
+              <FolderClosed className="w-3.5 h-3.5 text-[#6B1D2A]" />
               File Box / Archfile Binder
             </span>
             {activeBox && (

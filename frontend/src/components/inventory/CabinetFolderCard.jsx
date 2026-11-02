@@ -1,12 +1,12 @@
 import React from "react";
-import { Archive, Shield, Grid3X3, Edit2, Trash2, ChevronRight, Folder } from "lucide-react";
+import { FileBox, FolderArchive, Layers, Box, Edit2, Trash2, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
 import { detectUnitType } from "./storageTaxonomy";
 
 /**
  * CabinetFolderCard
  * Displays a storage unit (Cabinet, Steel Cabinet, Shelves) as an interactive root folder.
+ * Uses accurate Lucide icons and a dynamic box counter (capacity limit not applicable).
  */
 export default function CabinetFolderCard({
   cab,
@@ -19,15 +19,13 @@ export default function CabinetFolderCard({
   onDelete,
 }) {
   const typeInfo = detectUnitType(cab.name);
-  const cap = cab.capacity || 20;
-  const pct = Math.round((boxesCount / cap) * 100);
 
   const IconComp =
     typeInfo.id === "steel_cabinet"
-      ? Shield
+      ? FolderArchive
       : typeInfo.id === "shelves"
-      ? Grid3X3
-      : Archive;
+      ? Layers
+      : FileBox;
 
   return (
     <div
@@ -82,30 +80,30 @@ export default function CabinetFolderCard({
         <div className="flex items-center gap-2 text-[11px] text-[#5F5A5C] mt-1">
           <span className="font-semibold text-[#1D1A1B]">{boxesCount} File Boxes</span>
           <span>•</span>
-          <span className="text-[#1E40AF] font-bold">{archfilesCount} Archfiles</span>
+          <span className="text-[#6B1D2A] font-bold">{archfilesCount} Archfiles</span>
           <span>•</span>
           <span>{totalDocs} Files</span>
         </div>
 
-        {/* OCCUPANCY BAR */}
-        <div className="mt-4 space-y-1">
-          <div className="flex justify-between text-[11px] text-[#5F5A5C]">
-            <span>Box Capacity</span>
-            <span className="font-bold text-[#1D1A1B]">
-              {boxesCount} / {cap} ({pct}%)
-            </span>
+        {/* DYNAMIC BOXES COUNTER (CAPACITY NOT APPLICABLE) */}
+        <div className="mt-4 pt-3 border-t border-[#E8E3E1] flex items-center justify-between text-xs">
+          <div className="flex items-center gap-1.5 text-[#5F5A5C]">
+            <Box className="w-4 h-4 text-[#6B1D2A]" />
+            <span className="font-medium">Boxes Stored:</span>
           </div>
-          <Progress value={pct} className="h-2 bg-[#E8E3E1]" />
+          <span className="font-bold text-[#1D1A1B] text-xs bg-[#FCFAF8] border border-[#E8E3E1] px-2.5 py-0.5 rounded-md">
+            {boxesCount} {boxesCount === 1 ? "File Box" : "File Boxes"}
+          </span>
         </div>
       </div>
 
       {/* FOOTER ENTER ACTION */}
       <div className="mt-5 pt-3.5 border-t border-[#E8E3E1] flex items-center justify-between text-xs font-bold text-[#6B1D2A]">
         <span className="text-[11px] font-normal text-[#5F5A5C]">
-          Click to enter cabinet
+          Click to enter unit
         </span>
         <span className="flex items-center gap-1 group-hover:translate-x-1 transition-transform">
-          Open Cabinet <ChevronRight className="w-3.5 h-3.5" />
+          Open Unit <ChevronRight className="w-3.5 h-3.5" />
         </span>
       </div>
     </div>

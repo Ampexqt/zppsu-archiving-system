@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { X, Box, BookOpen, Layers, Check } from "lucide-react";
+import { X, Box, FolderClosed, Layers, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import ShadcnSelect from "@/components/ui/ShadcnSelect";
@@ -129,7 +129,7 @@ export default function CreateFileBoxModal({
                   const isSelected = selectedType === type.id;
                   const IconComponent =
                     type.id === "archfile"
-                      ? BookOpen
+                      ? FolderClosed
                       : type.id === "shelf_tier"
                       ? Layers
                       : Box;

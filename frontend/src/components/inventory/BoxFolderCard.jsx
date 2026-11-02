@@ -72,7 +72,7 @@ export default function BoxFolderCard({
 
         {/* INNER CONTENT SUMMARY */}
         <div className="flex items-center gap-2 text-[11px] text-[#5F5A5C] mt-1">
-          <span className="text-[#1E40AF] font-bold bg-[#DBEAFE] px-1.5 py-0.2 rounded border border-[#BFDBFE]">
+          <span className="text-[#6B1D2A] font-bold bg-[#F4E7EA] px-2 py-0.5 rounded border border-[#E8E3E1]">
             {archfilesCount} Archfiles
           </span>
           <span>•</span>

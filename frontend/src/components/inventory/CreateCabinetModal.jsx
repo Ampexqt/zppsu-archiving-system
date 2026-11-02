@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { X, Archive, Shield, Grid3X3, ArrowRight, Check } from "lucide-react";
+import { X, FileBox, FolderArchive, Layers, ArrowRight, Check, Box } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { STORAGE_UNIT_TYPES } from "./storageTaxonomy";
@@ -8,6 +8,7 @@ import { STORAGE_UNIT_TYPES } from "./storageTaxonomy";
  * CreateCabinetModal
  * Guided creation modal with Stepper / Equipment selection
  * (Cabinet, Steel Cabinet, Shelves).
+ * Dynamic box counter: Container capacity is not applicable during creation.
  */
 export default function CreateCabinetModal({
   isOpen,
@@ -16,8 +17,7 @@ export default function CreateCabinetModal({
 }) {
   const [selectedType, setSelectedType] = useState("steel_cabinet");
   const [unitName, setUnitName] = useState("");
-  const [capacity, setCapacity] = useState("20");
-  const [step, setStep] = useState(1); // 1 = Select Type, 2 = Details & Capacity
+  const [step, setStep] = useState(1); // 1 = Select Type, 2 = Configure Unit
 
   if (!isOpen) return null;
 
@@ -32,14 +32,14 @@ export default function CreateCabinetModal({
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!unitName.trim() || !capacity) return;
+    if (!unitName.trim()) return;
+    // Capacity is not applicable for physical cabinets; default to 100 for backend compatibility
     onSubmit({
       name: unitName.trim(),
-      capacity: parseInt(capacity, 10),
+      capacity: 100,
     });
     // Reset
     setUnitName("");
-    setCapacity("20");
     setStep(1);
   };
 
@@ -61,7 +61,7 @@ export default function CreateCabinetModal({
                 Step {step} of 2
               </span>
               <span className="text-xs text-[#5F5A5C]">
-                {step === 1 ? "Select Storage Equipment" : "Configure Unit & Capacity"}
+                {step === 1 ? "Select Storage Equipment" : "Configure Unit Details"}
               </span>
             </div>
             <h2 className="text-base font-bold text-[#1D1A1B] mt-1">
@@ -96,10 +96,10 @@ export default function CreateCabinetModal({
                   const isSelected = selectedType === type.id;
                   const IconComponent =
                     type.id === "steel_cabinet"
-                      ? Shield
+                      ? FolderArchive
                       : type.id === "shelves"
-                      ? Grid3X3
-                      : Archive;
+                      ? Layers
+                      : FileBox;
 
                   return (
                     <button
@@ -112,7 +112,7 @@ export default function CreateCabinetModal({
                           : "border-[#E8E3E1] bg-[#FFFCF7] hover:border-[#6B1D2A]/50 hover:bg-[#FCFAF8]"
                       }`}
                     >
-                      <div className={`p-2 rounded-xl shrink-0 ${type.badgeBg} ${type.badgeText}`}>
+                      <div className={`p-2.5 rounded-xl shrink-0 ${type.badgeBg} ${type.badgeText} border border-[#E8E3E1]`}>
                         <IconComponent className="w-5 h-5 stroke-[2]" />
                       </div>
                       <div className="flex-1 min-w-0">
@@ -186,22 +186,24 @@ export default function CreateCabinetModal({
                 </span>
               </div>
 
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-[#1D1A1B] uppercase tracking-wider block">
-                  Container Capacity (Box / Archfile Limit) <span className="text-[#6B1D2A]">*</span>
-                </label>
-                <Input
-                  type="number"
-                  min="1"
-                  max="500"
-                  placeholder="e.g. 20"
-                  value={capacity}
-                  onChange={(e) => setCapacity(e.target.value)}
-                  className="h-10 text-xs rounded-xl bg-[#FFFCF7] border-[#E8E3E1] text-[#1D1A1B] focus-visible:ring-[#6B1D2A]"
-                />
-                <span className="text-[10px] text-[#5F5A5C]">
-                  Maximum number of file boxes or archfiles this unit can physically store.
-                </span>
+              {/* DYNAMIC CONTAINER COUNTER INFO CARD (CAPACITY NOT APPLICABLE) */}
+              <div className="p-3.5 rounded-xl border border-[#E8E3E1] bg-[#FCFAF8] flex items-start gap-3">
+                <div className="w-8 h-8 rounded-lg bg-[#F4E7EA] text-[#6B1D2A] flex items-center justify-center shrink-0 mt-0.5">
+                  <Box className="w-4 h-4" />
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-[#1D1A1B]">
+                      Container Capacity: Not Applicable
+                    </span>
+                    <span className="text-[10px] font-bold text-[#6B1D2A] bg-[#F4E7EA] px-2 py-0.5 rounded border border-[#E8E3E1]">
+                      Dynamic Counter
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-[#5F5A5C] mt-0.5 leading-relaxed">
+                    Storage units dynamically count and track whichever file boxes and archfiles are housed inside.
+                  </p>
+                </div>
               </div>
 
               {/* FOOTER ACTIONS */}
@@ -216,7 +218,7 @@ export default function CreateCabinetModal({
                 </Button>
                 <Button
                   type="submit"
-                  disabled={!unitName.trim() || !capacity}
+                  disabled={!unitName.trim()}
                   className="h-10 px-5 rounded-xl text-xs font-bold bg-[#6B1D2A] text-[#FFFCF7] hover:bg-[#8B3545] cursor-pointer shadow-xs disabled:opacity-50"
                 >
                   Confirm Unit Creation

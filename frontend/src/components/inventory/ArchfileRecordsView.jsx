@@ -1,11 +1,13 @@
 import React from "react";
-import { ArrowLeft, BookOpen, FileText, Eye, FolderOpen } from "lucide-react";
+import { ArrowLeft, FileText, Eye, FolderClosed, FolderOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { parseBoxHierarchy } from "./storageTaxonomy";
 
 /**
  * ArchfileRecordsView
  * Displays the filed documents inside an Archfile (Level 3).
+ * Adheres strictly to the custom archfile color and institutional palette.
  */
 export default function ArchfileRecordsView({
   archfile,
@@ -15,12 +17,20 @@ export default function ArchfileRecordsView({
   onViewFile,
 }) {
   const files = archfile?.files || [];
+  const parsed = parseBoxHierarchy(archfile?.name || "");
+  const color = archfile?.color || parsed.color || "#6B1D2A";
+  const label = archfile?.displayName || parsed.archfileName || archfile?.name;
 
   return (
     <div className="space-y-4 animate-in fade-in duration-200">
-      {/* HEADER */}
-      <div className="bg-[#FFFCF7] border border-[#BFDBFE] rounded-2xl p-5 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4 ring-1 ring-[#DBEAFE]/60">
-        <div className="flex items-center gap-3.5">
+      {/* HEADER WITH CUSTOM COLOR ACCENT */}
+      <div className="bg-[#FFFCF7] border border-[#E8E3E1] rounded-2xl p-5 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative overflow-hidden">
+        <div
+          style={{ backgroundColor: color }}
+          className="absolute left-0 top-0 bottom-0 w-1.5"
+        />
+
+        <div className="flex items-center gap-3.5 pl-1">
           <button
             onClick={onBack}
             className="p-2 rounded-xl border border-[#E8E3E1] text-[#5F5A5C] hover:text-[#1D1A1B] hover:bg-[#F4E7EA] transition-colors cursor-pointer"
@@ -30,7 +40,10 @@ export default function ArchfileRecordsView({
           </button>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-[10px] font-bold text-[#1E40AF] uppercase tracking-wider bg-[#DBEAFE] px-2 py-0.5 rounded-md border border-[#BFDBFE]">
+              <span
+                style={{ backgroundColor: `${color}18`, color: color, borderColor: `${color}35` }}
+                className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border"
+              >
                 Archfile Binder
               </span>
               <span className="text-xs text-[#5F5A5C]">
@@ -38,13 +51,16 @@ export default function ArchfileRecordsView({
               </span>
             </div>
             <h2 className="text-lg font-bold text-[#1D1A1B] mt-0.5">
-              {archfile?.displayName || archfile?.name}
+              {label}
             </h2>
           </div>
         </div>
 
-        <div className="text-right">
-          <span className="text-xs font-bold text-[#1E40AF] bg-[#DBEAFE] px-3 py-1 rounded-full border border-[#BFDBFE]">
+        <div className="text-right pl-1 sm:pl-0">
+          <span
+            style={{ backgroundColor: `${color}15`, color: color, borderColor: `${color}30` }}
+            className="text-xs font-bold px-3 py-1 rounded-full border inline-block"
+          >
             {files.length} Records Stored
           </span>
         </div>
@@ -54,7 +70,7 @@ export default function ArchfileRecordsView({
       <div className="bg-[#FFFCF7] border border-[#E8E3E1] rounded-2xl p-5 shadow-xs space-y-3">
         <div className="flex items-center justify-between pb-3 border-b border-[#E8E3E1]">
           <h3 className="text-sm font-bold text-[#1D1A1B] flex items-center gap-2">
-            <FileText className="w-4 h-4 text-[#1E40AF]" />
+            <FileText className="w-4 h-4 text-[#6B1D2A]" />
             <span>Filed Documents</span>
           </h3>
           <span className="text-xs text-[#5F5A5C]">
@@ -66,7 +82,7 @@ export default function ArchfileRecordsView({
           {files.map((file) => (
             <div
               key={file.id}
-              className="border border-[#E8E3E1] rounded-xl p-3.5 flex justify-between items-center bg-[#FFFCF7] hover:border-[#2563EB]/40 hover:bg-[#FCFAF8] transition-all"
+              className="border border-[#E8E3E1] rounded-xl p-3.5 flex justify-between items-center bg-[#FFFCF7] hover:border-[#6B1D2A]/40 hover:bg-[#FCFAF8] transition-all"
             >
               <div className="min-w-0 flex-1 pr-3">
                 <h4 className="font-bold text-xs text-[#1D1A1B] truncate">

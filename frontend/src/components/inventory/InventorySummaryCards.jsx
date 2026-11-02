@@ -1,5 +1,5 @@
 import React from "react";
-import { Archive, Box, BookOpen, FileText } from "lucide-react";
+import { FolderArchive, Box, FolderClosed, FileText } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 
 /**
@@ -7,8 +7,9 @@ import { Card, CardContent } from "@/components/ui/card";
  * Renders 4 high-level KPI cards for Physical Storage & Inventory:
  * 1. Storage Units (Cabinets/Steel/Shelves)
  * 2. File Boxes
- * 3. Archfiles (Blue Binders)
+ * 3. Archfile Binders
  * 4. Archived Documents
+ * Fully adheres to the institutional palette (no blue).
  */
 export default function InventorySummaryCards({
   totalCabinets = 0,
@@ -33,7 +34,7 @@ export default function InventorySummaryCards({
             </span>
           </div>
           <div className="p-2.5 rounded-xl bg-[#F4E7EA] border border-[#E8E3E1] text-[#6B1D2A] shrink-0">
-            <Archive className="w-5 h-5 stroke-[2]" />
+            <FolderArchive className="w-5 h-5 stroke-[2]" />
           </div>
         </CardContent>
       </Card>
@@ -58,12 +59,12 @@ export default function InventorySummaryCards({
         </CardContent>
       </Card>
 
-      {/* 3. ARCHFILES (BLUE BINDERS) */}
-      <Card className="bg-[#FFFCF7] border border-[#BFDBFE] shadow-xs rounded-xl">
+      {/* 3. ARCHFILE BINDERS */}
+      <Card className="bg-[#FFFCF7] border border-[#E8E3E1] shadow-xs rounded-xl">
         <CardContent className="p-4 flex items-center justify-between">
           <div>
-            <span className="text-[11px] font-bold text-[#1E40AF] uppercase tracking-wider block">
-              Archfiles (Blue Binders)
+            <span className="text-[11px] font-bold text-[#5F5A5C] uppercase tracking-wider block">
+              Archfile Binders
             </span>
             <span className="text-2xl font-black text-[#1D1A1B] mt-1 block">
               {averageOccupancyPct}
@@ -72,8 +73,8 @@ export default function InventorySummaryCards({
               Box archfile folders
             </span>
           </div>
-          <div className="p-2.5 rounded-xl bg-[#DBEAFE] border border-[#BFDBFE] text-[#1E40AF] shrink-0">
-            <BookOpen className="w-5 h-5 stroke-[2]" />
+          <div className="p-2.5 rounded-xl bg-[#F4E7EA] border border-[#E8E3E1] text-[#6B1D2A] shrink-0">
+            <FolderClosed className="w-5 h-5 stroke-[2]" />
           </div>
         </CardContent>
       </Card>

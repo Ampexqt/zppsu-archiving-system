@@ -1,11 +1,12 @@
 import React from "react";
-import { ArrowLeft, BookOpen, Plus } from "lucide-react";
+import { ArrowLeft, FolderClosed, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ArchfileFolderCard from "./ArchfileFolderCard";
 
 /**
  * FileBoxContentView
  * Displays Archfiles and direct records inside a File Box (Level 2).
+ * Styled in institutional palette with accurate folder icons and custom color support.
  */
 export default function FileBoxContentView({
   cabinet,
@@ -50,10 +51,10 @@ export default function FileBoxContentView({
         {isAdmin && (
           <Button
             onClick={() => onOpenCreateArchfile(cabinet, box?.name)}
-            className="h-9 px-4 rounded-xl bg-[#1E40AF] text-[#FFFCF7] hover:bg-[#1D4ED8] text-xs font-bold shadow-xs flex items-center gap-1.5 cursor-pointer self-start sm:self-auto"
+            className="h-9 px-4 rounded-xl bg-[#6B1D2A] text-[#FFFCF7] hover:bg-[#8B3545] text-xs font-bold shadow-xs flex items-center gap-1.5 cursor-pointer self-start sm:self-auto"
           >
             <Plus className="w-3.5 h-3.5" />
-            <span>+ New Archfile (Blue Binder)</span>
+            <span>+ New Archfile</span>
           </Button>
         )}
       </div>
@@ -62,9 +63,9 @@ export default function FileBoxContentView({
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <BookOpen className="w-4 h-4 text-[#1E40AF]" />
+            <FolderClosed className="w-4 h-4 text-[#6B1D2A]" />
             <h3 className="text-sm font-bold text-[#1D1A1B]">
-              Archfiles in this Box ({archfiles.length})
+              Archfile Binders in this Box ({archfiles.length})
             </h3>
           </div>
           <span className="text-xs text-[#5F5A5C]">
@@ -87,18 +88,18 @@ export default function FileBoxContentView({
           ))}
 
           {archfiles.length === 0 && (
-            <div className="col-span-full py-12 text-center bg-[#FFFCF7] border border-dashed border-[#BFDBFE] rounded-2xl">
-              <BookOpen className="w-10 h-10 mx-auto mb-2 text-[#2563EB]/40" />
+            <div className="col-span-full py-12 text-center bg-[#FFFCF7] border border-dashed border-[#E8E3E1] rounded-2xl">
+              <FolderClosed className="w-10 h-10 mx-auto mb-2 text-[#6B1D2A]/30" />
               <h4 className="font-bold text-sm text-[#1D1A1B]">
                 No Archfiles In This Box
               </h4>
               <p className="text-xs text-[#5F5A5C] mt-1 max-w-sm mx-auto">
-                Organize this file box into blue archfile binders (e.g. Archfile HR, Archfile Accounting).
+                Organize this file box into customizable archfile ring binders (e.g. Guidance Reports, Personnel, Counseling).
               </p>
               {isAdmin && (
                 <Button
                   onClick={() => onOpenCreateArchfile(cabinet, box?.name)}
-                  className="mt-4 h-9 px-4 rounded-xl bg-[#1E40AF] text-[#FFFCF7] hover:bg-[#1D4ED8] text-xs font-bold cursor-pointer"
+                  className="mt-4 h-9 px-4 rounded-xl bg-[#6B1D2A] text-[#FFFCF7] hover:bg-[#8B3545] text-xs font-bold cursor-pointer"
                 >
                   <Plus className="w-3.5 h-3.5 mr-1" />
                   <span>Create First Archfile</span>

@@ -32,6 +32,13 @@ function DashboardLayout({ children }) {
   const user = JSON.parse(localStorage.getItem("user")) || {};
   const isAdmin = user?.role === "Admin";
   const displayRole = isAdmin ? "Admin" : "Staff";
+  const userInitials = (user?.name || "System Admin")
+    .split(" ")
+    .map(w => w[0])
+    .filter(Boolean)
+    .slice(0, 2)
+    .join("")
+    .toUpperCase() || "SA";
 
   const modal = useModal();
 
@@ -209,15 +216,35 @@ function DashboardLayout({ children }) {
             </div>
           </div>
           
-          {/* USER PROFILE INFO CHIP */}
+          {/* ARCHIVAL CUSTODIAN & CLEARANCE IDENTITY CARD */}
           <div className="flex items-center gap-3">
-            <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#FFFCF7] border border-[#E8E3E1] text-xs font-medium text-[#1D1A1B]">
-              <ShieldCheck className="w-3.5 h-3.5 text-[#6B1D2A]" />
-              <span className="font-semibold text-[#1D1A1B]">{user?.name || "User"}</span>
-              <span className="text-[#E8E3E1]">|</span>
-              <span className="text-xs px-2 py-0.5 rounded-full font-bold bg-[#F4E7EA] text-[#6B1D2A] border border-[#E8E3E1]">
-                {displayRole}
-              </span>
+            <div className="hidden md:flex items-center gap-3 px-3 py-1.5 rounded-xl bg-[#FFFCF7] border border-[#E8E3E1] shadow-2xs hover:border-[#6B1D2A]/40 transition-all select-none">
+              {/* Monogram Avatar with Institutional Seal Accent */}
+              <div className="relative shrink-0">
+                <div className="w-8 h-8 rounded-lg bg-[#4A0E1C] text-[#F2DFB0] font-mono font-bold text-xs flex items-center justify-center border border-[#6B1D2A]/40 shadow-xs">
+                  {userInitials}
+                </div>
+                {/* Active Authorized Session Indicator */}
+                <span 
+                  className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-[#FFFCF7]" 
+                  title="Active Authorized Session"
+                />
+              </div>
+
+              {/* Typographic Identity Hierarchy */}
+              <div className="flex flex-col text-left leading-tight">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-xs font-bold text-[#1D1A1B] tracking-tight">
+                    {user?.name || "System Admin"}
+                  </span>
+                  <span className="text-[9px] font-extrabold uppercase px-1.5 py-0.2 rounded-sm bg-[#F4E7EA] text-[#6B1D2A] border border-[#6B1D2A]/20">
+                    {displayRole}
+                  </span>
+                </div>
+                <span className="text-[9.5px] font-mono uppercase tracking-wider text-[#5F5A5C] font-semibold mt-0.5">
+                  {isAdmin ? "University Records Officer" : "Guidance Records Custodian"}
+                </span>
+              </div>
             </div>
           </div>
         </header>

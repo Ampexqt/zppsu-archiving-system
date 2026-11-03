@@ -4,6 +4,7 @@ import { ArrowRight, ShieldCheck, Database, Search, FileText, Lock, ChevronRight
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import logo from "../assets/logo.jpg";
+import heroImage from "../assets/image.jpg";
 
 function Home() {
   const navigate = useNavigate();
@@ -15,75 +16,102 @@ function Home() {
       {/* HERO SECTION */}
       <section
         id="home"
-        className="relative pt-32 pb-20 lg:pt-44 lg:pb-28 overflow-hidden flex flex-col justify-center items-center text-center px-4"
+        className="relative pt-28 pb-16 lg:pt-36 lg:pb-24 overflow-hidden px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full flex-1 flex flex-col justify-center"
       >
-        {/* Subtle Background Elements */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[450px] bg-gradient-to-b from-[#6B1D2A]/5 to-transparent rounded-full blur-3xl -z-10 pointer-events-none"></div>
-        <div className="absolute inset-0 -z-20 h-full w-full bg-[radial-gradient(#E8E3E1_1px,transparent_1px)] [background-size:24px_24px] opacity-60"></div>
-        
-        {/* Institutional Trust Badge */}
-        <div className="inline-flex items-center gap-2 rounded-full border border-[#6B1D2A]/20 bg-[#FFFCF7]/80 backdrop-blur-sm px-4 py-1.5 text-xs font-semibold text-[#6B1D2A] mb-6 shadow-xs">
-          <ShieldCheck className="w-4 h-4 text-[#6B1D2A]" />
-          <span>Official Institutional Archiving Portal</span>
-        </div>
-        
-        <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-[#6B1D2A] tracking-tight mb-4 max-w-4xl leading-[1.15]">
-          Digital Archiving System <br />
-          <span className="text-[#1D1A1B] font-bold text-3xl sm:text-4xl md:text-5xl block mt-2">
-            ZPPSU Guidance Office
-          </span>
-        </h1>
+        {/* Subtle Background Ambience */}
+        <div className="absolute top-0 right-1/4 w-[600px] h-[300px] bg-gradient-to-b from-[#6B1D2A]/5 to-transparent rounded-full blur-3xl -z-10 pointer-events-none" />
+        <div className="absolute inset-0 -z-20 h-full w-full bg-[radial-gradient(#E8E3E1_1px,transparent_1px)] [background-size:24px_24px] opacity-40" />
 
-        <p className="text-base sm:text-lg text-[#5F5A5C] max-w-2xl mb-8 leading-relaxed font-normal">
-          A secure, high-performance platform engineered for seamless student records management, instant retrieval, and strict institutional compliance.
-        </p>
-        
-        <div className="flex flex-col sm:flex-row gap-3.5 w-full sm:w-auto items-center">
-          <Button 
-            onClick={() => navigate("/login")}
-            className="w-full sm:w-auto px-7 py-6 rounded-xl bg-[#6B1D2A] text-[#FFFCF7] hover:bg-[#8B3545] shadow-sm hover:shadow-md text-base font-semibold transition-all group"
-          >
-            <span>Access Portal</span>
-            <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-          </Button>
-          
-          <Button 
-            variant="outline"
-            onClick={() => {
-              const el = document.getElementById("features");
-              if (el) el.scrollIntoView({ behavior: "smooth" });
-            }}
-            className="w-full sm:w-auto px-7 py-6 rounded-xl bg-[#FFFCF7] border border-[#E8E3E1] text-[#1D1A1B] hover:bg-[#F4E7EA] text-base font-semibold transition-all shadow-xs"
-          >
-            <span>Explore Capabilities</span>
-          </Button>
-        </div>
-        
-        {/* System Overview Visual Box */}
-        <div className="mt-14 w-full max-w-4xl mx-auto rounded-2xl border border-[#E8E3E1] bg-[#FFFCF7] p-6 shadow-sm">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
-            <div className="p-4 rounded-xl bg-[#FFFCF7] border border-[#E8E3E1]">
-              <div className="w-10 h-10 rounded-lg bg-[#F4E7EA] flex items-center justify-center text-[#6B1D2A] mb-3">
-                <Database className="w-5 h-5" />
-              </div>
-              <h3 className="font-bold text-[#1D1A1B] text-base mb-1">Central Repository</h3>
-              <p className="text-xs text-[#5F5A5C] leading-relaxed">Organized storage across academic, administrative, and financial classifications.</p>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
+          {/* LEFT COLUMN: Authority & Navigation */}
+          <div className="lg:col-span-7 flex flex-col items-start text-left">
+            {/* Institutional Sub-Badge */}
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#6B1D2A]/15 bg-[#F4E7EA]/70 px-3.5 py-1.5 text-xs font-semibold text-[#6B1D2A] mb-5 shadow-xs">
+              <span className="flex h-2 w-2 rounded-full bg-[#6B1D2A] animate-pulse" />
+              <span className="tracking-wide uppercase">ZPPSU Guidance &amp; Counseling Office</span>
             </div>
 
-            <div className="p-4 rounded-xl bg-[#FFFCF7] border border-[#E8E3E1]">
-              <div className="w-10 h-10 rounded-lg bg-[#F4E7EA] flex items-center justify-center text-[#6B1D2A] mb-3">
-                <Search className="w-5 h-5" />
-              </div>
-              <h3 className="font-bold text-[#1D1A1B] text-base mb-1">Instant Retrieval</h3>
-              <p className="text-xs text-[#5F5A5C] leading-relaxed">Search through thousands of student records with rapid keyword indexing.</p>
+            {/* Main Headline */}
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[50px] font-extrabold text-[#1D1A1B] tracking-tight leading-[1.14] mb-5">
+              Digital Archival &amp; <br />
+              <span className="text-[#6B1D2A]">Records Governance</span>
+            </h1>
+
+            {/* Narrative Subtitle */}
+            <p className="text-base sm:text-lg text-[#5F5A5C] max-w-xl mb-8 leading-relaxed font-normal">
+              The official institutional repository for student guidance records, accomplishment dossiers, and physical cabinet inventory at ZPPSU. Engineered for rapid indexing and certified compliance with National Archives (RA 9470) standards.
+            </p>
+
+            {/* Primary Calls to Action */}
+            <div className="flex flex-col sm:flex-row gap-3.5 w-full sm:w-auto items-stretch sm:items-center mb-10">
+              <Button
+                onClick={() => navigate("/login")}
+                className="px-7 py-6 rounded-xl bg-[#6B1D2A] text-[#FFFCF7] hover:bg-[#8B3545] shadow-sm hover:shadow-md text-base font-semibold transition-all group flex items-center justify-center gap-2.5"
+              >
+                <span>Access Portal</span>
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </Button>
+
+              <Button
+                variant="outline"
+                onClick={() => {
+                  const el = document.getElementById("features");
+                  if (el) el.scrollIntoView({ behavior: "smooth" });
+                }}
+                className="px-7 py-6 rounded-xl bg-[#FFFCF7] border border-[#E8E3E1] text-[#1D1A1B] hover:bg-[#F4E7EA] text-base font-semibold transition-all shadow-xs flex items-center justify-center gap-2"
+              >
+                <FileText className="w-4 h-4 text-[#6B1D2A]" />
+                <span>Explore Capabilities</span>
+              </Button>
             </div>
 
-            <div className="p-4 rounded-xl bg-[#FFFCF7] border border-[#E8E3E1]">
-              <div className="w-10 h-10 rounded-lg bg-[#F4E7EA] flex items-center justify-center text-[#6B1D2A] mb-3">
-                <Lock className="w-5 h-5" />
+            {/* Institutional Compliance Standards Bar */}
+            <div className="pt-6 border-t border-[#E8E3E1] w-full grid grid-cols-3 gap-3 sm:gap-6">
+              <div>
+                <div className="text-xs font-bold uppercase tracking-wider text-[#6B1D2A]">RA 9470</div>
+                <div className="text-xs text-[#5F5A5C] mt-0.5 font-medium">National Archives Compliant</div>
               </div>
-              <h3 className="font-bold text-[#1D1A1B] text-base mb-1">Role-Based Access</h3>
-              <p className="text-xs text-[#5F5A5C] leading-relaxed">Strict authorization controls ensuring confidentiality of student documents.</p>
+              <div>
+                <div className="text-xs font-bold uppercase tracking-wider text-[#6B1D2A]">ISO 9001:2015</div>
+                <div className="text-xs text-[#5F5A5C] mt-0.5 font-medium">Quality Management Standard</div>
+              </div>
+              <div>
+                <div className="text-xs font-bold uppercase tracking-wider text-[#6B1D2A]">Dual Custody</div>
+                <div className="text-xs text-[#5F5A5C] mt-0.5 font-medium">Physical &amp; Digital Indexing</div>
+              </div>
+            </div>
+          </div>
+
+          {/* RIGHT COLUMN: Realistic Photographic Archival Showcase */}
+          <div className="lg:col-span-5 relative flex justify-center">
+            <div className="relative w-full max-w-lg lg:max-w-none">
+              {/* Archival Museum Frame */}
+              <div className="relative rounded-2xl p-2 sm:p-2.5 bg-[#FFFCF7] border border-[#E8E3E1] shadow-xl group transition-all duration-300 hover:shadow-2xl hover:border-[#6B1D2A]/20">
+                <div className="relative rounded-xl overflow-hidden aspect-[4/3] sm:aspect-[16/11] lg:aspect-[4/3] bg-[#F4E7EA]">
+                  <img
+                    src={heroImage}
+                    alt="ZPPSU Guidance Office Archival Facility and Dossier Management Desk"
+                    className="w-full h-full object-cover object-center group-hover:scale-[1.02] transition-transform duration-700 ease-out"
+                  />
+
+                  {/* Top Status Tag */}
+                  <div className="absolute top-3.5 right-3.5 bg-[#1D1A1B]/80 backdrop-blur-md text-[#FFFCF7] border border-white/20 rounded-lg px-2.5 py-1 text-[11px] font-mono tracking-wider flex items-center gap-1.5 shadow-sm">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    <span>ACTIVE VAULT</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Floating Verified Physical Records Badge */}
+              <div className="mt-3.5 sm:mt-0 sm:absolute sm:-bottom-5 sm:-left-5 bg-[#FFFCF7] border border-[#E8E3E1] rounded-xl p-3 sm:p-3.5 shadow-lg flex items-center gap-3">
+                <div className="w-9 h-9 rounded-lg bg-[#F4E7EA] flex items-center justify-center text-[#6B1D2A] border border-[#6B1D2A]/15 shrink-0">
+                  <ShieldCheck className="w-5 h-5" />
+                </div>
+                <div className="text-left">
+                  <div className="text-xs font-bold text-[#1D1A1B]">Verified Archival Records</div>
+                  <div className="text-[11px] text-[#5F5A5C] font-medium">Cabinet, Box &amp; Folder Synchronized</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -96,7 +124,7 @@ function Home() {
             <h2 className="text-xs font-bold tracking-widest text-[#6B1D2A] uppercase mb-2">Core Capabilities</h2>
             <h3 className="text-2xl sm:text-3xl font-extrabold text-[#1D1A1B] tracking-tight">Engineered for Daily Institutional Workflows</h3>
           </div>
-          
+
           <div className="grid md:grid-cols-3 gap-6">
             {/* Feature 1 - Large */}
             <div className="md:col-span-2 p-8 rounded-2xl border border-[#E8E3E1] bg-[#FFFCF7] shadow-xs hover:shadow-sm transition-all flex flex-col justify-between group">
@@ -114,7 +142,7 @@ function Home() {
                 <ChevronRight className="w-4 h-4" />
               </div>
             </div>
-            
+
             {/* Feature 2 */}
             <div className="p-8 rounded-2xl border border-[#E8E3E1] bg-[#FFFCF7] shadow-xs hover:shadow-sm transition-all flex flex-col justify-between">
               <div>

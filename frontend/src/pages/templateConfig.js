@@ -17,10 +17,12 @@ export const templateConfig = {
     ]
   },
   "ACCOMPLISHMENT REPORTS": {
-    headers: ["ACCESS CODE", "SUBJECT", "FILE LOCATION"],
+    headers: ["DATE", "ACCESS CODE", "SUBJECT", "STATUS", "FILE LOCATION"],
     getRowData: (document, data) => [
+      (data || {}).date || (document.created_at ? new Date(document.created_at).toLocaleDateString() : ""),
       document.access_code || "N/A",
-      document.subject,
+      document.subject || document.title || "",
+      document.status || "Active",
       getCleanLocation(document, data),
     ]
   },

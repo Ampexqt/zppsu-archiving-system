@@ -1,7 +1,6 @@
-import { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import axios from "axios";
-import ExcelJS from "exceljs";
-import { Search, FileSpreadsheet, Calendar, RotateCcw, X, Loader2, Printer } from "lucide-react";
+import { Search, FileSpreadsheet, Calendar, RotateCcw, X, Loader2 } from "lucide-react";
 import DashboardLayout from "../components/layout/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -11,6 +10,7 @@ import MasterlistSummaryCards from "../components/reports/MasterlistSummaryCards
 import InstitutionalPrintHeader from "../components/common/InstitutionalPrintHeader";
 import InstitutionalSignatoryBlock from "../components/common/InstitutionalSignatoryBlock";
 import { templateConfig } from "./templateConfig";
+import { exportMasterlistToInstitutionalExcel } from "../utils/masterlistExcelExporter";
 
 function MasterlistReports() {
   const [allFiles, setAllFiles] = useState([]);
@@ -182,59 +182,12 @@ function MasterlistReports() {
 
     try {
       setIsExporting(true);
-      const workbook = new ExcelJS.Workbook();
-      const sheet = workbook.addWorksheet("Masterlist");
-
-      const titleStr = `ZPPSU MASTERLIST OF RECORDS - ${selectedDocType}`;
-
-      // Add Title Row
-      const lastColLetter = String.fromCharCode(65 + headers.length - 1);
-      sheet.mergeCells(`A1:${lastColLetter}1`);
-      const titleCell = sheet.getCell("A1");
-      titleCell.value = titleStr;
-      titleCell.font = { bold: true, size: 14 };
-      titleCell.alignment = { horizontal: "center", vertical: "middle" };
-
-      // Add Headers
-      const headerRow = sheet.addRow(headers);
-      headerRow.eachCell((cell) => {
-        cell.font = { bold: true };
-        cell.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
-        cell.border = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
+      await exportMasterlistToInstitutionalExcel({
+        records: filteredReports,
+        selectedDocType,
+        headers,
+        getRowData,
       });
-
-      // Add Data
-      filteredReports.forEach(file => {
-        const rowData = getRowData(file, headers);
-        // Clean undefined to empty string
-        const cleanRowData = rowData.map(v => v === undefined || v === null ? "" : v);
-        const dataRow = sheet.addRow(cleanRowData);
-        dataRow.eachCell((cell) => {
-          cell.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
-          cell.border = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
-        });
-      });
-
-      // Set Column Widths based on header name
-      sheet.columns = headers.map(header => {
-        let width = 30; // default wider
-        const hUpper = header.toUpperCase();
-        if (hUpper.includes("FILE LOCATION")) width = 35;
-        else if (hUpper.includes("SUBJECT") || hUpper.includes("DESCRIPTION") || hUpper.includes("TITLE")) width = 45;
-        else if (hUpper.includes("DATE") || hUpper.includes("STATUS") || hUpper.includes("ACTION")) width = 20;
-        return { width };
-      });
-
-      const buffer = await workbook.xlsx.writeBuffer();
-      const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `ZPPSU_${selectedDocType.replace(/\s+/g, '_')}_Masterlist.xlsx`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
 
       try {
         const token = localStorage.getItem("token");
@@ -242,8 +195,8 @@ function MasterlistReports() {
           "http://localhost:5000/api/logs/track",
           {
             action: "EXPORT MASTERLIST",
-            description: `Exported Excel masterlist for ${selectedDocType} (${filteredReports.length} records)`,
-            module: "reports"
+            description: `Exported Institutional Excel masterlist for ${selectedDocType} (${filteredReports.length} records)`,
+            module: "reports",
           },
           { headers: { Authorization: `Bearer ${token}` } }
         );
@@ -277,17 +230,7 @@ function MasterlistReports() {
           </div>
           
           <div className="flex items-center gap-2.5">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => window.print()}
-              disabled={filteredReports.length === 0}
-              className="h-10 px-3.5 rounded-xl border border-[#E8E3E1] bg-[#FFFCF7] text-[#1D1A1B] hover:bg-[#F4E7EA] font-bold text-xs shadow-xs flex items-center gap-2 cursor-pointer disabled:opacity-50 transition-colors"
-              title="Print official academic masterlist"
-            >
-              <Printer className="w-4 h-4 text-[#6B1D2A]" />
-              <span>Print Masterlist</span>
-            </Button>
+            
             <Button 
               onClick={handleExportExcel}
               disabled={filteredReports.length === 0 || isExporting}
@@ -450,25 +393,63 @@ function MasterlistReports() {
                 </thead>
                 <tbody>
                   {filteredReports.length > 0 ? (
-                    filteredReports.map((file) => {
+                    filteredReports.map((file, fileIdx) => {
                       const rowData = getRowData(file, headers);
+                      
+                      // Extract month name
+                      const currentMonth = (() => {
+                        if (file.dynamic_data?.month) return String(file.dynamic_data.month).toUpperCase();
+                        const dateIdx = headers.findIndex(h => String(h).toUpperCase().includes("DATE"));
+                        const rawDate = dateIdx >= 0 ? rowData[dateIdx] : file.created_at;
+                        if (rawDate && !isNaN(new Date(rawDate).getTime())) {
+                          return new Date(rawDate).toLocaleDateString("en-US", { month: "long" }).toUpperCase();
+                        }
+                        return "ACTIVE RECORDS";
+                      })();
+
+                      const prevFile = fileIdx > 0 ? filteredReports[fileIdx - 1] : null;
+                      const prevMonth = prevFile ? (() => {
+                        if (prevFile.dynamic_data?.month) return String(prevFile.dynamic_data.month).toUpperCase();
+                        const dateIdx = headers.findIndex(h => String(h).toUpperCase().includes("DATE"));
+                        const rawDate = dateIdx >= 0 ? getRowData(prevFile, headers)[dateIdx] : prevFile.created_at;
+                        if (rawDate && !isNaN(new Date(rawDate).getTime())) {
+                          return new Date(rawDate).toLocaleDateString("en-US", { month: "long" }).toUpperCase();
+                        }
+                        return "ACTIVE RECORDS";
+                      })() : null;
+
+                      const isNewMonth = fileIdx === 0 || currentMonth !== prevMonth;
+
                       return (
-                        <tr key={file.id} className="hover:bg-[#F4E7EA]/40">
-                          {rowData.map((data, idx) => (
-                            <td 
-                              key={idx} 
-                              className={`border border-[#1D1A1B] p-3 text-center align-middle ${
-                                headers[idx].includes("ACCESS") 
-                                  ? "font-mono font-bold text-[#6B1D2A]"
-                                  : headers[idx].includes("SUBJECT")
-                                  ? "font-medium text-[#1D1A1B]"
-                                  : "text-[#5F5A5C]"
-                              }`}
-                            >
-                              {data}
-                            </td>
-                          ))}
-                        </tr>
+                        <React.Fragment key={file.id}>
+                          {isNewMonth && (
+                            <tr>
+                              <td
+                                colSpan={headers.length}
+                                className="border border-[#1D1A1B] px-3.5 py-2 text-xs font-bold text-[#1D1A1B] text-left uppercase tracking-wider"
+                                style={{ backgroundColor: "#F2DFB0" }}
+                              >
+                                {currentMonth}
+                              </td>
+                            </tr>
+                          )}
+                          <tr className="hover:bg-[#F4E7EA]/40">
+                            {rowData.map((data, idx) => (
+                              <td 
+                                key={idx} 
+                                className={`border border-[#1D1A1B] p-3 text-center align-middle ${
+                                  headers[idx].includes("ACCESS") 
+                                    ? "font-mono font-bold text-[#6B1D2A]"
+                                    : headers[idx].includes("SUBJECT")
+                                    ? "font-medium text-[#1D1A1B]"
+                                    : "text-[#5F5A5C]"
+                                }`}
+                              >
+                                {data}
+                              </td>
+                            ))}
+                          </tr>
+                        </React.Fragment>
                       );
                     })
                   ) : (

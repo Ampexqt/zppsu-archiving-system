@@ -203,15 +203,243 @@ function generateMockRecord(docType, category, index, storageLocation) {
   };
 }
 
+// 28 authentic academic and guidance counseling Accomplishment Reports spanning Jan - Dec across 2024, 2025, and 2026
+const ACCOMPLISHMENT_REPORTS_DATA = [
+  // --- 2024 COMPLETE 12-MONTH CALENDAR (JANUARY TO DECEMBER) ---
+  {
+    year: 2024, month: 1, day: 15,
+    monthName: "JANUARY",
+    subject: "Guidance & Counseling Center Q1 Institutional Work & Financial Accomplishment Report FY 2024",
+    action_taken: "Approved by OSAS Director; transmitted to Planning & Development Office"
+  },
+  {
+    year: 2024, month: 2, day: 22,
+    monthName: "FEBRUARY",
+    subject: "Freshmen Orientation & Psychological Appraisal Services Accomplishment Report - 2nd Semester AY 2023-2024",
+    action_taken: "Student psychometric profiles verified and filed in Guidance Archive"
+  },
+  {
+    year: 2024, month: 3, day: 18,
+    monthName: "MARCH",
+    subject: "National Women's Month Gender-Responsive Student Counseling & Wellness Outreach Accomplishment Report",
+    action_taken: "Conducted GAD-funded counseling seminars; participant evaluations archived"
+  },
+  {
+    year: 2024, month: 4, day: 25,
+    monthName: "APRIL",
+    subject: "College Career Guidance & Graduating Students Exit Interview Analytics Accomplishment Report 2024",
+    action_taken: "Exit interview dataset summarized for institutional CHED tracer submission"
+  },
+  {
+    year: 2024, month: 5, day: 20,
+    monthName: "MAY",
+    subject: "Student Academic Deficiency Remediation & Midterm Counseling Monitoring Accomplishment Report AY 2023-2024",
+    action_taken: "Consulted 86 students on academic probation; individual plans endorsed"
+  },
+  {
+    year: 2024, month: 6, day: 28,
+    monthName: "JUNE",
+    subject: "Mid-Year Guidance Program Evaluation & Guidance Committee Institutional Accomplishment Report 2024",
+    action_taken: "Semi-annual audit submitted to Vice President for Academic Affairs"
+  },
+  {
+    year: 2024, month: 7, day: 19,
+    monthName: "JULY",
+    subject: "Special Needs Student Accommodation & Accessibility Services Accomplishment Report AY 2023-2024",
+    action_taken: "Learning adjustments documented and confirmed by College Deans"
+  },
+  {
+    year: 2024, month: 8, day: 26,
+    monthName: "AUGUST",
+    subject: "New Academic Year Student Intake & Initial Psychological Screening Accomplishment Report AY 2024-2025",
+    action_taken: "Intake interviews completed for incoming first-year cohort across 8 colleges"
+  },
+  {
+    year: 2024, month: 9, day: 16,
+    monthName: "SEPTEMBER",
+    subject: "Suicide Prevention & Mental Health Awareness Campus Campaign Accomplishment Report 2024",
+    action_taken: "Campus-wide awareness campaign executed in compliance with RA 11036"
+  },
+  {
+    year: 2024, month: 10, day: 24,
+    monthName: "OCTOBER",
+    subject: "Peer Facilitators Guild Leadership Training & Youth Counseling Camp Accomplishment Report 2024",
+    action_taken: "Certified 45 student peer counselors; roster endorsed to Student Affairs"
+  },
+  {
+    year: 2024, month: 11, day: 21,
+    monthName: "NOVEMBER",
+    subject: "Pre-Employment Seminar & Mock Job Interview Workshop Series Accomplishment Report 2024",
+    action_taken: "Conducted with DOLE and PESO Zamboanga; 620 senior students trained"
+  },
+  {
+    year: 2024, month: 12, day: 18,
+    monthName: "DECEMBER",
+    subject: "Guidance Center Year-End Comprehensive Performance & Target Delivery Accomplishment Report FY 2024",
+    action_taken: "Certified 100% OPCR milestone delivery by Director, Guidance & Counseling"
+  },
+
+  // --- 2025 COMPLETE 12-MONTH CALENDAR (JANUARY TO DECEMBER) ---
+  {
+    year: 2025, month: 1, day: 17,
+    monthName: "JANUARY",
+    subject: "Guidance Center Q1 Operational Work Plan & Counseling Services Accomplishment Report FY 2025",
+    action_taken: "Quality objectives confirmed aligned with ISO 9001:2015 institutional standards"
+  },
+  {
+    year: 2025, month: 2, day: 20,
+    monthName: "FEBRUARY",
+    subject: "Psychological Test Administration & Standardized IQ/Aptitude Profiling Accomplishment Report 2025",
+    action_taken: "Standardized psychometric profiles interpreted and secured in archival storage"
+  },
+  {
+    year: 2025, month: 3, day: 14,
+    monthName: "MARCH",
+    subject: "Crisis Intervention & Trauma-Informed Student Support Operations Accomplishment Report 2025",
+    action_taken: "Urgent student counseling cases handled and medical referrals coordinated"
+  },
+  {
+    year: 2025, month: 4, day: 22,
+    monthName: "APRIL",
+    subject: "Annual Job Fair & Career Placement Counseling Summit Accomplishment Report 2025",
+    action_taken: "38 participating employers; 114 graduates received on-the-spot hiring recommendations"
+  },
+  {
+    year: 2025, month: 5, day: 27,
+    monthName: "MAY",
+    subject: "Routine Individual Consultation & Confidential Counseling Case Log Accomplishment Report AY 2024-2025",
+    action_taken: "Logged 312 counseling consultations; statistical breakdown forwarded to OSAS"
+  },
+  {
+    year: 2025, month: 6, day: 30,
+    monthName: "JUNE",
+    subject: "AACCUP Level III Accreditation Guidance Document Registry & Compliance Accomplishment Report 2025",
+    action_taken: "Accreditation survey area parameters satisfied; compliance records sealed"
+  },
+  {
+    year: 2025, month: 7, day: 18,
+    monthName: "JULY",
+    subject: "Student Welfare Development & Anti-Bullying Preventive Counseling Accomplishment Report 2025",
+    action_taken: "Campus-wide guidance advisory released to academic departments"
+  },
+  {
+    year: 2025, month: 8, day: 25,
+    monthName: "AUGUST",
+    subject: "Freshmen Psychological Assessment & Mental Health Baseline Survey Accomplishment Report AY 2025-2026",
+    action_taken: "Intake assessment results indexed; counseling cohorts established"
+  },
+  {
+    year: 2025, month: 9, day: 23,
+    monthName: "SEPTEMBER",
+    subject: "Substance Abuse Prevention & Life Skills Counseling Seminar Accomplishment Report 2025",
+    action_taken: "Joint seminar organized with PDEA Region IX; attendance docket archived"
+  },
+  {
+    year: 2025, month: 10, day: 28,
+    monthName: "OCTOBER",
+    subject: "World Mental Health Day Symposium & Expressive Arts Wellness Workshop Accomplishment Report 2025",
+    action_taken: "Workshops conducted across 4 campus zones; activity reports verified"
+  },
+  {
+    year: 2025, month: 11, day: 19,
+    monthName: "NOVEMBER",
+    subject: "Industry Linkage & Internship Preparation Guidance Counseling Accomplishment Report 2025",
+    action_taken: "Pre-OJT clearances issued to 780 students across 6 academic divisions"
+  },
+  {
+    year: 2025, month: 12, day: 17,
+    monthName: "DECEMBER",
+    subject: "Annual Guidance Services Institutional Performance & Client Feedback Audit Accomplishment Report FY 2025",
+    action_taken: "98.4% student satisfaction rating certified by Guidance Assessment Board"
+  },
+
+  // --- 2026 IN-PROGRESS ACADEMIC TERM (JANUARY TO APRIL) ---
+  {
+    year: 2026, month: 1, day: 16,
+    monthName: "JANUARY",
+    subject: "Q1 Guidance Counseling Center Executive Program Implementation Accomplishment Report FY 2026",
+    action_taken: "Approved by OSAS Director and logged in Central Master Catalog"
+  },
+  {
+    year: 2026, month: 2, day: 24,
+    monthName: "FEBRUARY",
+    subject: "Group Guidance Dynamics & Stress Management for Graduating Engineers Accomplishment Report 2026",
+    action_taken: "Conducted for College of Engineering licensure examination reviewees"
+  },
+  {
+    year: 2026, month: 3, day: 10,
+    monthName: "MARCH",
+    subject: "Guidance Office Archival Digitization & Electronic Master Cataloging Accomplishment Report 2026",
+    action_taken: "Full statutory compliance under RA 9470 confirmed and verified"
+  },
+  {
+    year: 2026, month: 4, day: 5,
+    monthName: "APRIL",
+    subject: "Comprehensive Student Exit Clearance & Career Placement Tracker Accomplishment Report AY 2025-2026",
+    action_taken: "Graduating student exit documentation compiled and archived"
+  }
+];
+
+function generateAccomplishmentReport(item, aIdx, storageLocation) {
+  const dateStr = `${item.year}-${pad(item.month)}-${pad(item.day)}`;
+  const jsDate = new Date(Date.UTC(item.year, item.month - 1, item.day, 8, 30, 0));
+  const seq = pad(100 + aIdx + 1, 4);
+  const docId = `DOC-${item.year}-${seq}`;
+  const accessCode = `ZPPSU-ACAD-${item.year}-${seq}`;
+  const cleanLocation = formatLocationWithColorName(storageLocation.displayText);
+
+  const isArchived = (aIdx === 5 || aIdx === 17); // Realistic status variety
+
+  const dynamicData = {
+    date: dateStr,
+    access_code: accessCode,
+    file_location: cleanLocation,
+    subject: item.subject,
+    status: isArchived ? "Archived" : "Active",
+    month: item.monthName,
+    action_taken: item.action_taken,
+    tracking_details: `Approved by Director, Guidance & Counseling • Certified in ${storageLocation.boxName}`
+  };
+
+  return {
+    title: item.subject,
+    category: "Academic",
+    document_type: "ACCOMPLISHMENT REPORTS",
+    access_code: accessCode,
+    file_type: "OFFICIAL_RECORD",
+    is_generated: true,
+    document_id: docId,
+    subject: item.subject,
+    memo_date: jsDate,
+    received_date: jsDate,
+    created_at: jsDate,
+    status: dynamicData.status,
+    is_deleted: false,
+    file_name: null,
+    file_path: null,
+    dynamic_data: dynamicData,
+    file_box_id: storageLocation.fileBoxId
+  };
+}
+
 function getAll63MockRecords(storageLocations) {
   const records = [];
   let globalIndex = 0;
 
   for (const [category, docTypes] of Object.entries(documentCategories)) {
     for (const docType of docTypes) {
-      const storageLocation = storageLocations[globalIndex % storageLocations.length];
-      const record = generateMockRecord(docType, category, globalIndex, storageLocation);
-      records.push(record);
+      if (docType === "ACCOMPLISHMENT REPORTS") {
+        // Generate all 28 authentic Accomplishment Reports spanning Jan-Dec across multiple years
+        for (let aIdx = 0; aIdx < ACCOMPLISHMENT_REPORTS_DATA.length; aIdx++) {
+          const item = ACCOMPLISHMENT_REPORTS_DATA[aIdx];
+          const storageLocation = storageLocations[(globalIndex + aIdx) % storageLocations.length];
+          records.push(generateAccomplishmentReport(item, aIdx, storageLocation));
+        }
+      } else {
+        const storageLocation = storageLocations[globalIndex % storageLocations.length];
+        const record = generateMockRecord(docType, category, globalIndex, storageLocation);
+        records.push(record);
+      }
       globalIndex++;
     }
   }

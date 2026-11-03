@@ -1,7 +1,27 @@
 import React, { useState } from "react";
-import { ScanText, Download, Copy, Check, FileText, ExternalLink, FileSpreadsheet } from "lucide-react";
-import ExcelJS from "exceljs";
+import { 
+  FileSpreadsheet, 
+  Download, 
+  ScanText, 
+  Check, 
+  Copy, 
+  FileText, 
+  ShieldCheck, 
+  Building2, 
+  FolderArchive 
+} from "lucide-react";
+import InstitutionalPrintHeader from "../common/InstitutionalPrintHeader";
+import InstitutionalSignatoryBlock from "../common/InstitutionalSignatoryBlock";
+import { exportSingleDocumentExcel } from "../../utils/singleDocumentExcelExporter";
 import { API_BASE_URL } from "../../services/api";
+import { 
+  formatLocationWithColorName, 
+  getColorNameFromHex, 
+  stripColorTag, 
+  parseBoxHierarchy 
+} from "../inventory/storageTaxonomy";
+
+// Import all specific templates for modular rendering
 import AccomplishmentReportTemplate from "./AccomplishmentReportTemplate";
 import AaccupTemplate from "./AaccupTemplate";
 import AnnualReportTemplate from "./AnnualReportTemplate";
@@ -136,66 +156,72 @@ const templateMap = {
   "FREE HIGHER EDUCATION BILLING DETAILS": FreeHigherEducationBillingTemplate
 };
 
-function DocumentTemplateRenderer({ document }) {
+/**
+ * DocumentTemplateRenderer
+ * Full Institutional Archival Record Dossier Sheet.
+ * Perfectly mirrors the Excel spreadsheet format, print sheet layout, and official state university styling.
+ */
+function DocumentTemplateRenderer({ document: doc }) {
   const [copied, setCopied] = useState(false);
-  if (!document) return null;
+  if (!doc) return null;
 
-  const docTypeKey = (document.document_type || "").toUpperCase().trim();
+  const docTypeKey = (doc.document_type || "").toUpperCase().trim();
   const Component = templateMap[docTypeKey];
+  const documentIdentifier = doc.document_id || doc.access_code || `DOC-${doc.id || "RECORD"}`;
+
+  const formattedDate = doc.created_at
+    ? new Date(doc.created_at).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })
+    : new Date().toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+
+  // Physical Location parsing with color resolution (no raw hex codes!)
+  const boxParsed = doc.file_box ? parseBoxHierarchy(doc.file_box.name) : null;
+  const cabinetName = doc.file_box?.cabinet?.name || "Unassigned Storage Unit";
+  const cabinetType = doc.file_box?.cabinet?.type || "Unit";
+  const boxName = stripColorTag(boxParsed?.parentBoxName || (!boxParsed?.isArchfile ? doc.file_box?.name : "Direct Placement") || "Unassigned Box Container");
+  const archfileName = stripColorTag(doc.archfile?.name || doc.file_box?.archfile?.name || boxParsed?.archfileName || null);
+  const archfileCode = doc.archfile?.code || doc.file_box?.archfile?.code || null;
+  const rawColor = doc.archfile?.color_tag || doc.file_box?.archfile?.color_tag || boxParsed?.color || null;
+  const archfileColorName = getColorNameFromHex(rawColor);
+
+  const rawData = doc.dynamic_data || {};
+  const computedLocation = doc.file_box?.cabinet?.name
+    ? `${doc.file_box.cabinet.name} - ${doc.file_box.name}`
+    : (doc.file_box?.name || rawData.file_location || "Unassigned");
+  const fileLocation = formatLocationWithColorName(rawData.file_location || computedLocation);
+
+  const unifiedData = {
+    ...doc,
+    ...rawData,
+    subject: rawData.subject || doc.subject || doc.title || "—",
+    access_code: rawData.access_code || doc.access_code || "N/A",
+    date: rawData.date || formattedDate,
+    file_location: fileLocation,
+  };
+
+  const monthName = (() => {
+    if (unifiedData.month) return String(unifiedData.month).toUpperCase();
+    const d = doc.memo_date || doc.created_at;
+    if (d && !isNaN(new Date(d).getTime())) {
+      return new Date(d).toLocaleDateString("en-US", { month: "long" }).toUpperCase();
+    }
+    return "JANUARY";
+  })();
 
   const handleExportExcel = async () => {
-    const workbook = new ExcelJS.Workbook();
-    const sheet = workbook.addWorksheet("Masterlist");
-
-    const titleStr = `ZPPSU MASTERLIST OF RECORDS - ${(document.document_type || "DOCUMENT").toUpperCase()}`;
-
-    // Add Title
-    sheet.mergeCells("A1:E1");
-    const titleRow = sheet.getCell("A1");
-    titleRow.value = titleStr;
-    titleRow.font = { bold: true, size: 14 };
-    titleRow.alignment = { horizontal: "center", vertical: "middle" };
-
-    // Use dynamic data if available to match the generated templates, or fallback to standard document metadata
-    const isGenerated = document.is_generated;
-    const data = document.dynamic_data || document;
-    
-    // Most templates have ACTION TAKEN instead of STATUS
-    const statusOrActionHeader = isGenerated && data.action_taken ? "ACTION TAKEN" : "STATUS";
-    const statusOrActionValue = isGenerated && data.action_taken ? data.action_taken : (document.status || "Active");
-
-    // Add Headers
-    const headerRow = sheet.addRow(["DATE", "ACCESS CODE", "SUBJECT", statusOrActionHeader, "FILE LOCATION"]);
-    headerRow.eachCell((cell) => {
-      cell.font = { bold: true };
-      cell.alignment = { horizontal: "center", vertical: "middle" };
-      cell.border = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
-    });
-
-    // Add Data
-    const dataRow = sheet.addRow([
-      data.date || new Date(document.created_at || Date.now()).toLocaleDateString(),
-      data.access_code || document.access_code || "N/A",
-      data.subject || document.subject || document.title || "—",
-      statusOrActionValue,
-      data.file_location || (document.file_box?.cabinet?.name ? `${document.file_box.cabinet.name} - ${document.file_box.name}` : "Unassigned")
-    ]);
-    dataRow.eachCell((cell) => {
-      cell.alignment = { horizontal: "center", vertical: "middle" };
-      cell.border = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
-    });
-
-    sheet.columns = [ { width: 15 }, { width: 20 }, { width: 35 }, { width: 15 }, { width: 25 } ];
-
-    const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-    const url = window.URL.createObjectURL(blob);
-    const link = window.document.createElement("a");
-    link.href = url;
-    link.download = `${document.document_id || "Document"}.xlsx`;
-    link.click();
-    window.URL.revokeObjectURL(url);
-    trackDownload("Excel spreadsheet");
+    try {
+      await exportSingleDocumentExcel(doc, unifiedData);
+      trackDownload("Excel spreadsheet");
+    } catch (err) {
+      console.error("Failed to export institutional excel:", err);
+    }
   };
 
   const trackDownload = async (type = "file") => {
@@ -210,9 +236,9 @@ function DocumentTemplateRenderer({ document }) {
           },
           body: JSON.stringify({
             action: "DOWNLOAD",
-            description: `Downloaded ${type} for ${document.file_name || document.document_id || "Document"}`,
-            file_id: document.id,
-            document_id: document.document_id,
+            description: `Downloaded ${type} for ${doc.file_name || doc.document_id || "Document"}`,
+            file_id: doc.id,
+            document_id: doc.document_id,
             module: "documents"
           })
         });
@@ -222,195 +248,137 @@ function DocumentTemplateRenderer({ document }) {
     }
   };
 
-  if (Component && document.is_generated) {
-    return (
-      <div className="space-y-6 font-sans">
-        <Component document={document} data={document.dynamic_data || document} />
-        <div className="flex justify-end gap-2 max-w-[950px] mx-auto">
-          <button
-            onClick={handleExportExcel}
-            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-[#E8E3E1] bg-[#FFFCF7] text-xs font-bold text-[#1D1A1B] hover:bg-[#F4E7EA] transition-colors shadow-xs cursor-pointer"
-          >
-            <FileSpreadsheet className="w-3.5 h-3.5 text-[#6B1D2A]" />
-            <span>Export to Excel</span>
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  const fileUrl = document.file_path 
-    ? (document.file_path.startsWith("http") ? document.file_path : `${API_BASE_URL}/${document.file_path}`)
-    : null;
-
-  const isPdf = document.file_name?.toLowerCase().endsWith(".pdf") || document.file_type === "PDF";
-  const isImage = /\.(jpg|jpeg|png|webp)$/i.test(document.file_name || "") || ["JPG", "JPEG", "PNG", "WEBP"].includes(document.file_type);
-
   const handleCopyOcr = () => {
-    if (document.ocr_text) {
-      navigator.clipboard.writeText(document.ocr_text);
+    if (doc.ocr_text) {
+      navigator.clipboard.writeText(doc.ocr_text);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }
   };
 
   return (
-    <div className="space-y-6 font-sans">
-      {/* METADATA SUMMARY TABLE */}
-      <div className="w-full max-w-[950px] mx-auto bg-white border border-black overflow-hidden">
-        <table className="w-full border-collapse border border-black text-sm text-black font-sans">
-          <tbody>
-            <tr>
-              <td colSpan="5" className="border border-black text-center font-bold text-lg p-3 bg-white uppercase">
-                ZPPSU MASTERLIST OF RECORDS - {document.document_type || "DOCUMENT"}
-              </td>
-            </tr>
-            <tr className="bg-white">
-              <td className="border border-black text-center font-bold p-2 w-[15%]">DATE</td>
-              <td className="border border-black text-center font-bold p-2 w-[20%]">ACCESS CODE</td>
-              <td className="border border-black text-center font-bold p-2 w-[30%]">SUBJECT</td>
-              <td className="border border-black text-center font-bold p-2 w-[15%]">STATUS</td>
-              <td className="border border-black text-center font-bold p-2 w-[20%]">FILE LOCATION</td>
-            </tr>
-            <tr className="bg-white">
-              <td className="border border-black text-center p-2">
-                {new Date(document.created_at || Date.now()).toLocaleDateString()}
-              </td>
-              <td className="border border-black text-center p-2">
-                {document.access_code || "N/A"}
-              </td>
-              <td className="border border-black text-center p-2">
-                {document.subject || document.title || "—"}
-              </td>
-              <td className="border border-black text-center p-2">
-                {document.status || "Active"}
-              </td>
-              <td className="border border-black text-center p-2">
-                {document.file_box?.cabinet?.name ? `${document.file_box.cabinet.name} - ${document.file_box.name}` : "Unassigned"}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div className="flex justify-end gap-2 max-w-[950px] mx-auto">
+    <div className="space-y-4 font-sans max-w-[950px] mx-auto">
+      {/* EXPORT ACTION TOOLBAR */}
+      <div className="flex items-center justify-between bg-[#FFFCF7] p-2.5 px-4 rounded-xl border border-[#E8E3E1] shadow-2xs">
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] font-bold text-[#A87818] uppercase tracking-wider bg-[#F2DFB0]/50 px-2 py-0.5 rounded-md border border-[#C99A2E]/30">
+            Institutional Master Record
+          </span>
+          <span className="text-xs text-[#5F5A5C] hidden sm:inline">
+            Republic of the Philippines &bull; ZPPSU Archival Records Registry
+          </span>
+        </div>
         <button
           onClick={handleExportExcel}
           className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-[#E8E3E1] bg-[#FFFCF7] text-xs font-bold text-[#1D1A1B] hover:bg-[#F4E7EA] transition-colors shadow-xs cursor-pointer"
+          title="Export record in official state university Excel layout"
         >
           <FileSpreadsheet className="w-3.5 h-3.5 text-[#6B1D2A]" />
           <span>Export to Excel</span>
         </button>
       </div>
 
-      {/* EMBEDDED DOCUMENT VIEWER */}
-      {fileUrl && (
-        <div className="p-4 bg-[#FFFCF7] border border-[#E8E3E1] rounded-2xl shadow-xs space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#1D1A1B]">Document Preview</span>
-            <span className="text-[11px] text-[#5F5A5C] font-mono">{document.file_name}</span>
-          </div>
+      {/* INSTITUTIONAL MASTERLIST DOSSIER SHEET (MATCHING EXCEL LAYOUT) */}
+      <div className="bg-white border-2 border-black p-5 sm:p-7 shadow-sm rounded-none text-black">
+        {/* 1. STATE UNIVERSITY LETTERHEAD (IMAGE 1) */}
+        <InstitutionalPrintHeader
+          referenceCode={documentIdentifier}
+          classification={doc.category || "General"}
+          documentType={doc.document_type || "Record"}
+          hideTitleStrip={true}
+        />
 
-          {isPdf ? (
-            <iframe
-              src={fileUrl}
-              className="w-full h-[650px] rounded-xl border border-[#E8E3E1] bg-white shadow-inner"
-              title="Document PDF Preview"
-            />
-          ) : isImage ? (
-            <div className="flex flex-col items-center justify-center p-4 bg-[#F4E7EA]/30 rounded-xl border border-[#E8E3E1] space-y-4">
-              <img
-                src={fileUrl}
-                alt={document.title || "Document Image"}
-                className="max-h-[600px] w-auto rounded-lg object-contain shadow-xs"
-              />
-              <button
-                onClick={async () => {
-                  try {
-                    const response = await fetch(fileUrl);
-                    const blob = await response.blob();
-                    const objectUrl = window.URL.createObjectURL(blob);
-                    const link = window.document.createElement("a");
-                    link.href = objectUrl;
-                    link.download = document.file_name || "downloaded-image";
-                    window.document.body.appendChild(link);
-                    link.click();
-                    window.document.body.removeChild(link);
-                    window.URL.revokeObjectURL(objectUrl);
-                    trackDownload("image");
-                  } catch (err) {
-                    console.error("Failed to download image:", err);
-                    // Fallback to opening in new tab
-                    window.open(fileUrl, '_blank');
-                  }
-                }}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#6B1D2A] text-xs font-bold text-[#FFFCF7] hover:bg-[#8B3545] transition-colors cursor-pointer"
-              >
-                <Download className="w-3.5 h-3.5" />
-                <span>Download Image</span>
-              </button>
-            </div>
+        {/* 2. OFFICIAL TEMPLATE TABLE WITH GOLD BANNER (IMAGE 2) */}
+        <div className="template-viewport-container w-full overflow-x-auto mt-3">
+          {Component && doc.is_generated ? (
+            <Component document={doc} data={unifiedData} />
           ) : (
-            <div className="p-8 text-center bg-[#F4E7EA]/20 rounded-xl border border-[#E8E3E1] space-y-3">
-              <FileText className="w-10 h-10 text-[#6B1D2A] mx-auto" />
-              <p className="text-xs text-[#5F5A5C]">
-                Preview not directly supported in-browser for this file format ({document.file_type || "Document"}).
-              </p>
-              <button
-                onClick={async () => {
-                  try {
-                    const response = await fetch(fileUrl);
-                    const blob = await response.blob();
-                    const objectUrl = window.URL.createObjectURL(blob);
-                    const link = window.document.createElement("a");
-                    link.href = objectUrl;
-                    link.download = document.file_name || "downloaded-file";
-                    window.document.body.appendChild(link);
-                    link.click();
-                    window.document.body.removeChild(link);
-                    window.URL.revokeObjectURL(objectUrl);
-                    trackDownload("file");
-                  } catch (err) {
-                    console.error("Failed to download file:", err);
-                    window.open(fileUrl, '_blank');
-                  }
-                }}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#6B1D2A] text-xs font-bold text-[#FFFCF7] hover:bg-[#8B3545] transition-colors cursor-pointer"
-              >
-                <Download className="w-3.5 h-3.5" />
-                <span>Download {document.file_name}</span>
-              </button>
+            <div className="w-full max-w-[950px] mx-auto bg-white border border-black">
+              <table className="w-full border-collapse border border-black text-xs">
+                <tbody>
+                  <tr>
+                    <td
+                      colSpan="5"
+                      className="border border-black font-bold text-center p-2.5 text-sm uppercase bg-white text-black"
+                    >
+                      ZPPSU MASTERLIST OF RECORDS- {(doc.document_type || "DOCUMENT").toUpperCase()}
+                    </td>
+                  </tr>
+                  <tr className="font-bold text-center text-xs bg-neutral-50/50">
+                    <td className="border border-black p-2.5 text-center w-[15%]">Date</td>
+                    <td className="border border-black p-2.5 text-center w-[18%]">ACCESS CODE</td>
+                    <td className="border border-black p-2.5 text-center w-[32%]">SUBJECT</td>
+                    <td className="border border-black p-2.5 text-center w-[15%]">
+                      {unifiedData.action_taken ? "ACTION TAKEN" : "STATUS"}
+                    </td>
+                    <td className="border border-black p-2.5 text-center w-[20%]">FILE LOCATION</td>
+                  </tr>
+                  <tr>
+                    <td
+                      colSpan="5"
+                      className="border border-black font-bold px-3 py-2 text-xs text-black"
+                      style={{ backgroundColor: "#F2DFB0" }}
+                    >
+                      {monthName}
+                    </td>
+                  </tr>
+                  <tr className="text-center text-xs">
+                    <td className="border border-black p-3.5 text-center align-middle">{formattedDate}</td>
+                    <td className="border border-black p-3.5 text-center align-middle font-mono font-bold">{doc.access_code || "N/A"}</td>
+                    <td className="border border-black p-3.5 text-center align-middle font-medium break-words leading-relaxed max-w-[280px]">{unifiedData.subject || doc.title || "—"}</td>
+                    <td className="border border-black p-3.5 text-center align-middle">{unifiedData.action_taken || doc.status || "Active"}</td>
+                    <td className="border border-black p-3.5 text-center align-middle break-words leading-relaxed max-w-[240px]">{fileLocation}</td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           )}
         </div>
-      )}
 
-      {/* OCR EXTRACTED TEXT TRANSCRIPT */}
-      {document.ocr_text && (
-        <div className="p-5 bg-[#FFFCF7] border border-[#E8E3E1] rounded-2xl shadow-xs space-y-3">
-          <div className="flex items-center justify-between border-b border-[#E8E3E1] pb-3">
-            <div className="flex items-center gap-2">
-              <div className="p-1.5 rounded-lg bg-[#F2DFB0] border border-[#C99A2E] text-[#A87818]">
-                <ScanText className="w-3.5 h-3.5" />
-              </div>
-              <div>
-                <h4 className="text-xs font-bold text-[#1D1A1B] uppercase tracking-wider">OCR Extracted Content</h4>
-                <p className="text-[10px] text-[#5F5A5C]">Extracted textual content for semantic indexing</p>
-              </div>
+        {/* Uploaded Physical Document Attachment (Only rendered when a file was uploaded via Upload Document workflow) */}
+        {!doc.is_generated && doc.file_path && (
+          <div className="border border-black p-3 bg-neutral-50 text-left flex items-center justify-between mt-3">
+            <div>
+              <p className="text-xs font-bold text-black uppercase">Original Uploaded File</p>
+              <p className="text-[11px] text-neutral-700 font-mono">{doc.file_name || "Attachment"}</p>
             </div>
-            <button
-              onClick={handleCopyOcr}
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-[#E8E3E1] bg-[#FFFCF7] text-[11px] font-semibold text-[#1D1A1B] hover:bg-[#F4E7EA] transition-colors cursor-pointer"
+            <a
+              href={`${API_BASE_URL}/${doc.file_path}`}
+              target="_blank"
+              rel="noreferrer"
+              download
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#6B1D2A] text-white text-xs font-bold rounded hover:bg-[#8B3545]"
             >
-              {copied ? <Check className="w-3 h-3 text-[#6B1D2A]" /> : <Copy className="w-3 h-3 text-[#5F5A5C]" />}
-              <span>{copied ? "Copied" : "Copy Text"}</span>
-            </button>
+              <Download className="w-3.5 h-3.5" />
+              <span>Download Attachment</span>
+            </a>
           </div>
-          <div className="p-4 rounded-xl bg-[#F4E7EA]/40 border border-[#E8E3E1] text-[#1D1A1B] font-mono text-xs whitespace-pre-wrap max-h-72 overflow-y-auto leading-relaxed selection:bg-[#F2DFB0]">
-            {document.ocr_text}
+        )}
+
+        {/* OCR Extracted Text Transcript if present */}
+        {doc.ocr_text && (
+          <div className="border border-black mt-3">
+            <div className="bg-neutral-100 border-b border-black p-2 flex items-center justify-between">
+              <div>
+                <span className="font-bold text-[11px] uppercase tracking-wide text-black">
+                  Certified Semantic Text Transcription (OCR Content)
+                </span>
+                <p className="text-[9px] text-neutral-600">Machine-indexed transcript extracted for searchability</p>
+              </div>
+              <button
+                onClick={handleCopyOcr}
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded border border-black/30 bg-white text-[10px] font-semibold text-black hover:bg-neutral-100 cursor-pointer"
+              >
+                {copied ? <Check className="w-3 h-3 text-[#6B1D2A]" /> : <Copy className="w-3 h-3 text-neutral-600" />}
+                <span>{copied ? "Copied" : "Copy"}</span>
+              </button>
+            </div>
+            <div className="p-3 text-xs font-serif leading-relaxed text-neutral-900 whitespace-pre-wrap bg-white text-left max-h-48 overflow-y-auto">
+              {doc.ocr_text}
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

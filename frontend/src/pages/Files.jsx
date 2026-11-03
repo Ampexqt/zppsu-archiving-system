@@ -16,6 +16,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import ShadcnSelect from "@/components/ui/ShadcnSelect";
+import ShadcnDatePicker from "../components/ui/ShadcnDatePicker";
 import PhysicalStoragePlacementCard from "../components/files/PhysicalStoragePlacementCard";
 import RecentFiledDocumentsBar from "../components/files/RecentFiledDocumentsBar";
 import UploadDocumentSection from "../components/files/UploadDocumentSection";
@@ -375,21 +376,34 @@ function Files() {
                     Document Required Details
                   </span>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                    {selectedFields.map((field) => (
-                      <div key={field} className="space-y-1">
-                        <label className="text-[11px] font-bold text-[#5F5A5C] uppercase">
-                          {field.replaceAll("_", " ")}
-                        </label>
-                        <Input
-                          type="text"
-                          placeholder={`Enter ${field.replaceAll("_", " ")}`}
-                          value={formData[field] || ""}
-                          onChange={(e) => setFormData((prev) => ({ ...prev, [field]: e.target.value }))}
-                          className="h-10 text-xs rounded-xl border-[#E8E3E1] bg-[#FFFCF7] text-[#1D1A1B]"
-                          required={field === "access_code"}
-                        />
-                      </div>
-                    ))}
+                    {selectedFields.map((field) => {
+                      const isDateField = field.toLowerCase().includes("date");
+                      return (
+                        <div key={field} className="space-y-1">
+                          <label className="text-[11px] font-bold text-[#5F5A5C] uppercase">
+                            {field.replaceAll("_", " ")}
+                          </label>
+                          {isDateField ? (
+                            <ShadcnDatePicker
+                              value={formData[field] || ""}
+                              onChange={(formattedVal) =>
+                                setFormData((prev) => ({ ...prev, [field]: formattedVal }))
+                              }
+                              placeholder={`Select ${field.replaceAll("_", " ")}...`}
+                            />
+                          ) : (
+                            <Input
+                              type="text"
+                              placeholder={`Enter ${field.replaceAll("_", " ")}`}
+                              value={formData[field] || ""}
+                              onChange={(e) => setFormData((prev) => ({ ...prev, [field]: e.target.value }))}
+                              className="h-10 text-xs rounded-xl border-[#E8E3E1] bg-[#FFFCF7] text-[#1D1A1B]"
+                              required={field === "access_code"}
+                            />
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               )}

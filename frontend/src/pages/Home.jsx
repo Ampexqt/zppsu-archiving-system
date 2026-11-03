@@ -1,124 +1,120 @@
 import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
-import { ArrowRight, ShieldCheck, Database, Search, FileText, Lock, ChevronRight } from "lucide-react";
+import { Database, Search, FileText, Lock, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import logo from "../assets/logo.jpg";
+import heroImage from "../assets/image.jpg";
 
 function Home() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-[#FFFCF7] text-[#1D1A1B] font-sans selection:bg-[#F2DFB0] selection:text-[#4A0E1C] scroll-smooth overflow-x-hidden flex flex-col">
+    <div className="min-h-screen bg-[#FFFCF7] text-[#1D1A1B] font-sans selection:bg-[#6B1B2E] selection:text-[#FFFCF7] scroll-smooth overflow-x-hidden flex flex-col">
       <Navbar />
 
-      {/* HERO SECTION */}
+      {/* HERO SECTION: Balanced Swiss / Institutional Minimalist Editorial */}
       <section
         id="home"
-        className="relative pt-32 pb-20 lg:pt-44 lg:pb-28 overflow-hidden flex flex-col justify-center items-center text-center px-4"
+        className="relative pt-24 pb-14 sm:pt-28 sm:pb-16 lg:pt-36 lg:pb-24 px-4 sm:px-6 lg:px-12 max-w-7xl mx-auto w-full flex-1 flex flex-col justify-center border-b border-[#E8E3E1]"
       >
-        {/* Subtle Background Elements */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[450px] bg-gradient-to-b from-[#6B1D2A]/5 to-transparent rounded-full blur-3xl -z-10 pointer-events-none"></div>
-        <div className="absolute inset-0 -z-20 h-full w-full bg-[radial-gradient(#E8E3E1_1px,transparent_1px)] [background-size:24px_24px] opacity-60"></div>
-        
-        {/* Institutional Trust Badge */}
-        <div className="inline-flex items-center gap-2 rounded-full border border-[#6B1D2A]/20 bg-[#FFFCF7]/80 backdrop-blur-sm px-4 py-1.5 text-xs font-semibold text-[#6B1D2A] mb-6 shadow-xs">
-          <ShieldCheck className="w-4 h-4 text-[#6B1D2A]" />
-          <span>Official Institutional Archiving Portal</span>
-        </div>
-        
-        <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-[#6B1D2A] tracking-tight mb-4 max-w-4xl leading-[1.15]">
-          Digital Archiving System <br />
-          <span className="text-[#1D1A1B] font-bold text-3xl sm:text-4xl md:text-5xl block mt-2">
-            ZPPSU Guidance Office
-          </span>
-        </h1>
-
-        <p className="text-base sm:text-lg text-[#5F5A5C] max-w-2xl mb-8 leading-relaxed font-normal">
-          A secure, high-performance platform engineered for seamless student records management, instant retrieval, and strict institutional compliance.
-        </p>
-        
-        <div className="flex flex-col sm:flex-row gap-3.5 w-full sm:w-auto items-center">
-          <Button 
-            onClick={() => navigate("/login")}
-            className="w-full sm:w-auto px-7 py-6 rounded-xl bg-[#6B1D2A] text-[#FFFCF7] hover:bg-[#8B3545] shadow-sm hover:shadow-md text-base font-semibold transition-all group"
-          >
-            <span>Access Portal</span>
-            <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-          </Button>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 items-center">
           
-          <Button 
-            variant="outline"
-            onClick={() => {
-              const el = document.getElementById("features");
-              if (el) el.scrollIntoView({ behavior: "smooth" });
-            }}
-            className="w-full sm:w-auto px-7 py-6 rounded-xl bg-[#FFFCF7] border border-[#E8E3E1] text-[#1D1A1B] hover:bg-[#F4E7EA] text-base font-semibold transition-all shadow-xs"
-          >
-            <span>Explore Capabilities</span>
-          </Button>
-        </div>
-        
-        {/* System Overview Visual Box */}
-        <div className="mt-14 w-full max-w-4xl mx-auto rounded-2xl border border-[#E8E3E1] bg-[#FFFCF7] p-6 shadow-sm">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
-            <div className="p-4 rounded-xl bg-[#FFFCF7] border border-[#E8E3E1]">
-              <div className="w-10 h-10 rounded-lg bg-[#F4E7EA] flex items-center justify-center text-[#6B1D2A] mb-3">
-                <Database className="w-5 h-5" />
-              </div>
-              <h3 className="font-bold text-[#1D1A1B] text-base mb-1">Central Repository</h3>
-              <p className="text-xs text-[#5F5A5C] leading-relaxed">Organized storage across academic, administrative, and financial classifications.</p>
+          {/* LEFT COLUMN: 6 Columns - Balanced Typography & Direct Action */}
+          <div className="lg:col-span-6 flex flex-col items-start text-left w-full">
+            
+            {/* Small uppercase mono label */}
+            <p className="font-mono text-[11px] sm:text-xs uppercase tracking-widest text-[#5F5A5C] mb-4 sm:mb-5">
+              ZPPSU Guidance &amp; Counseling Office · Archival Repository
+            </p>
+
+            {/* Editorial Headline: Clean responsive breaks, single near-black color */}
+            <h1 className="font-['Newsreader',Georgia,serif] text-[30px] sm:text-4xl lg:text-[46px] xl:text-[52px] font-normal tracking-tight text-[#1D1A1B] leading-[1.12] mb-4 sm:mb-5">
+              Institutional records and <br className="hidden sm:inline" />
+              physical archives, unified.
+            </h1>
+
+            {/* System-accurate narrative directly derived from /docs */}
+            <p className="text-sm sm:text-base text-[#5F5A5C] max-w-lg mb-6 sm:mb-8 leading-relaxed font-normal">
+              A central repository linking physical storage cabinets and file boxes to digital documents. Search, manage, and preserve academic records, accomplishment reports, and guidance files with complete audit accountability.
+            </p>
+
+            {/* Action Components: One solid maroon button (4px corners, no arrow) + one plain text link */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-5 mb-6 sm:mb-8 w-full sm:w-auto">
+              <button
+                type="button"
+                onClick={() => navigate("/login")}
+                className="w-full sm:w-auto bg-[#6B1B2E] text-[#FFFCF7] hover:bg-[#521322] px-6 py-3.5 rounded-[4px] text-sm font-medium tracking-wide transition-colors cursor-pointer text-center"
+              >
+                Access the Archive
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  const el = document.getElementById("features");
+                  if (el) el.scrollIntoView({ behavior: "smooth" });
+                }}
+                className="text-center sm:text-left text-sm font-medium text-[#1D1A1B] hover:text-[#6B1B2E] underline underline-offset-4 py-1 transition-colors cursor-pointer"
+              >
+                Explore system capabilities
+              </button>
             </div>
 
-            <div className="p-4 rounded-xl bg-[#FFFCF7] border border-[#E8E3E1]">
-              <div className="w-10 h-10 rounded-lg bg-[#F4E7EA] flex items-center justify-center text-[#6B1D2A] mb-3">
-                <Search className="w-5 h-5" />
-              </div>
-              <h3 className="font-bold text-[#1D1A1B] text-base mb-1">Instant Retrieval</h3>
-              <p className="text-xs text-[#5F5A5C] leading-relaxed">Search through thousands of student records with rapid keyword indexing.</p>
+            {/* Concrete Facts Line */}
+            <div className="pt-5 sm:pt-6 border-t border-[#E8E3E1] w-full text-[11px] sm:text-xs font-mono text-[#5F5A5C] leading-relaxed tracking-wide">
+              Role-based access · Cabinet-to-file indexing · Audit log tracking · Document center
             </div>
 
-            <div className="p-4 rounded-xl bg-[#FFFCF7] border border-[#E8E3E1]">
-              <div className="w-10 h-10 rounded-lg bg-[#F4E7EA] flex items-center justify-center text-[#6B1D2A] mb-3">
-                <Lock className="w-5 h-5" />
+          </div>
+
+          {/* RIGHT COLUMN: 6 Columns - Optically Balanced Full Photographic Anchor */}
+          <div className="lg:col-span-6 w-full flex flex-col items-center mt-4 lg:mt-0">
+            <div className="w-full border border-[#E8E3E1] p-1.5 sm:p-2 bg-[#FFFCF7] rounded-[4px]">
+              <img
+                src={heroImage}
+                alt="ZPPSU Guidance & Counseling Office Building and Records Archive"
+                className="w-full h-auto block rounded-[2px]"
+              />
+              <div className="pt-2 px-1 flex flex-col sm:flex-row sm:items-center justify-between text-[10px] sm:text-[11px] font-mono text-[#5F5A5C] border-t border-[#E8E3E1] mt-1.5 gap-1">
+                <span>ZPPSU Guidance Office · Main Campus</span>
+                <span>Physical &amp; Digital Vault</span>
               </div>
-              <h3 className="font-bold text-[#1D1A1B] text-base mb-1">Role-Based Access</h3>
-              <p className="text-xs text-[#5F5A5C] leading-relaxed">Strict authorization controls ensuring confidentiality of student documents.</p>
             </div>
           </div>
+
         </div>
       </section>
 
       {/* FEATURES SECTION (Bento Grid) */}
-      <section id="features" className="py-20 bg-[#FFFCF7] border-y border-[#E8E3E1] relative">
+      <section id="features" className="py-20 bg-[#FFFCF7] border-b border-[#E8E3E1] relative">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-12">
-            <h2 className="text-xs font-bold tracking-widest text-[#6B1D2A] uppercase mb-2">Core Capabilities</h2>
+            <h2 className="text-xs font-bold tracking-widest text-[#6B1B2E] uppercase mb-2">Core Capabilities</h2>
             <h3 className="text-2xl sm:text-3xl font-extrabold text-[#1D1A1B] tracking-tight">Engineered for Daily Institutional Workflows</h3>
           </div>
-          
+
           <div className="grid md:grid-cols-3 gap-6">
             {/* Feature 1 - Large */}
-            <div className="md:col-span-2 p-8 rounded-2xl border border-[#E8E3E1] bg-[#FFFCF7] shadow-xs hover:shadow-sm transition-all flex flex-col justify-between group">
+            <div className="md:col-span-2 p-8 border border-[#E8E3E1] bg-[#FFFCF7] flex flex-col justify-between group">
               <div>
-                <div className="w-12 h-12 rounded-xl bg-[#F4E7EA] border border-[#E8E3E1] flex items-center justify-center mb-6 text-[#6B1D2A] shadow-xs">
+                <div className="w-12 h-12 bg-[#F4E7EA] border border-[#E8E3E1] flex items-center justify-center mb-6 text-[#6B1B2E]">
                   <Database className="w-6 h-6 stroke-[2]" />
                 </div>
                 <h4 className="text-xl font-bold mb-2 text-[#1D1A1B]">Unified Document Center</h4>
                 <p className="text-[#5F5A5C] leading-relaxed text-sm max-w-lg">
-                  Securely store, organize, and manage thousands of student guidance records in one unified digital vault, categorized by cabinets and file boxes.
+                  Securely store, organize, and manage institutional guidance records in one unified digital vault, categorized by cabinets and file boxes.
                 </p>
               </div>
-              <div className="mt-6 flex items-center text-xs font-bold text-[#6B1D2A] gap-1 group-hover:gap-2 transition-all">
+              <div className="mt-6 flex items-center text-xs font-bold text-[#6B1B2E] gap-1 group-hover:gap-2 transition-all">
                 <span>Learn more about document workflows</span>
                 <ChevronRight className="w-4 h-4" />
               </div>
             </div>
-            
+
             {/* Feature 2 */}
-            <div className="p-8 rounded-2xl border border-[#E8E3E1] bg-[#FFFCF7] shadow-xs hover:shadow-sm transition-all flex flex-col justify-between">
+            <div className="p-8 border border-[#E8E3E1] bg-[#FFFCF7] flex flex-col justify-between">
               <div>
-                <div className="w-12 h-12 rounded-xl bg-[#F4E7EA] border border-[#E8E3E1] flex items-center justify-center mb-6 text-[#6B1D2A]">
+                <div className="w-12 h-12 bg-[#F4E7EA] border border-[#E8E3E1] flex items-center justify-center mb-6 text-[#6B1B2E]">
                   <Search className="w-6 h-6 stroke-[2]" />
                 </div>
                 <h4 className="text-lg font-bold mb-2 text-[#1D1A1B]">High-Speed Querying</h4>
@@ -129,25 +125,25 @@ function Home() {
             </div>
 
             {/* Feature 3 */}
-            <div className="p-8 rounded-2xl border border-[#E8E3E1] bg-[#FFFCF7] shadow-xs hover:shadow-sm transition-all flex flex-col justify-between">
+            <div className="p-8 border border-[#E8E3E1] bg-[#FFFCF7] flex flex-col justify-between">
               <div>
-                <div className="w-12 h-12 rounded-xl bg-[#F4E7EA] border border-[#E8E3E1] flex items-center justify-center mb-6 text-[#6B1D2A]">
+                <div className="w-12 h-12 bg-[#F4E7EA] border border-[#E8E3E1] flex items-center justify-center mb-6 text-[#6B1B2E]">
                   <Lock className="w-6 h-6 stroke-[2]" />
                 </div>
                 <h4 className="text-lg font-bold mb-2 text-[#1D1A1B]">Compliant Security</h4>
                 <p className="text-[#5F5A5C] leading-relaxed text-sm">
-                  Role-based permissions and comprehensive activity logs provide an audit trail of every access and modification.
+                  Role-based permissions and comprehensive activity logs provide an immutable audit trail of every document access and modification.
                 </p>
               </div>
             </div>
 
             {/* Feature 4 - Large */}
-            <div className="md:col-span-2 p-8 rounded-2xl border border-[#4A0E1C] bg-[#4A0E1C] text-[#FFFCF7] shadow-xs hover:shadow-sm transition-all flex flex-col justify-between">
+            <div className="md:col-span-2 p-8 border border-[#4A0E1C] bg-[#4A0E1C] text-[#FFFCF7] flex flex-col justify-between">
               <div>
-                <div className="w-12 h-12 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center mb-6 text-[#C99A2E]">
+                <div className="w-12 h-12 bg-white/10 border border-white/20 flex items-center justify-center mb-6 text-[#C99A2E]">
                   <FileText className="w-6 h-6 stroke-[2]" />
                 </div>
-                <h4 className="text-xl font-bold mb-2 text-[#FFFCF7]">Automated Reports & Physical Inventory</h4>
+                <h4 className="text-xl font-bold mb-2 text-[#FFFCF7]">Automated Reports &amp; Physical Inventory</h4>
                 <p className="text-white/80 leading-relaxed text-sm max-w-lg">
                   Generate official accomplishment reports, print-ready document summaries, and synchronize physical cabinet storage without manual duplicate entry.
                 </p>
@@ -166,15 +162,15 @@ function Home() {
         className="py-20 flex flex-col items-center px-6 bg-[#FFFCF7]"
       >
         <div className="max-w-3xl text-center">
-          <div className="w-20 h-20 mx-auto mb-6 rounded-2xl overflow-hidden shadow-xs border border-[#E8E3E1] bg-[#FFFCF7]">
+          <div className="w-16 h-16 mx-auto mb-6 overflow-hidden border border-[#E8E3E1] bg-[#FFFCF7]">
             <img src={logo} alt="ZPPSU Logo" className="w-full h-full object-cover" />
           </div>
           <h2 className="text-3xl font-extrabold text-[#1D1A1B] mb-4 tracking-tight">
             Empowering the Guidance Office
           </h2>
-          <div className="w-16 h-1 bg-[#6B1D2A] mx-auto mb-6 rounded-full"></div>
+          <div className="w-12 h-0.5 bg-[#6B1B2E] mx-auto mb-6" />
           <p className="text-base leading-relaxed text-[#5F5A5C] font-normal">
-            Designed exclusively for the <strong className="text-[#1D1A1B] font-semibold">Zamboanga Peninsula Polytechnic State University</strong>, this archiving system streamlines document retention, simplifies physical cabinet indexing, and safeguards sensitive student guidance records.
+            Designed exclusively for the <strong className="text-[#1D1A1B] font-semibold">Zamboanga Peninsula Polytechnic State University</strong>, this archiving system streamlines document retention, simplifies physical cabinet indexing, and safeguards sensitive institutional and guidance records.
           </p>
         </div>
       </section>

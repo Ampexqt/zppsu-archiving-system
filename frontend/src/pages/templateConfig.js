@@ -1,18 +1,29 @@
+import { formatLocationWithColorName } from "../components/inventory/storageTaxonomy";
+
+const getCleanLocation = (document, data) => {
+  const loc = document?.file_box?.cabinet?.name
+    ? `${document.file_box.cabinet.name} - ${document.file_box.name}`
+    : ((data || {}).file_location || "Unassigned");
+  return formatLocationWithColorName(loc);
+};
+
 export const templateConfig = {
   "AACCUP FINDINGS AND RECOMMENDATIONS": {
     headers: ["ACCESS CODE", "PROGRAM", "FILE LOCATION"],
     getRowData: (document, data) => [
       (data || {}).access_code || "N/A",
       (data || {}).program,
-      document.file_box?.cabinet?.name ? `${document.file_box.cabinet.name} - ${document.file_box.name}` : ((data || {}).file_location || "Unassigned"),
+      getCleanLocation(document, data),
     ]
   },
   "ACCOMPLISHMENT REPORTS": {
-    headers: ["ACCESS CODE", "SUBJECT", "FILE LOCATION"],
+    headers: ["DATE", "ACCESS CODE", "SUBJECT", "STATUS", "FILE LOCATION"],
     getRowData: (document, data) => [
+      (data || {}).date || (document.created_at ? new Date(document.created_at).toLocaleDateString() : ""),
       document.access_code || "N/A",
-      document.subject,
-      document.file_box?.cabinet?.name ? `${document.file_box.cabinet.name} - ${document.file_box.name}` : (data.file_location || "Unassigned"),
+      document.subject || document.title || "",
+      document.status || "Active",
+      getCleanLocation(document, data),
     ]
   },
   "ANNUAL REPORTS": {
@@ -20,7 +31,7 @@ export const templateConfig = {
     getRowData: (document, data) => [
       document.access_code || "N/A",
       document.subject,
-      document.file_box?.cabinet?.name ? `${document.file_box.cabinet.name} - ${document.file_box.name}` : (data.file_location || "Unassigned"),
+      getCleanLocation(document, data),
     ]
   },
   "ASSESSMENT RECORDS OF STUDENTS": {
@@ -28,7 +39,7 @@ export const templateConfig = {
     getRowData: (document, data) => [
       document.access_code || "N/A",
       data.student_name,
-      document.file_box?.cabinet?.name ? `${document.file_box.cabinet.name} - ${document.file_box.name}` : (data.file_location || "Unassigned"),
+      getCleanLocation(document, data),
     ]
   },
   "BOARD RESOLUTIONS": {
@@ -36,7 +47,7 @@ export const templateConfig = {
     getRowData: (document, data) => [
       document.access_code || "N/A",
       document.subject,
-      document.file_box?.cabinet?.name ? `${document.file_box.cabinet.name} - ${document.file_box.name}` : (data.file_location || "Unassigned"),
+      getCleanLocation(document, data),
     ]
   },
   "BUDGET PLAN": {
@@ -44,7 +55,7 @@ export const templateConfig = {
     getRowData: (document, data) => [
       document.access_code || "N/A",
       data.year_and_proposed_budget,
-      document.file_box?.cabinet?.name ? `${document.file_box.cabinet.name} - ${document.file_box.name}` : (data.file_location || "Unassigned"),
+      getCleanLocation(document, data),
     ]
   },
   "BUDGET PROPOSALS": {
@@ -52,7 +63,7 @@ export const templateConfig = {
     getRowData: (document, data) => [
       data.access_code || "N/A",
       data.fiscal_year || "",
-      document.file_box?.cabinet?.name ? `${document.file_box.cabinet.name} - ${document.file_box.name}` : (data.file_location || "" || "Unassigned"),
+      getCleanLocation(document, data),
     ]
   },
   "BUDGETARY REQUIREMENTS": {
@@ -60,7 +71,7 @@ export const templateConfig = {
     getRowData: (document, data) => [
       data.access_code || "N/A",
       data.fiscal_year || "",
-      document.file_box?.cabinet?.name ? `${document.file_box.cabinet.name} - ${document.file_box.name}` : (data.file_location || "" || "Unassigned"),
+      getCleanLocation(document, data),
     ]
   },
   "CHECKS ISSUED": {
@@ -69,7 +80,7 @@ export const templateConfig = {
       data.access_code || "N/A",
       data.payee || "",
       data.amount || "",
-      document.file_box?.cabinet?.name ? `${document.file_box.cabinet.name} - ${document.file_box.name}` : (data.file_location || "" || "Unassigned"),
+      getCleanLocation(document, data),
     ]
   },
   "CHED COMMUNICATIONS 2024": {
@@ -79,7 +90,7 @@ export const templateConfig = {
       data.access_code || "N/A",
       data.subject,
       data.action_taken,
-      document.file_box?.cabinet?.name ? `${document.file_box.cabinet.name} - ${document.file_box.name}` : (data.file_location || "Unassigned"),
+      getCleanLocation(document, data),
     ]
   },
   "CHED MEMORANDUM ORDERS 2024": {
@@ -89,7 +100,7 @@ export const templateConfig = {
       data.access_code || "N/A",
       data.subject || "",
       data.action_taken || "",
-      document.file_box?.cabinet?.name ? `${document.file_box.cabinet.name} - ${document.file_box.name}` : (data.file_location || "" || "Unassigned"),
+      getCleanLocation(document, data),
     ]
   },
   "CLASS PROGRAM": {
@@ -98,7 +109,7 @@ export const templateConfig = {
       data.access_code || "N/A",
       data.name_of_faculty || "",
       data.academic_year || "",
-      document.file_box?.cabinet?.name ? `${document.file_box.cabinet.name} - ${document.file_box.name}` : (data.file_location || "" || "Unassigned"),
+      getCleanLocation(document, data),
     ]
   },
   "COA ANNUAL REPORTS 2024": {
@@ -108,7 +119,7 @@ export const templateConfig = {
       data.access_code || "N/A",
       data.subject || "",
       data.action_taken || "",
-      document.file_box?.cabinet?.name ? `${document.file_box.cabinet.name} - ${document.file_box.name}` : (data.file_location || "" || "Unassigned"),
+      getCleanLocation(document, data),
     ]
   },
   "COA AUDIT OBSERVATION 2024": {
@@ -118,7 +129,7 @@ export const templateConfig = {
       data.access_code || "N/A",
       data.subject || "",
       data.action_taken || "",
-      document.file_box?.cabinet?.name ? `${document.file_box.cabinet.name} - ${document.file_box.name}` : (data.file_location || "" || "Unassigned"),
+      getCleanLocation(document, data),
     ]
   },
   "COA CIRCULARS": {
@@ -127,7 +138,7 @@ export const templateConfig = {
       data.date || "",
       data.access_code || "N/A",
       data.subject || "",
-      document.file_box?.cabinet?.name ? `${document.file_box.cabinet.name} - ${document.file_box.name}` : (data.file_location || "" || "Unassigned"),
+      getCleanLocation(document, data),
     ]
   },
   "COA COMMUNICATIONS 2024": {
@@ -137,7 +148,7 @@ export const templateConfig = {
       data.access_code || "N/A",
       data.subject || "",
       data.action_taken || "",
-      document.file_box?.cabinet?.name ? `${document.file_box.cabinet.name} - ${document.file_box.name}` : (data.file_location || "" || "Unassigned"),
+      getCleanLocation(document, data),
     ]
   },
   "COA NOTICE OF DISALLOWANCES 2024": {
@@ -147,7 +158,7 @@ export const templateConfig = {
       data.access_code || "N/A",
       data.subject || "",
       data.action_taken || "",
-      document.file_box?.cabinet?.name ? `${document.file_box.cabinet.name} - ${document.file_box.name}` : (data.file_location || "" || "Unassigned"),
+      getCleanLocation(document, data),
     ]
   },
   "COA NOTICE OF SUSPENSION 2024": {
@@ -157,7 +168,7 @@ export const templateConfig = {
       data.access_code || "N/A",
       data.subject || "",
       data.action_taken || "",
-      document.file_box?.cabinet?.name ? `${document.file_box.cabinet.name} - ${document.file_box.name}` : (data.file_location || "" || "Unassigned"),
+      getCleanLocation(document, data),
     ]
   },
   "MASTER LIST OF RECORDS FOR COLLECTION": {
@@ -166,7 +177,7 @@ export const templateConfig = {
       data.access_code || "N/A",
       data.receivables_from || "",
       data.amount || "",
-      document.file_box?.cabinet?.name ? `${document.file_box.cabinet.name} - ${document.file_box.name}` : (data.file_location || "" || "Unassigned"),
+      getCleanLocation(document, data),
     ]
   },
   "CONTRACT OF SERVICE (VISITING LECTURERS)": {
@@ -192,7 +203,7 @@ export const templateConfig = {
       data.date,
       data.access_code || "N/A",
       data.subject,
-      document.file_box?.cabinet?.name ? `${document.file_box.cabinet.name} - ${document.file_box.name}` : (data.file_location || "Unassigned"),
+      getCleanLocation(document, data),
     ]
   },
   "CSC COMMUNICATIONS 2024": {
@@ -202,7 +213,7 @@ export const templateConfig = {
       data.access_code || "N/A",
       data.subject,
       data.action_taken,
-      document.file_box?.cabinet?.name ? `${document.file_box.cabinet.name} - ${document.file_box.name}` : (data.file_location || "Unassigned"),
+      getCleanLocation(document, data),
     ]
   },
   "DATA ANALYSIS": {
@@ -210,7 +221,7 @@ export const templateConfig = {
     getRowData: (document, data) => [
       data.access_code || "N/A",
       data.subject,
-      document.file_box?.cabinet?.name ? `${document.file_box.cabinet.name} - ${document.file_box.name}` : (data.file_location || "Unassigned"),
+      getCleanLocation(document, data),
     ]
   },
   "DBM CIRCULARS": {
@@ -221,7 +232,7 @@ export const templateConfig = {
       data.subject,
       data.action_taken,
       data.memo_number,
-      document.file_box?.cabinet?.name ? `${document.file_box.cabinet.name} - ${document.file_box.name}` : (data.file_location || "Unassigned"),
+      getCleanLocation(document, data),
     ]
   },
   "DBM CIRCULARS 1": {
@@ -230,7 +241,7 @@ export const templateConfig = {
       data.date,
       data.access_code || "N/A",
       data.subject,
-      document.file_box?.cabinet?.name ? `${document.file_box.cabinet.name} - ${document.file_box.name}` : (data.file_location || "Unassigned"),
+      getCleanLocation(document, data),
     ]
   },
   "DISBURSEMENTS": {
@@ -239,7 +250,7 @@ export const templateConfig = {
       data.access_code || "N/A",
       data.particulars,
       data.amount,
-      document.file_box?.cabinet?.name ? `${document.file_box.cabinet.name} - ${document.file_box.name}` : (data.file_location || "Unassigned"),
+      getCleanLocation(document, data),
     ]
   },
   "DOST COMMUNICATIONS": {
@@ -249,7 +260,7 @@ export const templateConfig = {
       data.access_code || "N/A",
       data.subject,
       data.action_taken,
-      document.file_box?.cabinet?.name ? `${document.file_box.cabinet.name} - ${document.file_box.name}` : (data.file_location || "Unassigned"),
+      getCleanLocation(document, data),
     ]
   },
   "HEMIS": {
@@ -258,7 +269,7 @@ export const templateConfig = {
       data.access_code || "N/A",
       data.semester_school_year,
       data.tracking_details,
-      document.file_box?.cabinet?.name ? `${document.file_box.cabinet.name} - ${document.file_box.name}` : (data.file_location || "Unassigned"),
+      getCleanLocation(document, data),
     ]
   },
   "INDIVIDUAL DAILY PROGRAM IDP": {
@@ -267,7 +278,7 @@ export const templateConfig = {
       data.access_code || "N/A",
       data.name_of_faculty,
       data.semester_year,
-      document.file_box?.cabinet?.name ? `${document.file_box.cabinet.name} - ${document.file_box.name}` : (data.file_location || "Unassigned"),
+      getCleanLocation(document, data),
     ]
   },
   "INCOMING COMMUNICATIONS OUTSIDE ZC PERIMETER": {
@@ -278,7 +289,7 @@ export const templateConfig = {
       data.agency,
       data.subject,
       data.action_taken,
-      document.file_box?.cabinet?.name ? `${document.file_box.cabinet.name} - ${document.file_box.name}` : (data.file_location || "Unassigned"),
+      getCleanLocation(document, data),
     ]
   },
   "INCOMING COMMUNICATIONS WITHIN ZC": {
@@ -289,7 +300,7 @@ export const templateConfig = {
       data.agency,
       data.subject,
       data.action_taken,
-      document.file_box?.cabinet?.name ? `${document.file_box.cabinet.name} - ${document.file_box.name}` : (data.file_location || "Unassigned"),
+      getCleanLocation(document, data),
     ]
   },
   "IPCR": {
@@ -298,7 +309,7 @@ export const templateConfig = {
       data.access_code || "N/A",
       data.name_of_faculty,
       data.semester_year,
-      document.file_box?.cabinet?.name ? `${document.file_box.cabinet.name} - ${document.file_box.name}` : (data.file_location || "Unassigned"),
+      getCleanLocation(document, data),
     ]
   },
   "JOB ORDER WORKERS": {
@@ -307,7 +318,7 @@ export const templateConfig = {
       data.access_code || "N/A",
       data.name,
       data.period,
-      document.file_box?.cabinet?.name ? `${document.file_box.cabinet.name} - ${document.file_box.name}` : (data.file_location || "Unassigned"),
+      getCleanLocation(document, data),
     ]
   },
   "MANUALS OF OPERATIONS": {
@@ -315,7 +326,7 @@ export const templateConfig = {
     getRowData: (document, data) => [
       data.access_code || "N/A",
       data.subject,
-      document.file_box?.cabinet?.name ? `${document.file_box.cabinet.name} - ${document.file_box.name}` : (data.file_location || "Unassigned"),
+      getCleanLocation(document, data),
     ]
   },
   "MEDICAL RECORDS FOR STUDENTS": {
@@ -323,7 +334,7 @@ export const templateConfig = {
     getRowData: (document, data) => [
       data.access_code || "N/A",
       data.name,
-      document.file_box?.cabinet?.name ? `${document.file_box.cabinet.name} - ${document.file_box.name}` : (data.file_location || "Unassigned"),
+      getCleanLocation(document, data),
     ]
   },
   "MEMO OTHER MATTERS": {
@@ -334,7 +345,7 @@ export const templateConfig = {
       data.subject,
       data.personnel,
       data.memo_number,
-      document.file_box?.cabinet?.name ? `${document.file_box.cabinet.name} - ${document.file_box.name}` : (data.file_location || "Unassigned"),
+      getCleanLocation(document, data),
     ]
   },
   "MEMORANDUM": {
@@ -345,7 +356,7 @@ export const templateConfig = {
       data.subject,
       data.personnel,
       data.memo_number,
-      document.file_box?.cabinet?.name ? `${document.file_box.cabinet.name} - ${document.file_box.name}` : (data.file_location || "Unassigned"),
+      getCleanLocation(document, data),
     ]
   },
   "MINUTES OF MEETINGS": {
@@ -353,7 +364,7 @@ export const templateConfig = {
     getRowData: (document, data) => [
       data.access_code || "N/A",
       data.agenda_and_date_of_meeting,
-      document.file_box?.cabinet?.name ? `${document.file_box.cabinet.name} - ${document.file_box.name}` : (data.file_location || "Unassigned"),
+      getCleanLocation(document, data),
     ]
   },
   "MOA/MOU RECORDS": {
@@ -362,7 +373,7 @@ export const templateConfig = {
       data.access_code || "N/A",
       data.agency,
       data.subject,
-      document.file_box?.cabinet?.name ? `${document.file_box.cabinet.name} - ${document.file_box.name}` : (data.file_location || "Unassigned"),
+      getCleanLocation(document, data),
     ]
   },
   "NOTICE OF SALARY ADJUSTMENT (NOSA)": {
@@ -371,7 +382,7 @@ export const templateConfig = {
       data.access_code || "N/A",
       data.personnel_name,
       data.year,
-      document.file_box?.cabinet?.name ? `${document.file_box.cabinet.name} - ${document.file_box.name}` : (data.file_location || "Unassigned"),
+      getCleanLocation(document, data),
     ]
   },
   "SALN RECORDS": {
@@ -380,7 +391,7 @@ export const templateConfig = {
       data.access_code || "N/A",
       data.personnel_name,
       data.year,
-      document.file_box?.cabinet?.name ? `${document.file_box.cabinet.name} - ${document.file_box.name}` : (data.file_location || "Unassigned"),
+      getCleanLocation(document, data),
     ]
   },
   "NOTICE OF STEP INCREMENT (NSI)": {
@@ -389,7 +400,7 @@ export const templateConfig = {
       data.access_code || "N/A",
       data.personnel,
       data.year,
-      document.file_box?.cabinet?.name ? `${document.file_box.cabinet.name} - ${document.file_box.name}` : (data.file_location || "Unassigned"),
+      getCleanLocation(document, data),
     ]
   },
   "OFFENSES AND VIOLATIONS": {
@@ -399,7 +410,7 @@ export const templateConfig = {
       data.student_name,
       data.school_year_semester,
       data.offenses,
-      document.file_box?.cabinet?.name ? `${document.file_box.cabinet.name} - ${document.file_box.name}` : (data.file_location || "Unassigned"),
+      getCleanLocation(document, data),
     ]
   },
   "OUTGOING COMMUNICATIONS OUTSIDE ZC PERIMETER": {
@@ -410,7 +421,7 @@ export const templateConfig = {
       data.concerned_agency,
       data.subject,
       data.tracking_details,
-      document.file_box?.cabinet?.name ? `${document.file_box.cabinet.name} - ${document.file_box.name}` : (data.file_location || "Unassigned"),
+      getCleanLocation(document, data),
     ]
   },
   "PORTFOLIO OF FACULTY": {
@@ -418,7 +429,7 @@ export const templateConfig = {
     getRowData: (document, data) => [
       data.access_code || "N/A",
       data.faculty_name,
-      document.file_box?.cabinet?.name ? `${document.file_box.cabinet.name} - ${document.file_box.name}` : (data.file_location || "Unassigned"),
+      getCleanLocation(document, data),
     ]
   },
   "PURCHASE REQUESTS": {
@@ -428,7 +439,7 @@ export const templateConfig = {
       data.access_code || "N/A",
       data.items,
       data.amount,
-      document.file_box?.cabinet?.name ? `${document.file_box.cabinet.name} - ${document.file_box.name}` : (data.file_location || "Unassigned"),
+      getCleanLocation(document, data),
     ]
   },
   "REPORT OF RATINGS": {
@@ -436,7 +447,7 @@ export const templateConfig = {
     getRowData: (document, data) => [
       data.access_code || "N/A",
       data.details,
-      document.file_box?.cabinet?.name ? `${document.file_box.cabinet.name} - ${document.file_box.name}` : (data.file_location || "Unassigned"),
+      getCleanLocation(document, data),
     ]
   },
   "REQUEST LETTER MEMORANDUM (RLM)": {
@@ -446,7 +457,7 @@ export const templateConfig = {
       data.access_code || "N/A",
       data.subject,
       data.action_taken,
-      document.file_box?.cabinet?.name ? `${document.file_box.cabinet.name} - ${document.file_box.name}` : (data.file_location || "Unassigned"),
+      getCleanLocation(document, data),
     ]
   },
   "SPECIAL ORDERS": {
@@ -456,7 +467,7 @@ export const templateConfig = {
       data.access_code || "N/A",
       data.subject,
       data.personnel,
-      document.file_box?.cabinet?.name ? `${document.file_box.cabinet.name} - ${document.file_box.name}` : (data.file_location || "Unassigned"),
+      getCleanLocation(document, data),
     ]
   },
   "STUDENT ADMISSION RECORDS": {
@@ -465,7 +476,7 @@ export const templateConfig = {
       data.access_code || "N/A",
       data.name,
       data.semester_year,
-      document.file_box?.cabinet?.name ? `${document.file_box.cabinet.name} - ${document.file_box.name}` : (data.file_location || "Unassigned"),
+      getCleanLocation(document, data),
     ]
   },
   "STUDENTS IN/OFF CAMPUS TEACHING": {
@@ -474,7 +485,7 @@ export const templateConfig = {
       data.access_code || "N/A",
       data.student_name,
       data.assigned_school,
-      document.file_box?.cabinet?.name ? `${document.file_box.cabinet.name} - ${document.file_box.name}` : (data.file_location || "Unassigned"),
+      getCleanLocation(document, data),
     ]
   },
   "STUDENTS PROSPECTUS": {
@@ -482,7 +493,7 @@ export const templateConfig = {
     getRowData: (document, data) => [
       data.access_code || "N/A",
       data.course_and_year,
-      document.file_box?.cabinet?.name ? `${document.file_box.cabinet.name} - ${document.file_box.name}` : (data.file_location || "Unassigned"),
+      getCleanLocation(document, data),
     ]
   },
   "STUDENTS THESIS": {
@@ -491,7 +502,7 @@ export const templateConfig = {
       data.access_code || "N/A",
       data.student_name,
       data.thesis_title,
-      document.file_box?.cabinet?.name ? `${document.file_box.cabinet.name} - ${document.file_box.name}` : (data.file_location || "Unassigned"),
+      getCleanLocation(document, data),
     ]
   },
   "STUDENTS APPRENTICESHIP AND EXPO (APEX)": {
@@ -500,7 +511,7 @@ export const templateConfig = {
       data.access_code || "N/A",
       data.student_name,
       data.course_and_year,
-      document.file_box?.cabinet?.name ? `${document.file_box.cabinet.name} - ${document.file_box.name}` : (data.file_location || "Unassigned"),
+      getCleanLocation(document, data),
     ]
   },
   "TEACHING LOAD": {
@@ -509,7 +520,7 @@ export const templateConfig = {
       data.access_code || "N/A",
       data.faculty_name,
       data.academic_year,
-      document.file_box?.cabinet?.name ? `${document.file_box.cabinet.name} - ${document.file_box.name}` : (data.file_location || "Unassigned"),
+      getCleanLocation(document, data),
     ]
   },
   "TRAININGS AND SEMINARS": {
@@ -520,7 +531,7 @@ export const templateConfig = {
       data.subject,
       data.personnel,
       data.zppsu_memo_number,
-      document.file_box?.cabinet?.name ? `${document.file_box.cabinet.name} - ${document.file_box.name}` : (data.file_location || "Unassigned"),
+      getCleanLocation(document, data),
     ]
   },
   "VARIOUS RECORDS": {
@@ -528,7 +539,7 @@ export const templateConfig = {
     getRowData: (document, data) => [
       data.access_code || "N/A",
       data.subject,
-      document.file_box?.cabinet?.name ? `${document.file_box.cabinet.name} - ${document.file_box.name}` : (data.file_location || "Unassigned"),
+      getCleanLocation(document, data),
     ]
   },
   "VERIFICATION REQUEST": {
@@ -539,7 +550,7 @@ export const templateConfig = {
       data.requesting_party,
       data.student_name,
       data.action_taken,
-      document.file_box?.cabinet?.name ? `${document.file_box.cabinet.name} - ${document.file_box.name}` : (data.file_location || "Unassigned"),
+      getCleanLocation(document, data),
     ]
   },
   "VPAA MEMORANDA": {
@@ -549,7 +560,7 @@ export const templateConfig = {
       data.access_code || "N/A",
       data.subject,
       data.personnel,
-      document.file_box?.cabinet?.name ? `${document.file_box.cabinet.name} - ${document.file_box.name}` : (data.file_location || "Unassigned"),
+      getCleanLocation(document, data),
     ]
   },
   "VPAF INDORSEMENTS": {
@@ -558,7 +569,7 @@ export const templateConfig = {
       data.access_code || "N/A",
       data.subject,
       data.concerned_personnel,
-      document.file_box?.cabinet?.name ? `${document.file_box.cabinet.name} - ${document.file_box.name}` : (data.file_location || "Unassigned"),
+      getCleanLocation(document, data),
     ]
   },
   "VPAF MEMORANDUM": {
@@ -568,7 +579,7 @@ export const templateConfig = {
       data.access_code || "N/A",
       data.subject,
       data.personnel,
-      document.file_box?.cabinet?.name ? `${document.file_box.cabinet.name} - ${document.file_box.name}` : (data.file_location || "Unassigned"),
+      getCleanLocation(document, data),
     ]
   },
   "VPRE MEMORANDA": {
@@ -578,7 +589,7 @@ export const templateConfig = {
       data.access_code || "N/A",
       data.subject,
       data.personnel,
-      document.file_box?.cabinet?.name ? `${document.file_box.cabinet.name} - ${document.file_box.name}` : (data.file_location || "Unassigned"),
+      getCleanLocation(document, data),
     ]
   },
   "FORDEED OF DONATIONS": {
@@ -587,7 +598,7 @@ export const templateConfig = {
       data.access_code || "N/A",
       data.donor,
       data.title_of_donation,
-      document.file_box?.cabinet?.name ? `${document.file_box.cabinet.name} - ${document.file_box.name}` : (data.file_location || "Unassigned"),
+      getCleanLocation(document, data),
     ]
   },
   "FREE HIGHER EDUCATION BILLING DETAILS": {
@@ -597,7 +608,7 @@ export const templateConfig = {
       data.access_code || "N/A",
       data.semester,
       data.action_taken,
-      document.file_box?.cabinet?.name ? `${document.file_box.cabinet.name} - ${document.file_box.name}` : (data.file_location || "Unassigned"),
+      getCleanLocation(document, data),
     ]
   },
 };

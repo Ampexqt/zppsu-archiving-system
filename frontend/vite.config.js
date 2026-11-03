@@ -17,16 +17,31 @@ export default defineConfig({
         name: 'ZPPSU Archiving & Records Management System',
         short_name: 'ZPPSU Archive',
         description: 'ZPPSU Official Institutional Guidance Records and Archiving System',
-        theme_color: '#4A0E1C',
+        theme_color: '#6B1B2E',
         background_color: '#FFFCF7',
         display: 'standalone',
         orientation: 'any',
+        start_url: '/',
+        scope: '/',
+        id: '/',
         icons: [
           {
-            src: '/logo.jpg',
-            sizes: '192x192 512x512',
-            type: 'image/jpeg',
-            purpose: 'any maskable'
+            src: '/pwa-192x192.png',
+            sizes: '192x192',
+            type: 'image/png',
+            purpose: 'any'
+          },
+          {
+            src: '/pwa-512x512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'any'
+          },
+          {
+            src: '/maskable-icon-512x512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'maskable'
           }
         ]
       }

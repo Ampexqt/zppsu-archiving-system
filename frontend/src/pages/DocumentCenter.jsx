@@ -307,41 +307,45 @@ export default function DocumentCenter() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
+      <div className={`space-y-6 ${viewingFile ? "print:hidden" : ""}`}>
         {/* SUMMARY METRICS CARDS */}
-        <DocumentSummaryCards
-          totalDocuments={totalDocuments}
-          activeDocuments={activeDocuments}
-          archivedDocuments={archivedDocuments}
-          unassignedStorageCount={unassignedStorageCount}
-          selectedStorageFilter={selectedStorageFilter}
-          onToggleUnassignedFilter={() => {
-            setSelectedStorageFilter(selectedStorageFilter === "unassigned" ? "" : "unassigned");
-          }}
-        />
+        <div className="no-print">
+          <DocumentSummaryCards
+            totalDocuments={totalDocuments}
+            activeDocuments={activeDocuments}
+            archivedDocuments={archivedDocuments}
+            unassignedStorageCount={unassignedStorageCount}
+            selectedStorageFilter={selectedStorageFilter}
+            onToggleUnassignedFilter={() => {
+              setSelectedStorageFilter(selectedStorageFilter === "unassigned" ? "" : "unassigned");
+            }}
+          />
+        </div>
 
         {/* SEARCH & FILTERS BAR */}
-        <DocumentFiltersBar
-          search={search}
-          setSearch={setSearch}
-          searchMode={searchMode}
-          setSearchMode={setSearchMode}
-          onAISearch={handleAISearch}
-          selectedStorageFilter={selectedStorageFilter}
-          setSelectedStorageFilter={setSelectedStorageFilter}
-          unassignedStorageCount={unassignedStorageCount}
-          selectedStatus={selectedStatus}
-          setSelectedStatus={setSelectedStatus}
-          selectedYear={selectedYear}
-          setSelectedYear={setSelectedYear}
-          hasActiveFilters={hasActiveFilters}
-          onClearFilters={clearAllFilters}
-          showTrash={showTrash}
-          setShowTrash={setShowTrash}
-          trashCount={trashCount}
-          onExport={handleExportCatalog}
-          isExporting={isExporting}
-        />
+        <div className="no-print">
+          <DocumentFiltersBar
+            search={search}
+            setSearch={setSearch}
+            searchMode={searchMode}
+            setSearchMode={setSearchMode}
+            onAISearch={handleAISearch}
+            selectedStorageFilter={selectedStorageFilter}
+            setSelectedStorageFilter={setSelectedStorageFilter}
+            unassignedStorageCount={unassignedStorageCount}
+            selectedStatus={selectedStatus}
+            setSelectedStatus={setSelectedStatus}
+            selectedYear={selectedYear}
+            setSelectedYear={setSelectedYear}
+            hasActiveFilters={hasActiveFilters}
+            onClearFilters={clearAllFilters}
+            showTrash={showTrash}
+            setShowTrash={setShowTrash}
+            trashCount={trashCount}
+            onExport={handleExportCatalog}
+            isExporting={isExporting}
+          />
+        </div>
 
         {/* DOCUMENTS DATA TABLE */}
         <DocumentTable
@@ -362,24 +366,24 @@ export default function DocumentCenter() {
           hasActiveFilters={hasActiveFilters}
           onClearFilters={clearAllFilters}
         />
-
-        {/* VIEW DOCUMENT MODAL */}
-        <DocumentViewModal
-          isOpen={Boolean(viewingFile)}
-          file={viewingFile}
-          onClose={() => setViewingFile(null)}
-        />
-
-        {/* EDIT METADATA & PHYSICAL STORAGE MODAL */}
-        <DocumentEditModal
-          isOpen={Boolean(editingFile)}
-          file={editingFile}
-          cabinets={cabinets}
-          onClose={() => setEditingFile(null)}
-          onSave={handleSaveEdit}
-          isSaving={isSaving}
-        />
       </div>
+
+      {/* VIEW DOCUMENT MODAL */}
+      <DocumentViewModal
+        isOpen={Boolean(viewingFile)}
+        file={viewingFile}
+        onClose={() => setViewingFile(null)}
+      />
+
+      {/* EDIT METADATA & PHYSICAL STORAGE MODAL */}
+      <DocumentEditModal
+        isOpen={Boolean(editingFile)}
+        file={editingFile}
+        cabinets={cabinets}
+        onClose={() => setEditingFile(null)}
+        onSave={handleSaveEdit}
+        isSaving={isSaving}
+      />
     </DashboardLayout>
   );
 }

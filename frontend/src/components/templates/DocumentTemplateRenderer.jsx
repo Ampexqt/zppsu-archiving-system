@@ -206,6 +206,15 @@ function DocumentTemplateRenderer({ document: doc }) {
     file_location: fileLocation,
   };
 
+  const monthName = (() => {
+    if (unifiedData.month) return String(unifiedData.month).toUpperCase();
+    const d = doc.memo_date || doc.created_at;
+    if (d && !isNaN(new Date(d).getTime())) {
+      return new Date(d).toLocaleDateString("en-US", { month: "long" }).toUpperCase();
+    }
+    return "JANUARY";
+  })();
+
   const handleExportExcel = async () => {
     try {
       await exportSingleDocumentExcel(doc, unifiedData);
@@ -269,207 +278,106 @@ function DocumentTemplateRenderer({ document: doc }) {
         </button>
       </div>
 
-      {/* INSTITUTIONAL DOSSIER SHEET (MATCHING EXCEL & PRINT LAYOUT) */}
+      {/* INSTITUTIONAL MASTERLIST DOSSIER SHEET (MATCHING EXCEL LAYOUT) */}
       <div className="bg-white border-2 border-black p-5 sm:p-7 shadow-sm rounded-none text-black">
-        {/* 1. STATE UNIVERSITY LETTERHEAD */}
+        {/* 1. STATE UNIVERSITY LETTERHEAD (IMAGE 1) */}
         <InstitutionalPrintHeader
-          title={doc.is_generated ? `MASTERLIST OF RECORDS FOR ${(doc.document_type || "DOCUMENT").toUpperCase()}` : "OFFICIAL ARCHIVAL RECORD DOSSIER"}
           referenceCode={documentIdentifier}
           classification={doc.category || "General"}
           documentType={doc.document_type || "Record"}
+          hideTitleStrip={true}
         />
 
-        {/* 2. SECTION I: REGISTRATION & CLASSIFICATION */}
-        <div className="mb-4">
-          <div className="bg-neutral-100 border border-black px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-black flex justify-between items-center">
-            <span>Section I: Archival Document Registration & Classification</span>
-            <span className="font-mono text-[9px] font-bold">STATUS: {(doc.status || "ACTIVE").toUpperCase()}</span>
-          </div>
-          <table className="w-full border-collapse border border-black text-xs">
-            <tbody>
-              <tr>
-                <td className="border border-black p-2 bg-neutral-50 font-bold w-[20%] text-neutral-800 align-middle">
-                  Document Accession No.
-                </td>
-                <td className="border border-black p-2 font-mono font-bold text-black w-[30%] align-middle text-center">
-                  {documentIdentifier}
-                </td>
-                <td className="border border-black p-2 bg-neutral-50 font-bold w-[20%] text-neutral-800 align-middle">
-                  Registration Date
-                </td>
-                <td className="border border-black p-2 text-black w-[30%] align-middle text-center">
-                  {formattedDate}
-                </td>
-              </tr>
-              <tr>
-                <td className="border border-black p-2 bg-neutral-50 font-bold text-neutral-800 align-middle">
-                  Official Subject / Title
-                </td>
-                <td className="border border-black p-2 font-semibold text-black align-middle text-center" colSpan="3">
-                  {unifiedData.subject || doc.title || "—"}
-                </td>
-              </tr>
-              <tr>
-                <td className="border border-black p-2 bg-neutral-50 font-bold text-neutral-800 align-middle">
-                  Primary Category
-                </td>
-                <td className="border border-black p-2 text-black align-middle text-center">
-                  {doc.category || "Uncategorized"}
-                </td>
-                <td className="border border-black p-2 bg-neutral-50 font-bold text-neutral-800 align-middle">
-                  Document Classification
-                </td>
-                <td className="border border-black p-2 text-black font-medium align-middle text-center">
-                  {doc.document_type || "Standard Document"}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        {/* 3. SECTION II: PHYSICAL STORAGE CHAIN OF CUSTODY */}
-        <div className="mb-4">
-          <div className="bg-neutral-100 border border-black px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-black flex justify-between items-center">
-            <span>Section II: Physical Storage Chain of Custody & Repository Location</span>
-            <span className="font-mono text-[9px]">OFFICE REPOSITORY UNIT</span>
-          </div>
-          <table className="w-full border-collapse border border-black text-xs">
-            <tbody>
-              <tr>
-                <td className="border border-black p-2 bg-neutral-50 font-bold w-[20%] text-neutral-800 align-middle">
-                  Primary Storage Unit
-                </td>
-                <td className="border border-black p-2 text-black w-[30%] align-middle text-center">
-                  <strong>{cabinetName}</strong> <span className="text-neutral-600 text-[10px]">({cabinetType})</span>
-                </td>
-                <td className="border border-black p-2 bg-neutral-50 font-bold w-[20%] text-neutral-800 align-middle">
-                  File Box Container
-                </td>
-                <td className="border border-black p-2 text-black w-[30%] align-middle text-center">
-                  <strong>{boxName}</strong>
-                </td>
-              </tr>
-              <tr>
-                <td className="border border-black p-2 bg-neutral-50 font-bold text-neutral-800 align-middle">
-                  Archfile Binder
-                </td>
-                <td className="border border-black p-2 text-black align-middle text-center" colSpan="3">
-                  {archfileName ? (
-                    <div className="inline-flex items-center gap-2 justify-center">
-                      <span className="font-bold">{archfileName}</span>
-                      {archfileCode && <span className="font-mono text-[10px] text-neutral-700">[{archfileCode}]</span>}
-                      {archfileColorName && (
-                        <span 
-                          className="text-[9.5px] uppercase font-bold px-2 py-0.5 rounded border border-black/20"
-                          style={{ backgroundColor: `${rawColor}15`, color: rawColor || "#6B1D2A" }}
-                        >
-                          Spine: {archfileColorName}
-                        </span>
-                      )}
-                    </div>
-                  ) : (
-                    <span className="text-neutral-600 italic">Direct Unit / Box Placement (Not filed inside a separate Archfile binder)</span>
-                  )}
-                </td>
-              </tr>
-              <tr>
-                <td className="border border-black p-2 bg-neutral-50 font-bold text-neutral-800 align-middle">
-                  Full Location Coordinate
-                </td>
-                <td className="border border-black p-2 font-mono font-medium text-black align-middle text-center" colSpan="3">
-                  {fileLocation}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        {/* 4. SECTION III: OFFICIAL ARCHIVE RECORD DATA */}
-        <div className="mb-4">
-          <div className="bg-neutral-100 border border-black px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-black mb-2">
-            <span>Section III: Official Archival Document Content & Transcript</span>
-          </div>
-
-          {/* Record Table */}
-          <div className="template-viewport-container w-full overflow-x-auto mb-3">
-            {Component && doc.is_generated ? (
-              <Component document={doc} data={unifiedData} />
-            ) : (
+        {/* 2. OFFICIAL TEMPLATE TABLE WITH GOLD BANNER (IMAGE 2) */}
+        <div className="template-viewport-container w-full overflow-x-auto mt-3">
+          {Component && doc.is_generated ? (
+            <Component document={doc} data={unifiedData} />
+          ) : (
+            <div className="w-full max-w-[950px] mx-auto bg-white border border-black">
               <table className="w-full border-collapse border border-black text-xs">
-                <thead>
-                  <tr className="bg-neutral-50">
-                    <th className="border border-black p-2 text-center font-bold">DATE</th>
-                    <th className="border border-black p-2 text-center font-bold">ACCESS CODE</th>
-                    <th className="border border-black p-2 text-center font-bold">SUBJECT</th>
-                    <th className="border border-black p-2 text-center font-bold">STATUS</th>
-                    <th className="border border-black p-2 text-center font-bold">FILE LOCATION</th>
-                  </tr>
-                </thead>
                 <tbody>
                   <tr>
+                    <td
+                      colSpan="5"
+                      className="border border-black font-bold text-center p-2.5 text-sm uppercase bg-white text-black"
+                    >
+                      ZPPSU MASTERLIST OF RECORDS- {(doc.document_type || "DOCUMENT").toUpperCase()}
+                    </td>
+                  </tr>
+                  <tr className="font-bold text-center text-xs">
+                    <td className="border border-black p-2 text-center w-[15%]">Date</td>
+                    <td className="border border-black p-2 text-center w-[20%]">ACCESS CODE</td>
+                    <td className="border border-black p-2 text-center w-[30%]">SUBJECT</td>
+                    <td className="border border-black p-2 text-center w-[15%]">
+                      {unifiedData.action_taken ? "ACTION TAKEN" : "STATUS"}
+                    </td>
+                    <td className="border border-black p-2 text-center w-[20%]">FILE LOCATION</td>
+                  </tr>
+                  <tr>
+                    <td
+                      colSpan="5"
+                      className="border border-black font-bold p-1.5 text-xs text-black"
+                      style={{ backgroundColor: "#F2DFB0" }}
+                    >
+                      {monthName}
+                    </td>
+                  </tr>
+                  <tr className="text-center text-xs">
                     <td className="border border-black p-2 text-center">{formattedDate}</td>
                     <td className="border border-black p-2 text-center font-mono font-bold">{doc.access_code || "N/A"}</td>
                     <td className="border border-black p-2 text-center font-medium">{unifiedData.subject || doc.title || "—"}</td>
-                    <td className="border border-black p-2 text-center">{doc.status || "Active"}</td>
+                    <td className="border border-black p-2 text-center">{unifiedData.action_taken || doc.status || "Active"}</td>
                     <td className="border border-black p-2 text-center">{fileLocation}</td>
                   </tr>
                 </tbody>
               </table>
-            )}
+            </div>
+          )}
+        </div>
+
+        {/* Uploaded Physical Document Attachment (Only rendered when a file was uploaded via Upload Document workflow) */}
+        {!doc.is_generated && doc.file_path && (
+          <div className="border border-black p-3 bg-neutral-50 text-left flex items-center justify-between mt-3">
+            <div>
+              <p className="text-xs font-bold text-black uppercase">Original Uploaded File</p>
+              <p className="text-[11px] text-neutral-700 font-mono">{doc.file_name || "Attachment"}</p>
+            </div>
+            <a
+              href={`${API_BASE_URL}/${doc.file_path}`}
+              target="_blank"
+              rel="noreferrer"
+              download
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#6B1D2A] text-white text-xs font-bold rounded hover:bg-[#8B3545]"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span>Download Attachment</span>
+            </a>
           </div>
+        )}
 
-          {/* Uploaded Physical Document Attachment (Only rendered when a file was uploaded via Upload Document workflow) */}
-          {!doc.is_generated && doc.file_path && (
-            <div className="border border-black p-3 bg-neutral-50 text-left flex items-center justify-between">
+        {/* OCR Extracted Text Transcript if present */}
+        {doc.ocr_text && (
+          <div className="border border-black mt-3">
+            <div className="bg-neutral-100 border-b border-black p-2 flex items-center justify-between">
               <div>
-                <p className="text-xs font-bold text-black uppercase">Original Uploaded File</p>
-                <p className="text-[11px] text-neutral-700 font-mono">{doc.file_name || "Attachment"}</p>
+                <span className="font-bold text-[11px] uppercase tracking-wide text-black">
+                  Certified Semantic Text Transcription (OCR Content)
+                </span>
+                <p className="text-[9px] text-neutral-600">Machine-indexed transcript extracted for searchability</p>
               </div>
-              <a
-                href={`${API_BASE_URL}/${doc.file_path}`}
-                target="_blank"
-                rel="noreferrer"
-                download
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#6B1D2A] text-white text-xs font-bold rounded hover:bg-[#8B3545]"
+              <button
+                onClick={handleCopyOcr}
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded border border-black/30 bg-white text-[10px] font-semibold text-black hover:bg-neutral-100 cursor-pointer"
               >
-                <Download className="w-3.5 h-3.5" />
-                <span>Download Attachment</span>
-              </a>
+                {copied ? <Check className="w-3 h-3 text-[#6B1D2A]" /> : <Copy className="w-3 h-3 text-neutral-600" />}
+                <span>{copied ? "Copied" : "Copy"}</span>
+              </button>
             </div>
-          )}
-
-          {/* OCR Extracted Text Transcript if present */}
-          {doc.ocr_text && (
-            <div className="border border-black mt-3">
-              <div className="bg-neutral-100 border-b border-black p-2 flex items-center justify-between">
-                <div>
-                  <span className="font-bold text-[11px] uppercase tracking-wide text-black">
-                    Certified Semantic Text Transcription (OCR Content)
-                  </span>
-                  <p className="text-[9px] text-neutral-600">Machine-indexed transcript extracted for searchability</p>
-                </div>
-                <button
-                  onClick={handleCopyOcr}
-                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded border border-black/30 bg-white text-[10px] font-semibold text-black hover:bg-neutral-100 cursor-pointer"
-                >
-                  {copied ? <Check className="w-3 h-3 text-[#6B1D2A]" /> : <Copy className="w-3 h-3 text-neutral-600" />}
-                  <span>{copied ? "Copied" : "Copy"}</span>
-                </button>
-              </div>
-              <div className="p-3 text-xs font-serif leading-relaxed text-neutral-900 whitespace-pre-wrap bg-white text-left max-h-48 overflow-y-auto">
-                {doc.ocr_text}
-              </div>
+            <div className="p-3 text-xs font-serif leading-relaxed text-neutral-900 whitespace-pre-wrap bg-white text-left max-h-48 overflow-y-auto">
+              {doc.ocr_text}
             </div>
-          )}
-        </div>
-
-        {/* 5. INSTITUTIONAL SIGNATORY FOOTER (2-COLUMN SIGNATORIES + RA 9470 NOTICE) */}
-        <div className="mt-5 pt-3 border-t border-black">
-          <InstitutionalSignatoryBlock
-            documentIdentifier={documentIdentifier}
-            printDate={formattedDate}
-          />
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );

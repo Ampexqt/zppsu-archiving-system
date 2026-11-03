@@ -186,250 +186,59 @@ export async function exportSingleDocumentExcel(document, unifiedData = {}) {
     sheet.getCell(ref).border = { bottom: { style: "medium", color: { argb: "FF000000" } } };
   });
 
-  sheet.addRow([]); // Row 9
+  sheet.addRow([]); // Row 9: spacing
 
-  // --- 2. TITLE BAR & CLASSIFICATION ---
+  // --- 2. MASTERLIST TABLE (EXACT MATCH TO 2ND IMAGE) ---
+  // Row 10: Table Title
   sheet.mergeCells("A10:E10");
   const r10 = sheet.getCell("A10");
-  r10.value = `MASTERLIST OF RECORDS FOR ${documentType}`;
-  r10.font = { bold: true, size: 11, color: { argb: "FFFFFCF7" } };
-  r10.fill = maroonFill;
+  r10.value = `ZPPSU MASTERLIST OF RECORDS- ${documentType}`;
+  r10.font = { bold: true, size: 12, color: { argb: "FF1D1A1B" } };
   r10.alignment = { horizontal: "center", vertical: "middle" };
-  sheet.getRow(10).height = 24;
-
-  sheet.mergeCells("A11:C11");
-  const r11Left = sheet.getCell("A11");
-  r11Left.value = `Classification: ${category} | Document Type: ${document.document_type || "Record"}`;
-  r11Left.font = { size: 9, color: { argb: "FF1D1A1B" } };
-  r11Left.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF4E7EA" } };
-  r11Left.alignment = { horizontal: "left", vertical: "middle" };
-
-  sheet.mergeCells("D11:E11");
-  const r11Right = sheet.getCell("D11");
-  r11Right.value = `Archival Series: ${new Date().getFullYear()} • Certified University Copy`;
-  r11Right.font = { size: 8.5, color: { argb: "FF555555" }, italic: true };
-  r11Right.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF4E7EA" } };
-  r11Right.alignment = { horizontal: "right", vertical: "middle" };
-  sheet.getRow(11).height = 18;
-
-  sheet.addRow([]); // Row 12
-
-  // --- 3. SECTION I: ARCHIVAL DOCUMENT REGISTRATION ---
-  sheet.mergeCells("A13:E13");
-  const r13 = sheet.getCell("A13");
-  r13.value = "SECTION I: ARCHIVAL DOCUMENT REGISTRATION & CLASSIFICATION (STATUS: ACTIVE)";
-  r13.font = { bold: true, size: 9, color: { argb: "FFFFFCF7" } };
-  r13.fill = darkFill;
-  r13.alignment = { horizontal: "left", vertical: "middle", indent: 1 };
-  sheet.getRow(13).height = 20;
-
-  // Row 14: Accession & Date
-  sheet.addRow(["Document Accession No.", documentIdentifier, "Registration Date", formattedDate, ""]);
-  sheet.mergeCells("D14:E14");
-  sheet.getCell("A14").font = { bold: true, size: 9 };
-  sheet.getCell("A14").fill = grayFill;
-  sheet.getCell("B14").font = { bold: true, size: 9, color: { argb: "FF6B1D2A" } };
-  sheet.getCell("C14").font = { bold: true, size: 9 };
-  sheet.getCell("C14").fill = grayFill;
-  sheet.getCell("D14").font = { size: 9 };
-  sheet.getRow(14).height = 20;
-  ["A14", "B14", "C14", "D14", "E14"].forEach((c) => {
-    sheet.getCell(c).border = thinBorder;
-    sheet.getCell(c).alignment = { vertical: "middle", indent: 1 };
+  sheet.getRow(10).height = 28;
+  ["A10", "B10", "C10", "D10", "E10"].forEach((ref) => {
+    sheet.getCell(ref).border = thinBorder;
   });
 
-  // Row 15: Subject
-  sheet.addRow(["Official Subject / Title", subject, "", "", ""]);
-  sheet.mergeCells("B15:E15");
-  sheet.getCell("A15").font = { bold: true, size: 9 };
-  sheet.getCell("A15").fill = grayFill;
-  sheet.getCell("B15").font = { bold: true, size: 9 };
-  sheet.getRow(15).height = 20;
-  ["A15", "B15", "C15", "D15", "E15"].forEach((c) => {
-    sheet.getCell(c).border = thinBorder;
-    sheet.getCell(c).alignment = { vertical: "middle", indent: 1 };
-  });
-
-  // Row 16: Category & Classification
-  sheet.addRow(["Primary Category", category, "Document Classification", document.document_type || "Standard", ""]);
-  sheet.mergeCells("D16:E16");
-  sheet.getCell("A16").font = { bold: true, size: 9 };
-  sheet.getCell("A16").fill = grayFill;
-  sheet.getCell("B16").font = { size: 9 };
-  sheet.getCell("C16").font = { bold: true, size: 9 };
-  sheet.getCell("C16").fill = grayFill;
-  sheet.getCell("D16").font = { size: 9 };
-  sheet.getRow(16).height = 20;
-  ["A16", "B16", "C16", "D16", "E16"].forEach((c) => {
-    sheet.getCell(c).border = thinBorder;
-    sheet.getCell(c).alignment = { vertical: "middle", indent: 1 };
-  });
-
-  sheet.addRow([]); // Row 17
-
-  // --- 4. SECTION II: PHYSICAL STORAGE CHAIN OF CUSTODY ---
-  sheet.mergeCells("A18:E18");
-  const r18 = sheet.getCell("A18");
-  r18.value = "SECTION II: PHYSICAL STORAGE CHAIN OF CUSTODY & REPOSITORY LOCATION";
-  r18.font = { bold: true, size: 9, color: { argb: "FFFFFCF7" } };
-  r18.fill = darkFill;
-  r18.alignment = { horizontal: "left", vertical: "middle", indent: 1 };
-  sheet.getRow(18).height = 20;
-
-  // Row 19: Storage Unit & Box
-  sheet.addRow(["Primary Storage Unit", cabinetName, "File Box Container", boxName, ""]);
-  sheet.mergeCells("D19:E19");
-  sheet.getCell("A19").font = { bold: true, size: 9 };
-  sheet.getCell("A19").fill = grayFill;
-  sheet.getCell("B19").font = { bold: true, size: 9 };
-  sheet.getCell("C19").font = { bold: true, size: 9 };
-  sheet.getCell("C19").fill = grayFill;
-  sheet.getCell("D19").font = { bold: true, size: 9 };
-  sheet.getRow(19).height = 20;
-  ["A19", "B19", "C19", "D19", "E19"].forEach((c) => {
-    sheet.getCell(c).border = thinBorder;
-    sheet.getCell(c).alignment = { vertical: "middle", indent: 1 };
-  });
-
-  // Row 20: Archfile Binder
-  sheet.addRow(["Archfile Binder", archfileInfo, "", "", ""]);
-  sheet.mergeCells("B20:E20");
-  sheet.getCell("A20").font = { bold: true, size: 9 };
-  sheet.getCell("A20").fill = grayFill;
-  sheet.getCell("B20").font = { italic: true, size: 8.5, color: { argb: "FF555555" } };
-  sheet.getRow(20).height = 20;
-  ["A20", "B20", "C20", "D20", "E20"].forEach((c) => {
-    sheet.getCell(c).border = thinBorder;
-    sheet.getCell(c).alignment = { vertical: "middle", indent: 1 };
-  });
-
-  sheet.addRow([]); // Row 21
-
-  // --- 5. SECTION III: CORE RECORD CONTENT ---
-  sheet.mergeCells("A22:E22");
-  const r22 = sheet.getCell("A22");
-  r22.value = "SECTION III: OFFICIAL ARCHIVAL DOCUMENT CONTENT & TRANSCRIPT";
-  r22.font = { bold: true, size: 9, color: { argb: "FFFFFCF7" } };
-  r22.fill = darkFill;
-  r22.alignment = { horizontal: "left", vertical: "middle", indent: 1 };
-  sheet.getRow(22).height = 20;
-
-  // Row 23: Table Sub-banner
-  sheet.mergeCells("A23:E23");
-  const r23 = sheet.getCell("A23");
-  r23.value = `ZPPSU MASTERLIST OF RECORDS - ${documentType}`;
-  r23.font = { bold: true, size: 10.5, color: { argb: "FF1D1A1B" } };
-  r23.fill = goldFill;
-  r23.alignment = { horizontal: "center", vertical: "middle" };
-  r23.border = thinBorder;
-  sheet.getRow(23).height = 22;
-
-  // Row 24: Table Column Headers
-  const r24 = sheet.addRow(["DATE", "ACCESS CODE", "SUBJECT", statusOrActionHeader, "FILE LOCATION"]);
-  r24.height = 22;
-  r24.eachCell((cell) => {
-    cell.font = { bold: true, color: { argb: "FFFFFCF7" }, size: 9.5 };
-    cell.fill = maroonFill;
+  // Row 11: Column Headers
+  const r11 = sheet.addRow(["Date", "ACCESS CODE", "SUBJECT", statusOrActionHeader, "FILE LOCATION"]);
+  r11.height = 22;
+  r11.eachCell((cell) => {
+    cell.font = { bold: true, size: 10, color: { argb: "FF1D1A1B" } };
     cell.alignment = { horizontal: "center", vertical: "middle" };
     cell.border = thinBorder;
   });
 
-  // Row 25: Data Record (Centered Horizontally & Vertically)
-  const r25 = sheet.addRow([recordDate, accessCode, subject, statusOrActionValue, fileLocation]);
-  r25.height = 24;
-  r25.eachCell((cell) => {
-    cell.font = { size: 9.5, color: { argb: "FF1D1A1B" } };
+  // Month determination
+  const monthName = (() => {
+    if (unifiedData.month) return String(unifiedData.month).toUpperCase();
+    const d = document.memo_date || document.created_at || (recordDate ? new Date(recordDate) : null);
+    if (d && !isNaN(new Date(d).getTime())) {
+      return new Date(d).toLocaleDateString("en-US", { month: "long" }).toUpperCase();
+    }
+    return "JANUARY";
+  })();
+
+  // Row 12: Gold Month Banner (Spanning all columns with #F2DFB0 gold fill)
+  sheet.mergeCells("A12:E12");
+  const r12 = sheet.getCell("A12");
+  r12.value = monthName;
+  r12.font = { bold: true, size: 10.5, color: { argb: "FF1D1A1B" } };
+  r12.fill = goldFill; // #F2DFB0
+  r12.alignment = { horizontal: "left", vertical: "middle", indent: 1 };
+  sheet.getRow(12).height = 22;
+  ["A12", "B12", "C12", "D12", "E12"].forEach((ref) => {
+    sheet.getCell(ref).border = thinBorder;
+  });
+
+  // Row 13: Data Record (Centered Horizontally & Vertically)
+  const r13 = sheet.addRow([recordDate, accessCode, subject, statusOrActionValue, fileLocation]);
+  r13.height = 24;
+  r13.eachCell((cell) => {
+    cell.font = { size: 10, color: { argb: "FF1D1A1B" } };
     cell.alignment = { horizontal: "center", vertical: "middle" };
     cell.border = thinBorder;
   });
-
-  sheet.addRow([]); // Row 26
-  sheet.addRow([]); // Row 27
-
-  // --- 6. EXECUTIVE SIGNATORIES FOOTER ---
-  // Row 28: Headers
-  sheet.mergeCells("A28:B28");
-  const r28Left = sheet.getCell("A28");
-  r28Left.value = "PREPARED & CATALOGED BY:";
-  r28Left.font = { bold: true, size: 9, color: { argb: "FF1D1A1B" } };
-  r28Left.alignment = { horizontal: "center", vertical: "middle" };
-
-  sheet.mergeCells("D28:E28");
-  const r28Right = sheet.getCell("D28");
-  r28Right.value = "CERTIFIED OFFICIAL RECORD:";
-  r28Right.font = { bold: true, size: 9, color: { argb: "FF1D1A1B" } };
-  r28Right.alignment = { horizontal: "center", vertical: "middle" };
-  sheet.getRow(28).height = 20;
-
-  // Row 29: Physical Signature Space Clearance
-  sheet.addRow([]); // Row 29
-  sheet.getRow(29).height = 36;
-
-  // Row 30: Names / Underline
-  sheet.mergeCells("A30:B30");
-  const r30Left = sheet.getCell("A30");
-  r30Left.value = staffName;
-  r30Left.font = { bold: true, size: 10.5, color: { argb: "FF1D1A1B" } };
-  r30Left.alignment = { horizontal: "center", vertical: "bottom" };
-  r30Left.border = { bottom: { style: "medium", color: { argb: "FF000000" } } };
-
-  sheet.mergeCells("D30:E30");
-  const r30Right = sheet.getCell("D30");
-  r30Right.value = ""; // Blank line for Director's physical signature & rubber seal!
-  r30Right.alignment = { horizontal: "center", vertical: "bottom" };
-  r30Right.border = { bottom: { style: "medium", color: { argb: "FF000000" } } };
-  sheet.getRow(30).height = 20;
-
-  // Row 31: Official Designations
-  sheet.mergeCells("A31:B31");
-  const r31Left = sheet.getCell("A31");
-  r31Left.value = "Guidance Records Custodian / Staff";
-  r31Left.font = { size: 9, color: { argb: "FF333333" } };
-  r31Left.alignment = { horizontal: "center", vertical: "middle" };
-
-  sheet.mergeCells("D31:E31");
-  const r31Right = sheet.getCell("D31");
-  r31Right.value = "DIRECTOR, GUIDANCE & COUNSELING";
-  r31Right.font = { bold: true, size: 9.5, color: { argb: "FF1D1A1B" } };
-  r31Right.alignment = { horizontal: "center", vertical: "middle" };
-  sheet.getRow(31).height = 18;
-
-  // Row 32: Dates & Office Head
-  sheet.mergeCells("A32:B32");
-  const r32Left = sheet.getCell("A32");
-  r32Left.value = `Date: ${formattedDate}`;
-  r32Left.font = { size: 8, color: { argb: "FF555555" } };
-  r32Left.alignment = { horizontal: "center", vertical: "middle" };
-
-  sheet.mergeCells("D32:E32");
-  const r32Right = sheet.getCell("D32");
-  r32Right.value = "Head, Guidance & Counseling Center • OSAS";
-  r32Right.font = { size: 8.5, color: { argb: "FF555555" } };
-  r32Right.alignment = { horizontal: "center", vertical: "middle" };
-  sheet.getRow(32).height = 18;
-
-  sheet.addRow([]); // Row 33
-
-  // --- 7. LEGAL NOTICE & SECURITY STAMP ---
-  sheet.mergeCells("A34:C35");
-  const legalNotice = sheet.getCell("A34");
-  legalNotice.value =
-    "INSTITUTIONAL LEGAL CERTIFICATION NOTICE:\nThis document constitutes an official archival record of Zamboanga Peninsula Polytechnic State University (ZPPSU). Any unauthorized erasure, modification, reproduction, or tampering renders this record null and void under Republic Act No. 9470 (National Archives of the Philippines Act of 2007) and the Revised Penal Code of the Philippines.";
-  legalNotice.font = { italic: true, size: 7.5, color: { argb: "FF555555" } };
-  legalNotice.alignment = { horizontal: "left", vertical: "middle", wrapText: true };
-
-  sheet.mergeCells("D34:E35");
-  const securityStamp = sheet.getCell("D34");
-  securityStamp.value = `ARCHIVAL SECURITY STAMP\nZPPSU-${String(documentIdentifier).replace(/[^a-zA-Z0-9-]/g, "")}-VERIFIED\nValid Institutional Electronic Verification`;
-  securityStamp.font = { bold: true, size: 8, color: { argb: "FF6B1D2A" } };
-  securityStamp.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF5F5F5" } };
-  securityStamp.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
-  ["D34", "D35", "E34", "E35"].forEach((c) => {
-    sheet.getCell(c).border = thinBorder;
-  });
-
-  sheet.getRow(34).height = 18;
-  sheet.getRow(35).height = 18;
 
   // Export buffer & trigger browser download
   const buffer = await workbook.xlsx.writeBuffer();

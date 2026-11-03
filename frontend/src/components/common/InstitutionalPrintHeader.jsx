@@ -11,6 +11,7 @@ export default function InstitutionalPrintHeader({
   referenceCode = null,
   classification = null,
   documentType = null,
+  hideTitleStrip = false,
 }) {
   const currentYear = new Date().getFullYear();
 
@@ -70,27 +71,29 @@ export default function InstitutionalPrintHeader({
         </div>
       </div>
 
-      {/* FORMAL REPORT TITLE STRIP */}
-      <div className="mt-2 pt-1.5 border-t border-black/40 flex items-center justify-between text-[9.5px]">
-        <div className="flex items-center gap-2">
-          <span className="font-extrabold uppercase tracking-wider text-black text-[11px]">
-            {title}
+      {/* FORMAL REPORT TITLE STRIP (OPTIONAL) */}
+      {!hideTitleStrip && (
+        <div className="mt-2 pt-1.5 border-t border-black/40 flex items-center justify-between text-[9.5px]">
+          <div className="flex items-center gap-2">
+            <span className="font-extrabold uppercase tracking-wider text-black text-[11px]">
+              {title}
+            </span>
+            {documentType && (
+              <span className="text-neutral-700">
+                &bull; Type: <strong className="text-black">{documentType}</strong>
+              </span>
+            )}
+            {classification && (
+              <span className="text-neutral-700">
+                &bull; Series: <strong className="text-black">{classification}</strong>
+              </span>
+            )}
+          </div>
+          <span className="text-neutral-600 font-mono text-[8.5px]">
+            Archival Series: {currentYear} &bull; Certified University Copy
           </span>
-          {documentType && (
-            <span className="text-neutral-700">
-              &bull; Type: <strong className="text-black">{documentType}</strong>
-            </span>
-          )}
-          {classification && (
-            <span className="text-neutral-700">
-              &bull; Series: <strong className="text-black">{classification}</strong>
-            </span>
-          )}
         </div>
-        <span className="text-neutral-600 font-mono text-[8.5px]">
-          Archival Series: {currentYear} &bull; Certified University Copy
-        </span>
-      </div>
+      )}
     </div>
   );
 }

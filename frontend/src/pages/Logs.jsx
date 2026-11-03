@@ -168,25 +168,27 @@ export default function Logs() {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        {/* HERO BANNER */}
-        <div className="bg-[#4A0E1C] rounded-2xl p-6 sm:p-7 text-[#FFFCF7] border border-[#6B1D2A] shadow-xs relative overflow-hidden flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div className="relative z-10">
-            <span className="text-[11px] uppercase tracking-widest text-[#C99A2E] font-bold block mb-1">
-              ZPPSU Security & Compliance
-            </span>
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight mb-1.5 text-[#FFFCF7]">
-              Activity & Audit Logs
+        {/* HEADER */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-[10px] font-bold text-[#A87818] uppercase tracking-wider bg-[#F2DFB0]/50 px-2.5 py-0.5 rounded-md border border-[#C99A2E]/30 font-mono">
+                Security &amp; Compliance Audit Ledger
+              </span>
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#1D1A1B]">
+              Activity &amp; Audit Logs
             </h1>
-            <p className="text-white/80 text-xs sm:text-sm max-w-xl">
+            <p className="text-xs sm:text-sm text-[#5F5A5C] mt-1 max-w-2xl font-normal">
               System-wide immutable audit ledger for institutional transparency, records provenance, and access control.
             </p>
           </div>
           
           <Button 
             onClick={() => setIsExportModalOpen(true)}
-            className="h-10 px-5 rounded-xl bg-[#C99A2E] text-[#1D1A1B] font-bold text-xs hover:bg-[#A87818] transition-all flex items-center justify-center gap-2 shadow-xs whitespace-nowrap z-10 cursor-pointer"
+            className="h-10 px-4 rounded-xl bg-[#6B1D2A] text-[#FFFCF7] hover:bg-[#521322] font-bold text-xs shadow-xs flex items-center gap-2 cursor-pointer transition-colors whitespace-nowrap"
           >
-            <FileSpreadsheet className="w-4 h-4" />
+            <FileSpreadsheet className="w-4 h-4 text-[#F2DFB0]" />
             <span>Export Logs</span>
           </Button>
         </div>

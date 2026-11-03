@@ -144,10 +144,10 @@
    ========================================================================== */
 
 @media print {
-  /* 1. Page Margin & Paper Setup */
+  /* 1. Page Margin & Paper Setup - margin: 0 suppresses browser default header/footer (title, date, URL) */
   @page {
     size: portrait;
-    margin: 12mm 15mm 15mm 15mm;
+    margin: 0;
   }
 
   /* 2. Global Resets: High-contrast black on white, remove all shadows & fixed heights */
@@ -157,8 +157,8 @@
     width: 100% !important;
     height: auto !important;
     overflow: visible !important;
-    font-size: 10pt !important;
-    line-height: 1.4 !important;
+    font-size: 9.5pt !important;
+    line-height: 1.35 !important;
     margin: 0 !important;
     padding: 0 !important;
   }
@@ -181,7 +181,7 @@
     display: none !important;
   }
 
-  /* 4. Display all print-only components */
+  /* 4. Display all print-only components with institutional padding */
   .print-dossier-root,
   .print-only-block {
     display: block !important;
@@ -189,10 +189,19 @@
     width: 100% !important;
     max-width: 100% !important;
     margin: 0 !important;
-    padding: 0 !important;
+    padding: 8mm 10mm !important;
     background: #ffffff !important;
     color: #000000 !important;
     visibility: visible !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Compact template tables inside print dossier to fit 1 page comfortably */
+  .print-dossier-root table th,
+  .print-dossier-root table td {
+    padding: 3px 6px !important;
+    font-size: 8.5pt !important;
+    line-height: 1.25 !important;
   }
 
   /* 5. Un-constrain layout containers */

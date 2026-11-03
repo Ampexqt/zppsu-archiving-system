@@ -32,7 +32,12 @@ export default function DocumentViewModal({
   const documentIdentifier = file.document_id || file.access_code || `DOC-${file.id}`;
 
   const handlePrint = () => {
+    const originalTitle = document.title;
+    document.title = "";
     window.print();
+    setTimeout(() => {
+      document.title = originalTitle;
+    }, 1000);
   };
 
   return (

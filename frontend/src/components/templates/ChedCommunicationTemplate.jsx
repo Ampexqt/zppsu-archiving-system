@@ -33,8 +33,8 @@ export default function ChedCommunicationTemplate({ document, data }) {
                 border: "1px solid black",
                 fontWeight: "bold",
                 textAlign: "center",
-                padding: "15px",
-                fontSize: "18px",
+                padding: "8px 12px",
+                fontSize: "14px",
               }}
             >
               ZPPSU MASTERLIST OF RECORDS- CHED COMMUNICATIONS (2024)
@@ -42,23 +42,23 @@ export default function ChedCommunicationTemplate({ document, data }) {
           </tr>
 
           <tr>
-            <td style={{ border: "1px solid black", fontWeight: "bold", textAlign: "center" }}>
+            <td style={{ border: "1px solid black", fontWeight: "bold", textAlign: "center", padding: "4px 6px", fontSize: "11px" }}>
               Date
             </td>
 
-            <td style={{ border: "1px solid black", fontWeight: "bold", textAlign: "center" }}>
+            <td style={{ border: "1px solid black", fontWeight: "bold", textAlign: "center", padding: "4px 6px", fontSize: "11px" }}>
               ACCESS CODE
             </td>
 
-            <td style={{ border: "1px solid black", fontWeight: "bold", textAlign: "center" }}>
+            <td style={{ border: "1px solid black", fontWeight: "bold", textAlign: "center", padding: "4px 6px", fontSize: "11px" }}>
               SUBJECT
             </td>
 
-            <td style={{ border: "1px solid black", fontWeight: "bold", textAlign: "center" }}>
+            <td style={{ border: "1px solid black", fontWeight: "bold", textAlign: "center", padding: "4px 6px", fontSize: "11px" }}>
               ACTION TAKEN
             </td>
 
-            <td style={{ border: "1px solid black", fontWeight: "bold", textAlign: "center" }}>
+            <td style={{ border: "1px solid black", fontWeight: "bold", textAlign: "center", padding: "4px 6px", fontSize: "11px" }}>
               FILE LOCATION
             </td>
           </tr>
@@ -71,7 +71,8 @@ export default function ChedCommunicationTemplate({ document, data }) {
                 color: "#1D1A1B",
                 border: "1px solid black",
                 fontWeight: "bold",
-                padding: "6px",
+                padding: "4px 6px",
+                fontSize: "11px",
               }}
             >
               {mergedData.month || "JANUARY"}
@@ -79,23 +80,23 @@ export default function ChedCommunicationTemplate({ document, data }) {
           </tr>
 
           <tr>
-            <td style={{ border: "1px solid black", padding: "10px", textAlign: "center" }}>
+            <td style={{ border: "1px solid black", padding: "6px 8px", textAlign: "center", fontSize: "11px" }}>
               {dateValue}
             </td>
 
-            <td style={{ border: "1px solid black", padding: "10px", textAlign: "center" }}>
+            <td style={{ border: "1px solid black", padding: "6px 8px", textAlign: "center", fontSize: "11px" }}>
               {accessCode}
             </td>
 
-            <td style={{ border: "1px solid black", padding: "10px", textAlign: "center" }}>
+            <td style={{ border: "1px solid black", padding: "6px 8px", textAlign: "center", fontSize: "11px" }}>
               {subject}
             </td>
 
-            <td style={{ border: "1px solid black", padding: "10px", textAlign: "center" }}>
+            <td style={{ border: "1px solid black", padding: "6px 8px", textAlign: "center", fontSize: "11px" }}>
               {mergedData.action_taken || "—"}
             </td>
 
-            <td style={{ border: "1px solid black", padding: "10px", textAlign: "center" }}>
+            <td style={{ border: "1px solid black", padding: "6px 8px", textAlign: "center", fontSize: "11px" }}>
               {fileLocation}
             </td>
           </tr>

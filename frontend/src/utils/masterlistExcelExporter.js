@@ -68,11 +68,11 @@ export async function exportMasterlistToInstitutionalExcel({
 
   // Pre-calculate Column Widths generously to prevent cramped layout
   sheet.columns = headers.map((header, idx) => {
-    let width = 22;
+    let width = idx === 0 ? 22 : 24;
     const hUpper = String(header).toUpperCase();
     if (hUpper.includes("LOCATION")) width = 45;
     else if (hUpper.includes("SUBJECT") || hUpper.includes("DESCRIPTION") || hUpper.includes("TITLE")) width = 65;
-    else if (hUpper.includes("DATE")) width = 18;
+    else if (hUpper.includes("DATE")) width = 22;
     else if (hUpper.includes("ACCESS")) width = 24;
     else if (hUpper.includes("STATUS") || hUpper.includes("ACTION")) width = 20;
 
@@ -102,8 +102,8 @@ export async function exportMasterlistToInstitutionalExcel({
         extension: "jpeg",
       });
       sheet.addImage(imageId, {
-        tl: { col: 0.15, row: 1.15 },
-        ext: { width: 72, height: 72 },
+        tl: { col: 0.22, row: 1.25 },
+        ext: { width: 98, height: 98 },
       });
     }
   } catch (imgErr) {
@@ -160,13 +160,13 @@ export async function exportMasterlistToInstitutionalExcel({
   sheet.getRow(7).height = 16;
 
   // --- 3. FRAMED CONTROL STANDARD STAMP (RIGHT: LAST COLUMN) ---
-  const docTypePrefix = selectedDocType.replace(/[^A-Za-z0-9]/g, "").substring(0, 4).toUpperCase();
-  const accessionRef = `ML-${new Date().getFullYear()}-${docTypePrefix}`;
+  const currentYear = new Date().getFullYear();
+  const accessionRef = `ZPPSU-OGCS-ML-${currentYear}`;
 
   // Top Stamp Cell
   const boxTop = sheet.getCell(`${lastColLetter}3`);
   boxTop.value = "CONTROL STANDARD";
-  boxTop.font = { bold: true, size: 7.5, color: { argb: "FF444444" } };
+  boxTop.font = { bold: true, size: 8, color: { argb: "FF333333" } };
   boxTop.alignment = { horizontal: "center", vertical: "middle" };
   boxTop.border = {
     top: { style: "thin", color: { argb: "FF000000" } },
@@ -176,8 +176,8 @@ export async function exportMasterlistToInstitutionalExcel({
 
   // Middle ISO Code Cell
   const boxMid = sheet.getCell(`${lastColLetter}4`);
-  boxMid.value = "ISO 9001:2015";
-  boxMid.font = { bold: true, size: 10, color: { argb: "FF6B1D2A" } };
+  boxMid.value = "ISO 9001:2015 CERTIFIED";
+  boxMid.font = { bold: true, size: 9.5, color: { argb: "FF6B1D2A" } };
   boxMid.alignment = { horizontal: "center", vertical: "middle" };
   boxMid.border = {
     left: { style: "thin", color: { argb: "FF000000" } },
@@ -187,7 +187,7 @@ export async function exportMasterlistToInstitutionalExcel({
   // Bottom Compliance Cell
   const boxBot = sheet.getCell(`${lastColLetter}5`);
   boxBot.value = "NAP RA 9470 COMPLIANT";
-  boxBot.font = { size: 7.5, color: { argb: "FF666666" } };
+  boxBot.font = { size: 8, color: { argb: "FF555555" } };
   boxBot.alignment = { horizontal: "center", vertical: "middle" };
   boxBot.border = {
     bottom: { style: "thin", color: { argb: "FF000000" } },
@@ -197,7 +197,7 @@ export async function exportMasterlistToInstitutionalExcel({
 
   // Accession Ref under Stamp
   const refCell = sheet.getCell(`${lastColLetter}6`);
-  refCell.value = `Ref: ${accessionRef}`;
+  refCell.value = `Control No: ${accessionRef}`;
   refCell.font = { bold: true, size: 8.5, color: { argb: "FF1D1A1B" } };
   refCell.alignment = { horizontal: "center", vertical: "middle" };
 

@@ -59,7 +59,7 @@ export async function exportSingleDocumentExcel(document, unifiedData = {}) {
   const accessText = String(accessCode || "");
   const statusText = String(statusOrActionValue || "");
 
-  const colAWidth = Math.max(18, dateText.length + 4);
+  const colAWidth = Math.max(22, dateText.length + 4);
   const colBWidth = Math.max(22, accessText.length + 6);
   const colCWidth = Math.min(80, Math.max(50, Math.ceil(subjectText.length * 0.75)));
   const colDWidth = Math.max(20, statusText.length + 6);
@@ -98,8 +98,8 @@ export async function exportSingleDocumentExcel(document, unifiedData = {}) {
         extension: "jpeg",
       });
       sheet.addImage(imageId, {
-        tl: { col: 0.15, row: 1.15 },
-        ext: { width: 72, height: 72 },
+        tl: { col: 0.22, row: 1.25 },
+        ext: { width: 98, height: 98 },
       });
     }
   } catch (imgErr) {
@@ -159,7 +159,7 @@ export async function exportSingleDocumentExcel(document, unifiedData = {}) {
   // E3: Top Stamp Header
   const boxTop = sheet.getCell("E3");
   boxTop.value = "CONTROL STANDARD";
-  boxTop.font = { bold: true, size: 7.5, color: { argb: "FF444444" } };
+  boxTop.font = { bold: true, size: 8, color: { argb: "FF333333" } };
   boxTop.alignment = { horizontal: "center", vertical: "middle" };
   boxTop.border = {
     top: { style: "thin", color: { argb: "FF000000" } },
@@ -169,8 +169,8 @@ export async function exportSingleDocumentExcel(document, unifiedData = {}) {
 
   // E4: ISO Standard Code
   const boxMid = sheet.getCell("E4");
-  boxMid.value = "ISO 9001:2015";
-  boxMid.font = { bold: true, size: 10, color: { argb: "FF6B1D2A" } };
+  boxMid.value = "ISO 9001:2015 CERTIFIED";
+  boxMid.font = { bold: true, size: 9.5, color: { argb: "FF6B1D2A" } };
   boxMid.alignment = { horizontal: "center", vertical: "middle" };
   boxMid.border = {
     left: { style: "thin", color: { argb: "FF000000" } },
@@ -180,7 +180,7 @@ export async function exportSingleDocumentExcel(document, unifiedData = {}) {
   // E5: NAP RA Compliance
   const boxBot = sheet.getCell("E5");
   boxBot.value = "NAP RA 9470 COMPLIANT";
-  boxBot.font = { size: 7.5, color: { argb: "FF666666" } };
+  boxBot.font = { size: 8, color: { argb: "FF555555" } };
   boxBot.alignment = { horizontal: "center", vertical: "middle" };
   boxBot.border = {
     bottom: { style: "thin", color: { argb: "FF000000" } },
@@ -190,7 +190,7 @@ export async function exportSingleDocumentExcel(document, unifiedData = {}) {
 
   // E6: Accession Reference
   const refCell = sheet.getCell("E6");
-  refCell.value = `Ref: ${documentIdentifier}`;
+  refCell.value = `Accession No: ${documentIdentifier}`;
   refCell.font = { bold: true, size: 8.5, color: { argb: "FF1D1A1B" } };
   refCell.alignment = { horizontal: "center", vertical: "middle" };
 

@@ -75,13 +75,30 @@ export async function exportSingleDocumentExcel(document, unifiedData = {}) {
   })();
   const staffName = currentUser?.name || "SYSTEM ADMIN";
 
-  // Column Widths (A to E)
+  // Auto-adjust Column Widths based on text lengths with generous uncramped bounds
+  const subjectText = String(subject || "");
+  const locationText = String(fileLocation || "");
+  const dateText = String(recordDate || "");
+  const accessText = String(accessCode || "");
+  const statusText = String(statusOrActionValue || "");
+
+  // Column A: Date
+  const colAWidth = Math.max(18, dateText.length + 4);
+  // Column B: Access Code
+  const colBWidth = Math.max(22, accessText.length + 6);
+  // Column C: Subject (spacious, auto-adjusted to prevent cramped truncation)
+  const colCWidth = Math.min(80, Math.max(50, Math.ceil(subjectText.length * 0.75)));
+  // Column D: Action Taken / Status
+  const colDWidth = Math.max(22, statusText.length + 6);
+  // Column E: File Location (spacious, auto-adjusted for long coordinates)
+  const colEWidth = Math.min(75, Math.max(42, Math.ceil(locationText.length * 0.75)));
+
   sheet.columns = [
-    { width: 18 }, // A: Date / Labels
-    { width: 22 }, // B: Access Code / Values
-    { width: 44 }, // C: Subject / Values
-    { width: 22 }, // D: Action Taken / Status
-    { width: 32 }, // E: File Location
+    { width: colAWidth },
+    { width: colBWidth },
+    { width: colCWidth },
+    { width: colDWidth },
+    { width: colEWidth },
   ];
 
   // Helper styles
@@ -194,18 +211,18 @@ export async function exportSingleDocumentExcel(document, unifiedData = {}) {
   const r10 = sheet.getCell("A10");
   r10.value = `ZPPSU MASTERLIST OF RECORDS- ${documentType}`;
   r10.font = { bold: true, size: 12, color: { argb: "FF1D1A1B" } };
-  r10.alignment = { horizontal: "center", vertical: "middle" };
-  sheet.getRow(10).height = 28;
+  r10.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
+  sheet.getRow(10).height = 32;
   ["A10", "B10", "C10", "D10", "E10"].forEach((ref) => {
     sheet.getCell(ref).border = thinBorder;
   });
 
   // Row 11: Column Headers
   const r11 = sheet.addRow(["Date", "ACCESS CODE", "SUBJECT", statusOrActionHeader, "FILE LOCATION"]);
-  r11.height = 22;
+  r11.height = 26;
   r11.eachCell((cell) => {
     cell.font = { bold: true, size: 10, color: { argb: "FF1D1A1B" } };
-    cell.alignment = { horizontal: "center", vertical: "middle" };
+    cell.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
     cell.border = thinBorder;
   });
 
@@ -226,17 +243,29 @@ export async function exportSingleDocumentExcel(document, unifiedData = {}) {
   r12.font = { bold: true, size: 10.5, color: { argb: "FF1D1A1B" } };
   r12.fill = goldFill; // #F2DFB0
   r12.alignment = { horizontal: "left", vertical: "middle", indent: 1 };
-  sheet.getRow(12).height = 22;
+  sheet.getRow(12).height = 24;
   ["A12", "B12", "C12", "D12", "E12"].forEach((ref) => {
     sheet.getCell(ref).border = thinBorder;
   });
 
-  // Row 13: Data Record (Centered Horizontally & Vertically)
+  // Dynamic Row 13 Height: Calculate line wrapping needs so text is NEVER truncated or cramped
+  const cCharsPerLine = colCWidth - 4;
+  const eCharsPerLine = colEWidth - 4;
+  const linesSubject = Math.max(1, Math.ceil(subjectText.length / cCharsPerLine));
+  const linesLocation = Math.max(1, Math.ceil(locationText.length / eCharsPerLine));
+  const maxLines = Math.max(linesSubject, linesLocation);
+  const dynamicDataRowHeight = Math.max(38, maxLines * 20 + 16);
+
+  // Row 13: Data Record (Centered Horizontally & Vertically with generous spacing and text wrap)
   const r13 = sheet.addRow([recordDate, accessCode, subject, statusOrActionValue, fileLocation]);
-  r13.height = 24;
+  r13.height = dynamicDataRowHeight;
   r13.eachCell((cell) => {
     cell.font = { size: 10, color: { argb: "FF1D1A1B" } };
-    cell.alignment = { horizontal: "center", vertical: "middle" };
+    cell.alignment = {
+      horizontal: "center",
+      vertical: "middle",
+      wrapText: true,
+    };
     cell.border = thinBorder;
   });
 

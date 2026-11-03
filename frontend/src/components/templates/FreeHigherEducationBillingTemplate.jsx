@@ -51,7 +51,10 @@ const styles = {
 
   cell: {
     border: "1px solid black",
-    padding: "10px",
+    padding: "12px 14px",
     textAlign: "center",
+    verticalAlign: "middle",
+    wordBreak: "break-word",
+    lineHeight: "1.5",
   },
 };

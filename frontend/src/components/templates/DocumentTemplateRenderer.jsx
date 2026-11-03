@@ -304,30 +304,30 @@ function DocumentTemplateRenderer({ document: doc }) {
                       ZPPSU MASTERLIST OF RECORDS- {(doc.document_type || "DOCUMENT").toUpperCase()}
                     </td>
                   </tr>
-                  <tr className="font-bold text-center text-xs">
-                    <td className="border border-black p-2 text-center w-[15%]">Date</td>
-                    <td className="border border-black p-2 text-center w-[20%]">ACCESS CODE</td>
-                    <td className="border border-black p-2 text-center w-[30%]">SUBJECT</td>
-                    <td className="border border-black p-2 text-center w-[15%]">
+                  <tr className="font-bold text-center text-xs bg-neutral-50/50">
+                    <td className="border border-black p-2.5 text-center w-[15%]">Date</td>
+                    <td className="border border-black p-2.5 text-center w-[18%]">ACCESS CODE</td>
+                    <td className="border border-black p-2.5 text-center w-[32%]">SUBJECT</td>
+                    <td className="border border-black p-2.5 text-center w-[15%]">
                       {unifiedData.action_taken ? "ACTION TAKEN" : "STATUS"}
                     </td>
-                    <td className="border border-black p-2 text-center w-[20%]">FILE LOCATION</td>
+                    <td className="border border-black p-2.5 text-center w-[20%]">FILE LOCATION</td>
                   </tr>
                   <tr>
                     <td
                       colSpan="5"
-                      className="border border-black font-bold p-1.5 text-xs text-black"
+                      className="border border-black font-bold px-3 py-2 text-xs text-black"
                       style={{ backgroundColor: "#F2DFB0" }}
                     >
                       {monthName}
                     </td>
                   </tr>
                   <tr className="text-center text-xs">
-                    <td className="border border-black p-2 text-center">{formattedDate}</td>
-                    <td className="border border-black p-2 text-center font-mono font-bold">{doc.access_code || "N/A"}</td>
-                    <td className="border border-black p-2 text-center font-medium">{unifiedData.subject || doc.title || "—"}</td>
-                    <td className="border border-black p-2 text-center">{unifiedData.action_taken || doc.status || "Active"}</td>
-                    <td className="border border-black p-2 text-center">{fileLocation}</td>
+                    <td className="border border-black p-3.5 text-center align-middle">{formattedDate}</td>
+                    <td className="border border-black p-3.5 text-center align-middle font-mono font-bold">{doc.access_code || "N/A"}</td>
+                    <td className="border border-black p-3.5 text-center align-middle font-medium break-words leading-relaxed max-w-[280px]">{unifiedData.subject || doc.title || "—"}</td>
+                    <td className="border border-black p-3.5 text-center align-middle">{unifiedData.action_taken || doc.status || "Active"}</td>
+                    <td className="border border-black p-3.5 text-center align-middle break-words leading-relaxed max-w-[240px]">{fileLocation}</td>
                   </tr>
                 </tbody>
               </table>

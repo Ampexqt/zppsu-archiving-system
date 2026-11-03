@@ -457,12 +457,12 @@ function MasterlistReports() {
                           {rowData.map((data, idx) => (
                             <td 
                               key={idx} 
-                              className={`border border-[#1D1A1B] p-3 ${
+                              className={`border border-[#1D1A1B] p-3 text-center align-middle ${
                                 headers[idx].includes("ACCESS") 
-                                  ? "font-mono font-bold text-center text-[#6B1D2A]"
+                                  ? "font-mono font-bold text-[#6B1D2A]"
                                   : headers[idx].includes("SUBJECT")
                                   ? "font-medium text-[#1D1A1B]"
-                                  : "text-center text-[#5F5A5C]"
+                                  : "text-[#5F5A5C]"
                               }`}
                             >
                               {data}

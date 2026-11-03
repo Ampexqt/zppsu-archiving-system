@@ -2,13 +2,12 @@ import React from "react";
 
 /**
  * InstitutionalSignatoryBlock
- * Formal academic certification & signatory block ensuring institutional authenticity,
- * chain of custody verification, and legal compliance under RA 9470 (National Archives Act).
+ * Formal academic certification & executive signatory footer.
+ * Compliant with RA 9470 (National Archives Act) and Philippine State University governance.
+ * 2-Column Executive Architecture: Prepared by Custodian vs Certified by Director.
  */
 export default function InstitutionalSignatoryBlock({
   preparedBy = null,
-  verifiedBy = "University Records Officer",
-  approvedBy = "Director, Guidance & Counseling",
   documentIdentifier = "DOC-ZPPSU",
   printDate = null,
 }) {
@@ -29,59 +28,47 @@ export default function InstitutionalSignatoryBlock({
   const staffName = preparedBy || currentUser?.name || "Guidance Records Custodian";
 
   return (
-    <div className="w-full mt-3 pt-2 border-t border-black text-black font-sans print-avoid-break">
-      {/* 3-COLUMN SIGNATORY GRID */}
-      <div className="grid grid-cols-3 gap-4 text-center text-xs">
-        {/* COLUMN 1: PREPARED BY */}
+    <div className="w-full pt-3 border-t border-black text-black font-sans print-avoid-break mt-auto">
+      {/* 2-COLUMN EXECUTIVE SIGNATORY GRID */}
+      <div className="grid grid-cols-2 gap-8 sm:gap-14 max-w-2xl mx-auto text-center text-xs">
+        {/* COLUMN 1: PREPARED & CATALOGED BY */}
         <div className="flex flex-col items-center">
-          <p className="text-[9.5px] font-bold uppercase tracking-wider text-neutral-700 mb-3">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-800 mb-1">
             Prepared & Cataloged by:
           </p>
-          <div className="w-40 border-b border-black pb-0.5">
-            <span className="font-bold text-[11px] uppercase text-neutral-900 tracking-tight">
+          {/* Dedicated physical pen signature signing clearance */}
+          <div className="h-11 w-56 flex items-end justify-center" aria-label="Physical Signature Space" />
+          <div className="w-56 border-b border-black pb-0.5">
+            <span className="font-bold text-[11px] uppercase text-neutral-900 tracking-tight block">
               {staffName}
             </span>
           </div>
-          <span className="text-[9.5px] text-neutral-700 mt-0.5">
+          <span className="text-[9.5px] text-neutral-700 mt-1 block">
             Guidance Records Custodian / Staff
           </span>
-          <span className="text-[8.5px] font-mono text-neutral-600">
+          <span className="text-[8.5px] font-mono text-neutral-600 block">
             Date: {currentDate}
           </span>
         </div>
 
-        {/* COLUMN 2: VERIFIED BY */}
+        {/* COLUMN 2: CERTIFIED OFFICIAL RECORD (BLANK FOR PHYSICAL PEN SIGNATURE & SEAL) */}
         <div className="flex flex-col items-center">
-          <p className="text-[9.5px] font-bold uppercase tracking-wider text-neutral-700 mb-3">
-            Verified & Archived by:
-          </p>
-          <div className="w-40 border-b border-black pb-0.5">
-            <span className="font-bold text-[11px] uppercase text-neutral-900 tracking-tight">
-              {verifiedBy}
-            </span>
-          </div>
-          <span className="text-[9.5px] text-neutral-700 mt-0.5">
-            University Records Officer / Admin
-          </span>
-          <span className="text-[8.5px] font-mono text-neutral-600">
-            Date: {currentDate}
-          </span>
-        </div>
-
-        {/* COLUMN 3: CERTIFIED BY */}
-        <div className="flex flex-col items-center">
-          <p className="text-[9.5px] font-bold uppercase tracking-wider text-neutral-700 mb-3">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-800 mb-1">
             Certified Official Record:
           </p>
-          <div className="w-40 border-b border-black pb-0.5">
-            <span className="font-bold text-[11px] uppercase text-neutral-900 tracking-tight">
-              {approvedBy}
-            </span>
+          {/* Dedicated physical pen signature & rubber seal clearance */}
+          <div className="h-11 w-56 flex items-end justify-center" aria-label="Director Physical Signature Space" />
+          <div className="w-56 border-b border-black pb-0.5">
+            {/* Blank line for Director's physical handwritten signature & official dry/wet seal */}
+            <span className="block h-4" />
           </div>
-          <span className="text-[9.5px] text-neutral-700 mt-0.5">
+          <span className="font-bold text-[10px] uppercase text-neutral-900 mt-1 block tracking-tight">
+            DIRECTOR, GUIDANCE & COUNSELING
+          </span>
+          <span className="text-[9.5px] text-neutral-700 block">
             Head, Guidance & Counseling Center
           </span>
-          <span className="text-[8.5px] font-mono text-neutral-600">
+          <span className="text-[8.5px] font-mono text-neutral-600 block">
             Office of Student Affairs & Services
           </span>
         </div>

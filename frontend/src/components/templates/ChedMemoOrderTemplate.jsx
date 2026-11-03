@@ -1,4 +1,16 @@
-export default function ChedMemoOrderTemplate({ data }) {
+import React from "react";
+
+export default function ChedMemoOrderTemplate({ document, data }) {
+  const mergedData = data || document?.dynamic_data || document || {};
+  const subject = mergedData.subject || document?.subject || document?.title || "—";
+  const fileLocation =
+    mergedData.file_location ||
+    (document?.file_box?.cabinet?.name
+      ? `${document.file_box.cabinet.name} - ${document.file_box.name}`
+      : document?.file_box?.name || "Unassigned");
+  const accessCode = mergedData.access_code || document?.access_code || "N/A";
+  const dateValue = mergedData.date || (document?.created_at ? new Date(document.created_at).toLocaleDateString() : "—");
+
   return (
     <div
       style={{
@@ -16,7 +28,6 @@ export default function ChedMemoOrderTemplate({ data }) {
         }}
       >
         <tbody>
-
           {/* TITLE */}
           <tr>
             <td
@@ -24,9 +35,10 @@ export default function ChedMemoOrderTemplate({ data }) {
               style={{
                 border: "1px solid black",
                 textAlign: "center",
+                verticalAlign: "middle",
                 fontWeight: "bold",
-                fontSize: "18px",
-                padding: "12px",
+                fontSize: "14px",
+                padding: "8px 12px",
               }}
             >
               ZPPSU MASTERLIST OF RECORDS- CHED MEMORANDUM ORDERS (CMO)
@@ -39,9 +51,11 @@ export default function ChedMemoOrderTemplate({ data }) {
               style={{
                 border: "1px solid black",
                 textAlign: "center",
+                verticalAlign: "middle",
                 fontWeight: "bold",
-                padding: "10px",
-                width: "12%",
+                padding: "4px 6px",
+                fontSize: "11px",
+                width: "14%",
               }}
             >
               Date
@@ -51,9 +65,11 @@ export default function ChedMemoOrderTemplate({ data }) {
               style={{
                 border: "1px solid black",
                 textAlign: "center",
+                verticalAlign: "middle",
                 fontWeight: "bold",
-                padding: "10px",
-                width: "28%",
+                padding: "4px 6px",
+                fontSize: "11px",
+                width: "20%",
               }}
             >
               ACCESS CODE
@@ -63,9 +79,11 @@ export default function ChedMemoOrderTemplate({ data }) {
               style={{
                 border: "1px solid black",
                 textAlign: "center",
+                verticalAlign: "middle",
                 fontWeight: "bold",
-                padding: "10px",
-                width: "25%",
+                padding: "4px 6px",
+                fontSize: "11px",
+                width: "28%",
               }}
             >
               SUBJECT
@@ -75,9 +93,11 @@ export default function ChedMemoOrderTemplate({ data }) {
               style={{
                 border: "1px solid black",
                 textAlign: "center",
+                verticalAlign: "middle",
                 fontWeight: "bold",
-                padding: "10px",
-                width: "20%",
+                padding: "4px 6px",
+                fontSize: "11px",
+                width: "18%",
               }}
             >
               ACTION TAKEN
@@ -87,63 +107,79 @@ export default function ChedMemoOrderTemplate({ data }) {
               style={{
                 border: "1px solid black",
                 textAlign: "center",
+                verticalAlign: "middle",
                 fontWeight: "bold",
-                padding: "10px",
-                width: "25%",
+                padding: "4px 6px",
+                fontSize: "11px",
+                width: "20%",
               }}
             >
               FILE LOCATION
             </td>
           </tr>
 
-          {/* DATA */}
+          {/* DATA ROW - CENTERED HORIZONTALLY AND VERTICALLY */}
           <tr>
             <td
               style={{
                 border: "1px solid black",
-                padding: "10px",
+                padding: "6px 8px",
+                fontSize: "11px",
+                textAlign: "center",
+                verticalAlign: "middle",
               }}
             >
-              {data.date || ""}
+              {dateValue}
             </td>
 
             <td
               style={{
                 border: "1px solid black",
-                padding: "10px",
+                padding: "6px 8px",
+                fontSize: "11px",
+                textAlign: "center",
+                verticalAlign: "middle",
               }}
             >
-              {data.access_code || "N/A"}
+              {accessCode}
             </td>
 
             <td
               style={{
                 border: "1px solid black",
-                padding: "10px",
+                padding: "6px 8px",
+                fontSize: "11px",
+                textAlign: "center",
+                verticalAlign: "middle",
               }}
             >
-              {data.subject || ""}
+              {subject}
             </td>
 
             <td
               style={{
                 border: "1px solid black",
-                padding: "10px",
+                padding: "6px 8px",
+                fontSize: "11px",
+                textAlign: "center",
+                verticalAlign: "middle",
               }}
             >
-              {data.action_taken || ""}
+              {mergedData.action_taken || "—"}
             </td>
 
             <td
               style={{
                 border: "1px solid black",
-                padding: "10px",
+                padding: "6px 8px",
+                fontSize: "11px",
+                textAlign: "center",
+                verticalAlign: "middle",
               }}
             >
-              {data.file_location || ""}
+              {fileLocation}
             </td>
           </tr>
-
         </tbody>
       </table>
     </div>

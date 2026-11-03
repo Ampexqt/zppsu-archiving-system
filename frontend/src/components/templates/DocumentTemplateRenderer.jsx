@@ -240,7 +240,9 @@ function DocumentTemplateRenderer({ document }) {
   if (Component && document.is_generated) {
     return (
       <div className="space-y-6 font-sans">
-        <Component document={document} data={unifiedData} />
+        <div className="template-viewport-container w-full overflow-x-auto">
+          <Component document={document} data={unifiedData} />
+        </div>
         <div className="flex justify-end gap-2 max-w-[950px] mx-auto">
           <button
             onClick={handleExportExcel}

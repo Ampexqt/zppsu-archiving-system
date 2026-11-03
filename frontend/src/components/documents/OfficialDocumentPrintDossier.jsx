@@ -190,118 +190,120 @@ export default function OfficialDocumentPrintDossier({ file }) {
   const isImage = /\.(jpg|jpeg|png|webp)$/i.test(file.file_name || "") || ["JPG", "JPEG", "PNG", "WEBP"].includes(file.file_type);
 
   return (
-    <div className="w-full bg-white text-black p-1 sm:p-2 font-sans leading-tight print-avoid-break">
-      {/* 1. INSTITUTIONAL LETTERHEAD */}
-      <InstitutionalPrintHeader
-        title={file.is_generated ? `MASTERLIST OF RECORDS FOR ${(file.document_type || "DOCUMENT").toUpperCase()}` : "OFFICIAL ARCHIVAL RECORD DOSSIER"}
-        referenceCode={documentIdentifier}
-        classification={file.category || "General"}
-        documentType={file.document_type || "Record"}
-      />
+    <div className="w-full bg-white text-black p-1 sm:p-2 font-sans leading-tight print-dossier-flex h-full flex-1 flex flex-col justify-between">
+      {/* MAIN DOSSIER BODY (SECTIONS I, II, III) */}
+      <div className="flex-1 w-full">
+        {/* 1. INSTITUTIONAL LETTERHEAD */}
+        <InstitutionalPrintHeader
+          title={file.is_generated ? `MASTERLIST OF RECORDS FOR ${(file.document_type || "DOCUMENT").toUpperCase()}` : "OFFICIAL ARCHIVAL RECORD DOSSIER"}
+          referenceCode={documentIdentifier}
+          classification={file.category || "General"}
+          documentType={file.document_type || "Record"}
+        />
 
-      {/* 2. ARCHIVAL CLASSIFICATION & ACCESSION SUMMARY TABLE */}
-      <div className="mb-2.5">
-        <div className="bg-neutral-100 border border-black px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-black flex justify-between items-center">
-          <span>Section I: Archival Document Registration & Classification</span>
-          <span className="font-mono">STATUS: {file.status ? file.status.toUpperCase() : "VERIFIED ACTIVE"}</span>
-        </div>
-        <table className="w-full border-collapse border border-black text-[11px]">
-          <tbody>
-            <tr>
-              <td className="border border-black p-1.5 bg-neutral-50 font-bold w-[20%] text-neutral-800">
-                Document Accession No.
-              </td>
-              <td className="border border-black p-1.5 font-mono font-bold text-black w-[30%]">
-                {documentIdentifier}
-              </td>
-              <td className="border border-black p-1.5 bg-neutral-50 font-bold w-[20%] text-neutral-800">
-                Registration Date
-              </td>
-              <td className="border border-black p-1.5 text-black w-[30%]">
-                {formattedDate}
-              </td>
-            </tr>
-            <tr>
-              <td className="border border-black p-1.5 bg-neutral-50 font-bold text-neutral-800">
-                Official Subject / Title
-              </td>
-              <td className="border border-black p-1.5 font-semibold text-black" colSpan="3">
-                {file.subject || file.title || "—"}
-              </td>
-            </tr>
-            <tr>
-              <td className="border border-black p-1.5 bg-neutral-50 font-bold text-neutral-800">
-                Primary Category
-              </td>
-              <td className="border border-black p-1.5 text-black">
-                {file.category || "Uncategorized"}
-              </td>
-              <td className="border border-black p-1.5 bg-neutral-50 font-bold text-neutral-800">
-                Document Classification
-              </td>
-              <td className="border border-black p-1.5 text-black font-medium">
-                {file.document_type || "Standard Document"}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      {/* 3. PHYSICAL STORAGE CHAIN OF CUSTODY TABLE */}
-      <div className="mb-2.5">
-        <div className="bg-neutral-100 border border-black px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-black flex justify-between items-center">
-          <span>Section II: Physical Storage Chain of Custody & Repository Location</span>
-          <span className="font-mono text-[8.5px]">OFFICE REPOSITORY UNIT</span>
-        </div>
-        <table className="w-full border-collapse border border-black text-[11px]">
-          <tbody>
-            <tr>
-              <td className="border border-black p-1.5 bg-neutral-50 font-bold w-[20%] text-neutral-800">
-                Primary Storage Unit
-              </td>
-              <td className="border border-black p-1.5 text-black w-[30%]">
-                <strong>{cabinetName}</strong> <span className="text-neutral-600 text-[10px]">({cabinetType})</span>
-              </td>
-              <td className="border border-black p-1.5 bg-neutral-50 font-bold w-[20%] text-neutral-800">
-                File Box Container
-              </td>
-              <td className="border border-black p-1.5 text-black w-[30%]">
-                <strong>{boxName}</strong>
-              </td>
-            </tr>
-            <tr>
-              <td className="border border-black p-1.5 bg-neutral-50 font-bold text-neutral-800">
-                Archfile Binder
-              </td>
-              <td className="border border-black p-1.5 text-black" colSpan="3">
-                {archfileName ? (
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold">{archfileName}</span>
-                    {archfileCode && <span className="font-mono text-[10px] text-neutral-700">[{archfileCode}]</span>}
-                    {archfileColor && <span className="text-[9.5px] uppercase font-mono px-1 py-0.2 bg-neutral-100 border border-neutral-300">Spine: {archfileColor}</span>}
-                  </div>
-                ) : (
-                  <span className="text-neutral-600 italic">Direct Unit / Box Placement (Not filed inside a separate Archfile binder)</span>
-                )}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      {/* 4. CORE DOCUMENT CONTENT SECTION */}
-      <div className="mb-2.5">
-        <div className="bg-neutral-100 border border-black px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-black mb-1">
-          <span>Section III: Official Archival Document Content & Transcript</span>
-        </div>
-
-        {/* Case A: Template Document */}
-        {TemplateComponent && file.is_generated ? (
-          <div className="w-full border border-black p-1 my-1">
-            <TemplateComponent document={file} data={unifiedData} />
+        {/* 2. ARCHIVAL CLASSIFICATION & ACCESSION SUMMARY TABLE */}
+        <div className="mb-2.5">
+          <div className="bg-neutral-100 border border-black px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-black flex justify-between items-center">
+            <span>Section I: Archival Document Registration & Classification</span>
+            <span className="font-mono">STATUS: {file.status ? file.status.toUpperCase() : "VERIFIED ACTIVE"}</span>
           </div>
-        ) : (
-          <div className="space-y-4">
+          <table className="w-full border-collapse border border-black text-[11px]">
+            <tbody>
+              <tr>
+                <td className="border border-black p-1.5 bg-neutral-50 font-bold w-[20%] text-neutral-800 align-middle">
+                  Document Accession No.
+                </td>
+                <td className="border border-black p-1.5 font-mono font-bold text-black w-[30%] align-middle">
+                  {documentIdentifier}
+                </td>
+                <td className="border border-black p-1.5 bg-neutral-50 font-bold w-[20%] text-neutral-800 align-middle">
+                  Registration Date
+                </td>
+                <td className="border border-black p-1.5 text-black w-[30%] align-middle">
+                  {formattedDate}
+                </td>
+              </tr>
+              <tr>
+                <td className="border border-black p-1.5 bg-neutral-50 font-bold text-neutral-800 align-middle">
+                  Official Subject / Title
+                </td>
+                <td className="border border-black p-1.5 font-semibold text-black align-middle" colSpan="3">
+                  {file.subject || file.title || "—"}
+                </td>
+              </tr>
+              <tr>
+                <td className="border border-black p-1.5 bg-neutral-50 font-bold text-neutral-800 align-middle">
+                  Primary Category
+                </td>
+                <td className="border border-black p-1.5 text-black align-middle">
+                  {file.category || "Uncategorized"}
+                </td>
+                <td className="border border-black p-1.5 bg-neutral-50 font-bold text-neutral-800 align-middle">
+                  Document Classification
+                </td>
+                <td className="border border-black p-1.5 text-black font-medium align-middle">
+                  {file.document_type || "Standard Document"}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        {/* 3. PHYSICAL STORAGE CHAIN OF CUSTODY TABLE */}
+        <div className="mb-2.5">
+          <div className="bg-neutral-100 border border-black px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-black flex justify-between items-center">
+            <span>Section II: Physical Storage Chain of Custody & Repository Location</span>
+            <span className="font-mono text-[8.5px]">OFFICE REPOSITORY UNIT</span>
+          </div>
+          <table className="w-full border-collapse border border-black text-[11px]">
+            <tbody>
+              <tr>
+                <td className="border border-black p-1.5 bg-neutral-50 font-bold w-[20%] text-neutral-800 align-middle">
+                  Primary Storage Unit
+                </td>
+                <td className="border border-black p-1.5 text-black w-[30%] align-middle">
+                  <strong>{cabinetName}</strong> <span className="text-neutral-600 text-[10px]">({cabinetType})</span>
+                </td>
+                <td className="border border-black p-1.5 bg-neutral-50 font-bold w-[20%] text-neutral-800 align-middle">
+                  File Box Container
+                </td>
+                <td className="border border-black p-1.5 text-black w-[30%] align-middle">
+                  <strong>{boxName}</strong>
+                </td>
+              </tr>
+              <tr>
+                <td className="border border-black p-1.5 bg-neutral-50 font-bold text-neutral-800 align-middle">
+                  Archfile Binder
+                </td>
+                <td className="border border-black p-1.5 text-black align-middle" colSpan="3">
+                  {archfileName ? (
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold">{archfileName}</span>
+                      {archfileCode && <span className="font-mono text-[10px] text-neutral-700">[{archfileCode}]</span>}
+                      {archfileColor && <span className="text-[9.5px] uppercase font-mono px-1 py-0.2 bg-neutral-100 border border-neutral-300">Spine: {archfileColor}</span>}
+                    </div>
+                  ) : (
+                    <span className="text-neutral-600 italic">Direct Unit / Box Placement (Not filed inside a separate Archfile binder)</span>
+                  )}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        {/* 4. CORE DOCUMENT CONTENT SECTION */}
+        <div className="mb-2.5">
+          <div className="bg-neutral-100 border border-black px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-black mb-1">
+            <span>Section III: Official Archival Document Content & Transcript</span>
+          </div>
+
+          {/* Case A: Template Document */}
+          {TemplateComponent && file.is_generated ? (
+            <div className="w-full border border-black p-1 my-1 print-template-container">
+              <TemplateComponent document={file} data={unifiedData} />
+            </div>
+          ) : (
+            <div className="space-y-4">
             {/* Metadata Summary Grid for Non-generated Records */}
             <table className="w-full border-collapse border border-black text-xs">
               <thead>
@@ -370,13 +372,16 @@ export default function OfficialDocumentPrintDossier({ file }) {
             )}
           </div>
         )}
+        </div>
       </div>
 
-      {/* 5. INSTITUTIONAL SIGNATORY BLOCK */}
-      <InstitutionalSignatoryBlock
-        documentIdentifier={documentIdentifier}
-        printDate={formattedDate}
-      />
+      {/* 5. INSTITUTIONAL SIGNATORY FOOTER (ANCHORED AT BOTTOM) */}
+      <footer className="w-full mt-auto pt-4 print-avoid-break">
+        <InstitutionalSignatoryBlock
+          documentIdentifier={documentIdentifier}
+          printDate={formattedDate}
+        />
+      </footer>
     </div>
   );
 }

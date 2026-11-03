@@ -80,23 +80,23 @@ export default function ChedCommunicationTemplate({ document, data }) {
           </tr>
 
           <tr>
-            <td style={{ border: "1px solid black", padding: "6px 8px", textAlign: "center", fontSize: "11px" }}>
+            <td style={{ border: "1px solid black", padding: "6px 8px", textAlign: "center", verticalAlign: "middle", fontSize: "11px" }}>
               {dateValue}
             </td>
 
-            <td style={{ border: "1px solid black", padding: "6px 8px", textAlign: "center", fontSize: "11px" }}>
+            <td style={{ border: "1px solid black", padding: "6px 8px", textAlign: "center", verticalAlign: "middle", fontSize: "11px" }}>
               {accessCode}
             </td>
 
-            <td style={{ border: "1px solid black", padding: "6px 8px", textAlign: "center", fontSize: "11px" }}>
+            <td style={{ border: "1px solid black", padding: "6px 8px", textAlign: "center", verticalAlign: "middle", fontSize: "11px" }}>
               {subject}
             </td>
 
-            <td style={{ border: "1px solid black", padding: "6px 8px", textAlign: "center", fontSize: "11px" }}>
+            <td style={{ border: "1px solid black", padding: "6px 8px", textAlign: "center", verticalAlign: "middle", fontSize: "11px" }}>
               {mergedData.action_taken || "—"}
             </td>
 
-            <td style={{ border: "1px solid black", padding: "6px 8px", textAlign: "center", fontSize: "11px" }}>
+            <td style={{ border: "1px solid black", padding: "6px 8px", textAlign: "center", verticalAlign: "middle", fontSize: "11px" }}>
               {fileLocation}
             </td>
           </tr>

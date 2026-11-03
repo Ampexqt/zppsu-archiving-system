@@ -181,19 +181,36 @@
     display: none !important;
   }
 
-  /* 4. Display all print-only components with institutional padding */
+  /* 4. Display all print-only components with flex column layout and bottom-anchored footer */
   .print-dossier-root,
   .print-only-block {
-    display: block !important;
+    display: flex !important;
+    flex-direction: column !important;
     position: static !important;
     width: 100% !important;
     max-width: 100% !important;
+    min-height: 265mm !important;
     margin: 0 !important;
-    padding: 8mm 10mm !important;
+    padding: 6mm 10mm !important;
     background: #ffffff !important;
     color: #000000 !important;
     visibility: visible !important;
     box-sizing: border-box !important;
+  }
+
+  .print-dossier-root footer,
+  .print-only-block footer {
+    display: block !important;
+    margin-top: auto !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  /* Universal Table Alignment for Document Templates (Centered horizontally & vertically in print) */
+  .print-template-container table td,
+  .print-template-container table th {
+    text-align: center !important;
+    vertical-align: middle !important;
   }
 
   /* Compact template tables inside print dossier to fit 1 page comfortably */
@@ -202,6 +219,7 @@
     padding: 3px 6px !important;
     font-size: 8.5pt !important;
     line-height: 1.25 !important;
+    vertical-align: middle !important;
   }
 
   /* 5. Un-constrain layout containers */
@@ -244,4 +262,11 @@
     text-shadow: none !important;
     outline: none !important;
   }
+}
+
+/* Universal Table Alignment for Document Templates (Centered horizontally & vertically) */
+.template-viewport-container table td,
+.template-viewport-container table th {
+  text-align: center;
+  vertical-align: middle;
 }

@@ -15,35 +15,35 @@ function Home() {
       {/* HERO SECTION: Balanced Swiss / Institutional Minimalist Editorial */}
       <section
         id="home"
-        className="relative pt-28 pb-16 lg:pt-36 lg:pb-24 px-6 lg:px-12 max-w-7xl mx-auto w-full flex-1 flex flex-col justify-center border-b border-[#E8E3E1]"
+        className="relative pt-24 pb-14 sm:pt-28 sm:pb-16 lg:pt-36 lg:pb-24 px-4 sm:px-6 lg:px-12 max-w-7xl mx-auto w-full flex-1 flex flex-col justify-center border-b border-[#E8E3E1]"
       >
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 items-center">
           
           {/* LEFT COLUMN: 6 Columns - Balanced Typography & Direct Action */}
-          <div className="lg:col-span-6 flex flex-col items-start text-left">
+          <div className="lg:col-span-6 flex flex-col items-start text-left w-full">
             
             {/* Small uppercase mono label */}
-            <p className="font-mono text-xs uppercase tracking-widest text-[#5F5A5C] mb-5">
+            <p className="font-mono text-[11px] sm:text-xs uppercase tracking-widest text-[#5F5A5C] mb-4 sm:mb-5">
               ZPPSU Guidance &amp; Counseling Office · Archival Repository
             </p>
 
-            {/* Editorial Headline: 2-line harmonious break, single near-black color */}
-            <h1 className="font-['Newsreader',Georgia,serif] text-3xl sm:text-4xl lg:text-[46px] xl:text-[52px] font-normal tracking-tight text-[#1D1A1B] leading-[1.12] mb-5">
-              Institutional records and <br />
+            {/* Editorial Headline: Clean responsive breaks, single near-black color */}
+            <h1 className="font-['Newsreader',Georgia,serif] text-[30px] sm:text-4xl lg:text-[46px] xl:text-[52px] font-normal tracking-tight text-[#1D1A1B] leading-[1.12] mb-4 sm:mb-5">
+              Institutional records and <br className="hidden sm:inline" />
               physical archives, unified.
             </h1>
 
             {/* System-accurate narrative directly derived from /docs */}
-            <p className="text-base sm:text-lg text-[#5F5A5C] max-w-lg mb-8 leading-relaxed font-normal">
+            <p className="text-sm sm:text-base text-[#5F5A5C] max-w-lg mb-6 sm:mb-8 leading-relaxed font-normal">
               A central repository linking physical storage cabinets and file boxes to digital documents. Search, manage, and preserve academic records, accomplishment reports, and guidance files with complete audit accountability.
             </p>
 
             {/* Action Components: One solid maroon button (4px corners, no arrow) + one plain text link */}
-            <div className="flex flex-wrap items-center gap-5 mb-8">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-5 mb-6 sm:mb-8 w-full sm:w-auto">
               <button
                 type="button"
                 onClick={() => navigate("/login")}
-                className="bg-[#6B1B2E] text-[#FFFCF7] hover:bg-[#521322] px-6 py-3.5 rounded-[4px] text-sm font-medium tracking-wide transition-colors cursor-pointer"
+                className="w-full sm:w-auto bg-[#6B1B2E] text-[#FFFCF7] hover:bg-[#521322] px-6 py-3.5 rounded-[4px] text-sm font-medium tracking-wide transition-colors cursor-pointer text-center"
               >
                 Access the Archive
               </button>
@@ -54,28 +54,28 @@ function Home() {
                   const el = document.getElementById("features");
                   if (el) el.scrollIntoView({ behavior: "smooth" });
                 }}
-                className="text-sm font-medium text-[#1D1A1B] hover:text-[#6B1B2E] underline underline-offset-4 transition-colors cursor-pointer"
+                className="text-center sm:text-left text-sm font-medium text-[#1D1A1B] hover:text-[#6B1B2E] underline underline-offset-4 py-1 transition-colors cursor-pointer"
               >
                 Explore system capabilities
               </button>
             </div>
 
             {/* Concrete Facts Line */}
-            <div className="pt-6 border-t border-[#E8E3E1] w-full text-xs font-mono text-[#5F5A5C] tracking-wide">
+            <div className="pt-5 sm:pt-6 border-t border-[#E8E3E1] w-full text-[11px] sm:text-xs font-mono text-[#5F5A5C] leading-relaxed tracking-wide">
               Role-based access · Cabinet-to-file indexing · Audit log tracking · Document center
             </div>
 
           </div>
 
           {/* RIGHT COLUMN: 6 Columns - Optically Balanced Full Photographic Anchor */}
-          <div className="lg:col-span-6 w-full flex flex-col items-center">
-            <div className="w-full border border-[#E8E3E1] p-2 bg-[#FFFCF7] rounded-[4px]">
+          <div className="lg:col-span-6 w-full flex flex-col items-center mt-4 lg:mt-0">
+            <div className="w-full border border-[#E8E3E1] p-1.5 sm:p-2 bg-[#FFFCF7] rounded-[4px]">
               <img
                 src={heroImage}
                 alt="ZPPSU Guidance & Counseling Office Building and Records Archive"
                 className="w-full h-auto block rounded-[2px]"
               />
-              <div className="pt-2.5 px-1 flex items-center justify-between text-[11px] font-mono text-[#5F5A5C] border-t border-[#E8E3E1] mt-2">
+              <div className="pt-2 px-1 flex flex-col sm:flex-row sm:items-center justify-between text-[10px] sm:text-[11px] font-mono text-[#5F5A5C] border-t border-[#E8E3E1] mt-1.5 gap-1">
                 <span>ZPPSU Guidance Office · Main Campus</span>
                 <span>Physical &amp; Digital Vault</span>
               </div>

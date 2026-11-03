@@ -170,6 +170,20 @@ export default function OfficialDocumentPrintDossier({ file }) {
   const archfileCode = file.archfile?.code || file.file_box?.archfile?.code || null;
   const archfileColor = file.archfile?.color_tag || file.file_box?.archfile?.color_tag || null;
 
+  const rawData = file.dynamic_data || {};
+  const computedLocation = file.file_box?.cabinet?.name
+    ? `${file.file_box.cabinet.name} - ${file.file_box.name}`
+    : (file.file_box?.name || rawData.file_location || "Unassigned");
+
+  const unifiedData = {
+    ...file,
+    ...rawData,
+    subject: rawData.subject || file.subject || file.title || "—",
+    access_code: rawData.access_code || file.access_code || "N/A",
+    date: rawData.date || formattedDate,
+    file_location: rawData.file_location || computedLocation,
+  };
+
   const fileUrl = file.file_path
     ? (file.file_path.startsWith("http") ? file.file_path : `${API_BASE_URL}/${file.file_path}`)
     : null;
@@ -284,7 +298,7 @@ export default function OfficialDocumentPrintDossier({ file }) {
         {/* Case A: Template Document */}
         {TemplateComponent && file.is_generated ? (
           <div className="w-full border border-black p-3 my-2">
-            <TemplateComponent document={file} data={file.dynamic_data || file} />
+            <TemplateComponent document={file} data={unifiedData} />
           </div>
         ) : (
           <div className="space-y-4">

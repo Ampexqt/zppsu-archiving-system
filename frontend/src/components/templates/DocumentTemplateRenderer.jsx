@@ -143,6 +143,21 @@ function DocumentTemplateRenderer({ document }) {
   const docTypeKey = (document.document_type || "").toUpperCase().trim();
   const Component = templateMap[docTypeKey];
 
+  // Robust Unified Data extraction merging root document fields with dynamic_data
+  const rawData = document.dynamic_data || {};
+  const computedLocation = document.file_box?.cabinet?.name
+    ? `${document.file_box.cabinet.name} - ${document.file_box.name}`
+    : (document.file_box?.name || rawData.file_location || "Unassigned");
+
+  const unifiedData = {
+    ...document,
+    ...rawData,
+    subject: rawData.subject || document.subject || document.title || "—",
+    access_code: rawData.access_code || document.access_code || "N/A",
+    date: rawData.date || (document.created_at ? new Date(document.created_at).toLocaleDateString() : ""),
+    file_location: rawData.file_location || computedLocation,
+  };
+
   const handleExportExcel = async () => {
     const workbook = new ExcelJS.Workbook();
     const sheet = workbook.addWorksheet("Masterlist");
@@ -158,7 +173,7 @@ function DocumentTemplateRenderer({ document }) {
 
     // Use dynamic data if available to match the generated templates, or fallback to standard document metadata
     const isGenerated = document.is_generated;
-    const data = document.dynamic_data || document;
+    const data = unifiedData;
     
     // Most templates have ACTION TAKEN instead of STATUS
     const statusOrActionHeader = isGenerated && data.action_taken ? "ACTION TAKEN" : "STATUS";
@@ -225,7 +240,7 @@ function DocumentTemplateRenderer({ document }) {
   if (Component && document.is_generated) {
     return (
       <div className="space-y-6 font-sans">
-        <Component document={document} data={document.dynamic_data || document} />
+        <Component document={document} data={unifiedData} />
         <div className="flex justify-end gap-2 max-w-[950px] mx-auto">
           <button
             onClick={handleExportExcel}
@@ -280,7 +295,7 @@ function DocumentTemplateRenderer({ document }) {
                 {document.access_code || "N/A"}
               </td>
               <td className="border border-black text-center p-2">
-                {document.subject || document.title || "—"}
+                {unifiedData.subject || "—"}
               </td>
               <td className="border border-black text-center p-2">
                 {document.status || "Active"}

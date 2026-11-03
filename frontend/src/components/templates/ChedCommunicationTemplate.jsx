@@ -1,4 +1,14 @@
-export default function ChedCommunicationTemplate({ data }) {
+export default function ChedCommunicationTemplate({ document, data }) {
+  const mergedData = data || document?.dynamic_data || document || {};
+  const subject = mergedData.subject || document?.subject || document?.title || "—";
+  const fileLocation =
+    mergedData.file_location ||
+    (document?.file_box?.cabinet?.name
+      ? `${document.file_box.cabinet.name} - ${document.file_box.name}`
+      : document?.file_box?.name || "Unassigned");
+  const accessCode = mergedData.access_code || document?.access_code || "N/A";
+  const dateValue = mergedData.date || (document?.created_at ? new Date(document.created_at).toLocaleDateString() : "—");
+
   return (
     <div
       style={{
@@ -64,29 +74,29 @@ export default function ChedCommunicationTemplate({ data }) {
                 padding: "6px",
               }}
             >
-              {data.month || "JANUARY"}
+              {mergedData.month || "JANUARY"}
             </td>
           </tr>
 
           <tr>
-            <td style={{ border: "1px solid black", padding: "10px" }}>
-              {data.date}
+            <td style={{ border: "1px solid black", padding: "10px", textAlign: "center" }}>
+              {dateValue}
             </td>
 
-            <td style={{ border: "1px solid black", padding: "10px" }}>
-              {data.access_code || "N/A"}
+            <td style={{ border: "1px solid black", padding: "10px", textAlign: "center" }}>
+              {accessCode}
             </td>
 
-            <td style={{ border: "1px solid black", padding: "10px" }}>
-              {data.subject}
+            <td style={{ border: "1px solid black", padding: "10px", textAlign: "center" }}>
+              {subject}
             </td>
 
-            <td style={{ border: "1px solid black", padding: "10px" }}>
-              {data.action_taken}
+            <td style={{ border: "1px solid black", padding: "10px", textAlign: "center" }}>
+              {mergedData.action_taken || "—"}
             </td>
 
-            <td style={{ border: "1px solid black", padding: "10px" }}>
-              {data.file_location}
+            <td style={{ border: "1px solid black", padding: "10px", textAlign: "center" }}>
+              {fileLocation}
             </td>
           </tr>
         </tbody>

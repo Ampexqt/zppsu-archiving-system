@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { ScanText, Download, Copy, Check, FileText, ExternalLink, FileSpreadsheet } from "lucide-react";
 import ExcelJS from "exceljs";
+import { exportSingleDocumentExcel } from "../../utils/singleDocumentExcelExporter";
 import { API_BASE_URL } from "../../services/api";
 import AccomplishmentReportTemplate from "./AccomplishmentReportTemplate";
 import AaccupTemplate from "./AaccupTemplate";
@@ -159,58 +160,12 @@ function DocumentTemplateRenderer({ document }) {
   };
 
   const handleExportExcel = async () => {
-    const workbook = new ExcelJS.Workbook();
-    const sheet = workbook.addWorksheet("Masterlist");
-
-    const titleStr = `ZPPSU MASTERLIST OF RECORDS - ${(document.document_type || "DOCUMENT").toUpperCase()}`;
-
-    // Add Title
-    sheet.mergeCells("A1:E1");
-    const titleRow = sheet.getCell("A1");
-    titleRow.value = titleStr;
-    titleRow.font = { bold: true, size: 14 };
-    titleRow.alignment = { horizontal: "center", vertical: "middle" };
-
-    // Use dynamic data if available to match the generated templates, or fallback to standard document metadata
-    const isGenerated = document.is_generated;
-    const data = unifiedData;
-    
-    // Most templates have ACTION TAKEN instead of STATUS
-    const statusOrActionHeader = isGenerated && data.action_taken ? "ACTION TAKEN" : "STATUS";
-    const statusOrActionValue = isGenerated && data.action_taken ? data.action_taken : (document.status || "Active");
-
-    // Add Headers
-    const headerRow = sheet.addRow(["DATE", "ACCESS CODE", "SUBJECT", statusOrActionHeader, "FILE LOCATION"]);
-    headerRow.eachCell((cell) => {
-      cell.font = { bold: true };
-      cell.alignment = { horizontal: "center", vertical: "middle" };
-      cell.border = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
-    });
-
-    // Add Data
-    const dataRow = sheet.addRow([
-      data.date || new Date(document.created_at || Date.now()).toLocaleDateString(),
-      data.access_code || document.access_code || "N/A",
-      data.subject || document.subject || document.title || "—",
-      statusOrActionValue,
-      data.file_location || (document.file_box?.cabinet?.name ? `${document.file_box.cabinet.name} - ${document.file_box.name}` : "Unassigned")
-    ]);
-    dataRow.eachCell((cell) => {
-      cell.alignment = { horizontal: "center", vertical: "middle" };
-      cell.border = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
-    });
-
-    sheet.columns = [ { width: 15 }, { width: 20 }, { width: 35 }, { width: 15 }, { width: 25 } ];
-
-    const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-    const url = window.URL.createObjectURL(blob);
-    const link = window.document.createElement("a");
-    link.href = url;
-    link.download = `${document.document_id || "Document"}.xlsx`;
-    link.click();
-    window.URL.revokeObjectURL(url);
-    trackDownload("Excel spreadsheet");
+    try {
+      await exportSingleDocumentExcel(document, unifiedData);
+      trackDownload("Excel spreadsheet");
+    } catch (err) {
+      console.error("Failed to export institutional excel:", err);
+    }
   };
 
   const trackDownload = async (type = "file") => {

@@ -213,37 +213,6 @@ export default function StorageExplorer({
             </>
           )}
         </div>
-
-        {/* CONTEXT-AWARE "+ ADD" BUTTON */}
-        {isAdmin && (
-          <div>
-            {!selectedCabinetId ? (
-              <Button
-                onClick={onOpenCreateUnit}
-                className="h-9 px-4 rounded-xl bg-[#6B1D2A] text-[#FFFCF7] hover:bg-[#8B3545] text-xs font-bold shadow-xs flex items-center gap-1.5 cursor-pointer"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                <span>New Storage Unit</span>
-              </Button>
-            ) : !selectedBoxName ? (
-              <Button
-                onClick={() => onOpenCreateBox(currentCabinet.id)}
-                className="h-9 px-4 rounded-xl bg-[#6B1D2A] text-[#FFFCF7] hover:bg-[#8B3545] text-xs font-bold shadow-xs flex items-center gap-1.5 cursor-pointer"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                <span>New File Box</span>
-              </Button>
-            ) : !selectedArchfile ? (
-              <Button
-                onClick={() => onOpenCreateArchfile(currentCabinet, currentBox.name)}
-                className="h-9 px-4 rounded-xl bg-[#6B1D2A] text-[#FFFCF7] hover:bg-[#8B3545] text-xs font-bold shadow-xs flex items-center gap-1.5 cursor-pointer"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                <span>New Archfile</span>
-              </Button>
-            ) : null}
-          </div>
-        )}
       </div>
 
       {/* ============================================================== */}

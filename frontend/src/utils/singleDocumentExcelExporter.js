@@ -5,12 +5,13 @@ import {
   stripColorTag, 
   parseBoxHierarchy 
 } from "../components/inventory/storageTaxonomy";
+import { getInstitutionalLogoBuffer } from "./excelLogoLoader";
 
 /**
  * Institutional Single Document Excel Exporter
  * Generates an official state university archival spreadsheet (.xlsx)
- * matching Republic of the Philippines / ZPPSU letterhead, ISO 9001:2015 / NAP RA 9470 standards,
- * physical storage custody, styled record tables, and executive signatories.
+ * matching Republic of the Philippines / ZPPSU letterhead with official seal,
+ * boxed ISO 9001:2015 / NAP RA 9470 Control Standard stamp, and Gold Month Banner (#F2DFB0).
  */
 export async function exportSingleDocumentExcel(document, unifiedData = {}) {
   if (!document) {
@@ -24,7 +25,6 @@ export async function exportSingleDocumentExcel(document, unifiedData = {}) {
 
   const documentIdentifier = document.document_id || document.access_code || `DOC-${document.id || "RECORD"}`;
   const documentType = (document.document_type || "DOCUMENT").toUpperCase();
-  const category = document.category || "Administrative";
   const subject = unifiedData.subject || document.subject || document.title || "—";
   
   const formattedDate = document.created_at
@@ -47,33 +47,10 @@ export async function exportSingleDocumentExcel(document, unifiedData = {}) {
   
   // Storage Location
   const boxParsed = document.file_box ? parseBoxHierarchy(document.file_box.name) : null;
-  const cabinetName = document.file_box?.cabinet?.name 
-    ? `${document.file_box.cabinet.name} (${document.file_box.cabinet.type || "Unit"})`
-    : "Unassigned Storage Unit";
-  const boxName = stripColorTag(boxParsed?.parentBoxName || (!boxParsed?.isArchfile ? document.file_box?.name : "Direct Placement") || "Unassigned Box Container");
-  const archfileName = stripColorTag(document.archfile?.name || document.file_box?.archfile?.name || boxParsed?.archfileName || null);
-  const archfileCode = document.archfile?.code || document.file_box?.archfile?.code || null;
-  const rawColor = document.archfile?.color_tag || document.file_box?.archfile?.color_tag || boxParsed?.color || null;
-  const archfileColorName = getColorNameFromHex(rawColor);
-
-  const archfileInfo = archfileName
-    ? `${archfileName}${archfileCode ? ` [${archfileCode}]` : ""}${archfileColorName ? ` (Spine: ${archfileColorName})` : ""}`
-    : "Direct Unit / Box Placement (Not filed inside a separate Archfile binder)";
-
   const computedLocation = document.file_box?.cabinet?.name
     ? `${document.file_box.cabinet.name} - ${document.file_box.name}`
     : (document.file_box?.name || unifiedData.file_location || "Unassigned");
   const fileLocation = formatLocationWithColorName(unifiedData.file_location || computedLocation);
-
-  // Current logged in user
-  const currentUser = (() => {
-    try {
-      return JSON.parse(localStorage.getItem("user") || "{}");
-    } catch {
-      return {};
-    }
-  })();
-  const staffName = currentUser?.name || "SYSTEM ADMIN";
 
   // Auto-adjust Column Widths based on text lengths with generous uncramped bounds
   const subjectText = String(subject || "");
@@ -82,15 +59,10 @@ export async function exportSingleDocumentExcel(document, unifiedData = {}) {
   const accessText = String(accessCode || "");
   const statusText = String(statusOrActionValue || "");
 
-  // Column A: Date
   const colAWidth = Math.max(18, dateText.length + 4);
-  // Column B: Access Code
   const colBWidth = Math.max(22, accessText.length + 6);
-  // Column C: Subject (spacious, auto-adjusted to prevent cramped truncation)
   const colCWidth = Math.min(80, Math.max(50, Math.ceil(subjectText.length * 0.75)));
-  // Column D: Action Taken / Status
-  const colDWidth = Math.max(22, statusText.length + 6);
-  // Column E: File Location (spacious, auto-adjusted for long coordinates)
+  const colDWidth = Math.max(20, statusText.length + 6);
   const colEWidth = Math.min(75, Math.max(42, Math.ceil(locationText.length * 0.75)));
 
   sheet.columns = [
@@ -109,103 +81,128 @@ export async function exportSingleDocumentExcel(document, unifiedData = {}) {
     right: { style: "thin", color: { argb: "FF000000" } },
   };
 
-  const maroonFill = {
-    type: "pattern",
-    pattern: "solid",
-    fgColor: { argb: "FF6B1D2A" }, // ZPPSU Maroon
-  };
-
   const goldFill = {
     type: "pattern",
     pattern: "solid",
     fgColor: { argb: "FFF2DFB0" }, // ZPPSU Gold Tint
   };
 
-  const darkFill = {
-    type: "pattern",
-    pattern: "solid",
-    fgColor: { argb: "FF1D1A1B" }, // Charcoal
-  };
+  // --- 1. EMBED OFFICIAL ZPPSU SEAL (LEFT) ---
+  sheet.addRow([]); // Row 1: Top spacing
 
-  const grayFill = {
-    type: "pattern",
-    pattern: "solid",
-    fgColor: { argb: "FFF8F6F6" },
-  };
+  try {
+    const logoBuffer = await getInstitutionalLogoBuffer();
+    if (logoBuffer) {
+      const imageId = workbook.addImage({
+        buffer: logoBuffer,
+        extension: "jpeg",
+      });
+      sheet.addImage(imageId, {
+        tl: { col: 0.15, row: 1.15 },
+        ext: { width: 72, height: 72 },
+      });
+    }
+  } catch (imgErr) {
+    console.warn("Could not embed institutional logo into single document Excel:", imgErr);
+  }
 
-  // --- 1. STATE UNIVERSITY LETTERHEAD ---
-  sheet.addRow([]); // Row 1
-
+  // --- 2. CENTER UNIVERSITY HEADINGS (COLS B TO D) ---
   // Row 2: Republic of the Philippines
-  sheet.mergeCells("A2:E2");
-  const r2 = sheet.getCell("A2");
+  sheet.mergeCells("B2:D2");
+  const r2 = sheet.getCell("B2");
   r2.value = "REPUBLIC OF THE PHILIPPINES";
   r2.font = { bold: true, size: 10, color: { argb: "FF333333" } };
   r2.alignment = { horizontal: "center", vertical: "middle" };
   sheet.getRow(2).height = 18;
 
   // Row 3: University Name
-  sheet.mergeCells("A3:E3");
-  const r3 = sheet.getCell("A3");
+  sheet.mergeCells("B3:D3");
+  const r3 = sheet.getCell("B3");
   r3.value = "ZAMBOANGA PENINSULA POLYTECHNIC STATE UNIVERSITY";
   r3.font = { bold: true, size: 13, color: { argb: "FF1D1A1B" } };
   r3.alignment = { horizontal: "center", vertical: "middle" };
-  sheet.getRow(3).height = 24;
+  sheet.getRow(3).height = 22;
 
-  // Row 4: Region
-  sheet.mergeCells("A4:E4");
-  const r4 = sheet.getCell("A4");
+  // Row 4: Regional Address
+  sheet.mergeCells("B4:D4");
+  const r4 = sheet.getCell("B4");
   r4.value = "Region IX - Zamboanga Del Sur, Zamboanga City, Philippines";
   r4.font = { italic: true, size: 9.5, color: { argb: "FF555555" } };
   r4.alignment = { horizontal: "center", vertical: "middle" };
-  sheet.getRow(4).height = 18;
+  sheet.getRow(4).height = 17;
 
   // Row 5: Office Name
-  sheet.mergeCells("A5:E5");
-  const r5 = sheet.getCell("A5");
+  sheet.mergeCells("B5:D5");
+  const r5 = sheet.getCell("B5");
   r5.value = "OFFICE OF GUIDANCE AND COUNSELING SERVICES";
   r5.font = { bold: true, size: 10.5, color: { argb: "FF6B1D2A" } };
   r5.alignment = { horizontal: "center", vertical: "middle" };
   sheet.getRow(5).height = 18;
 
-  // Row 6: Unit Name
-  sheet.mergeCells("A6:E6");
-  const r6 = sheet.getCell("A6");
+  // Row 6: Archival Unit Name
+  sheet.mergeCells("B6:D6");
+  const r6 = sheet.getCell("B6");
   r6.value = "ARCHIVAL & RECORDS MANAGEMENT UNIT";
   r6.font = { bold: true, size: 9.5, color: { argb: "FF1D1A1B" } };
   r6.alignment = { horizontal: "center", vertical: "middle" };
-  sheet.getRow(6).height = 17;
+  sheet.getRow(6).height = 16;
 
-  // Row 7: Address
-  sheet.mergeCells("A7:E7");
-  const r7 = sheet.getCell("A7");
+  // Row 7: Physical Address
+  sheet.mergeCells("B7:D7");
+  const r7 = sheet.getCell("B7");
   r7.value = "R.T. Lim Boulevard, Baliwasan, Zamboanga City 7000 • records@zppsu.edu.ph";
   r7.font = { size: 8.5, color: { argb: "FF666666" } };
   r7.alignment = { horizontal: "center", vertical: "middle" };
   sheet.getRow(7).height = 16;
 
-  // Row 8: Standards & Reference Control
-  sheet.mergeCells("A8:C8");
-  const r8Left = sheet.getCell("A8");
-  r8Left.value = "CONTROL STANDARD: ISO 9001:2015 | NAP RA 9470 COMPLIANT";
-  r8Left.font = { bold: true, size: 8.5, color: { argb: "FF6B1D2A" } };
-  r8Left.alignment = { horizontal: "left", vertical: "middle" };
+  // --- 3. FRAMED CONTROL STANDARD STAMP (RIGHT: COLUMN E) ---
+  // E3: Top Stamp Header
+  const boxTop = sheet.getCell("E3");
+  boxTop.value = "CONTROL STANDARD";
+  boxTop.font = { bold: true, size: 7.5, color: { argb: "FF444444" } };
+  boxTop.alignment = { horizontal: "center", vertical: "middle" };
+  boxTop.border = {
+    top: { style: "thin", color: { argb: "FF000000" } },
+    left: { style: "thin", color: { argb: "FF000000" } },
+    right: { style: "thin", color: { argb: "FF000000" } },
+  };
 
-  sheet.mergeCells("D8:E8");
-  const r8Right = sheet.getCell("D8");
-  r8Right.value = `Ref Accession: ${documentIdentifier}`;
-  r8Right.font = { bold: true, size: 8.5, color: { argb: "FF1D1A1B" } };
-  r8Right.alignment = { horizontal: "right", vertical: "middle" };
-  sheet.getRow(8).height = 18;
+  // E4: ISO Standard Code
+  const boxMid = sheet.getCell("E4");
+  boxMid.value = "ISO 9001:2015";
+  boxMid.font = { bold: true, size: 10, color: { argb: "FF6B1D2A" } };
+  boxMid.alignment = { horizontal: "center", vertical: "middle" };
+  boxMid.border = {
+    left: { style: "thin", color: { argb: "FF000000" } },
+    right: { style: "thin", color: { argb: "FF000000" } },
+  };
 
-  // Border separating letterhead
+  // E5: NAP RA Compliance
+  const boxBot = sheet.getCell("E5");
+  boxBot.value = "NAP RA 9470 COMPLIANT";
+  boxBot.font = { size: 7.5, color: { argb: "FF666666" } };
+  boxBot.alignment = { horizontal: "center", vertical: "middle" };
+  boxBot.border = {
+    bottom: { style: "thin", color: { argb: "FF000000" } },
+    left: { style: "thin", color: { argb: "FF000000" } },
+    right: { style: "thin", color: { argb: "FF000000" } },
+  };
+
+  // E6: Accession Reference
+  const refCell = sheet.getCell("E6");
+  refCell.value = `Ref: ${documentIdentifier}`;
+  refCell.font = { bold: true, size: 8.5, color: { argb: "FF1D1A1B" } };
+  refCell.alignment = { horizontal: "center", vertical: "middle" };
+
+  // --- 4. LETTERHEAD DIVIDER LINE (ROW 8) ---
   ["A8", "B8", "C8", "D8", "E8"].forEach((ref) => {
     sheet.getCell(ref).border = { bottom: { style: "medium", color: { argb: "FF000000" } } };
   });
+  sheet.getRow(8).height = 8;
 
-  sheet.addRow([]); // Row 9: spacing
+  sheet.addRow([]); // Row 9: Spacing
 
-  // --- 2. MASTERLIST TABLE (EXACT MATCH TO 2ND IMAGE) ---
+  // --- 5. MASTERLIST TABLE ---
   // Row 10: Table Title
   sheet.mergeCells("A10:E10");
   const r10 = sheet.getCell("A10");
@@ -236,12 +233,12 @@ export async function exportSingleDocumentExcel(document, unifiedData = {}) {
     return "JANUARY";
   })();
 
-  // Row 12: Gold Month Banner (Spanning all columns with #F2DFB0 gold fill)
+  // Row 12: Gold Month Banner (Exactly 1 Month Banner for Single Document)
   sheet.mergeCells("A12:E12");
   const r12 = sheet.getCell("A12");
   r12.value = monthName;
   r12.font = { bold: true, size: 10.5, color: { argb: "FF1D1A1B" } };
-  r12.fill = goldFill; // #F2DFB0
+  r12.fill = goldFill;
   r12.alignment = { horizontal: "left", vertical: "middle", indent: 1 };
   sheet.getRow(12).height = 24;
   ["A12", "B12", "C12", "D12", "E12"].forEach((ref) => {
@@ -256,7 +253,7 @@ export async function exportSingleDocumentExcel(document, unifiedData = {}) {
   const maxLines = Math.max(linesSubject, linesLocation);
   const dynamicDataRowHeight = Math.max(38, maxLines * 20 + 16);
 
-  // Row 13: Data Record (Centered Horizontally & Vertically with generous spacing and text wrap)
+  // Row 13: Data Record (Centered Horizontally & Vertically)
   const r13 = sheet.addRow([recordDate, accessCode, subject, statusOrActionValue, fileLocation]);
   r13.height = dynamicDataRowHeight;
   r13.eachCell((cell) => {

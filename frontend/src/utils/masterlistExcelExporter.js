@@ -1,11 +1,16 @@
 import ExcelJS from "exceljs";
 import { formatLocationWithColorName } from "../components/inventory/storageTaxonomy";
+import { getInstitutionalLogoBuffer } from "./excelLogoLoader";
 
 /**
  * Institutional Masterlist Excel Exporter
- * Generates an official university records masterlist (.xlsx)
- * matching the exact institutional letterhead, ISO 9001:2015 / NAP RA 9470 compliance standards,
- * table formatting, and Gold Month Banners (#F2DFB0) from Document Center.
+ * Generates an official state university records masterlist (.xlsx)
+ * matching the exact institutional letterhead from Image 4:
+ * - Official Guidance & Counseling seal on the left
+ * - Center university headings
+ * - Boxed Control Standard stamp (ISO 9001:2015 / NAP RA 9470) on the right
+ * - Intelligent Month Banners: rendered when records span <= 2 months;
+ *   automatically omitted when spanning > 2 months to ensure clean, continuous flow.
  *
  * @param {Array} records - Filtered document records
  * @param {string} selectedDocType - Selected document classification / type
@@ -29,6 +34,7 @@ export async function exportMasterlistToInstitutionalExcel({
 
   const numCols = headers.length;
   const lastColLetter = String.fromCharCode(65 + numCols - 1);
+  const midColEndLetter = String.fromCharCode(65 + numCols - 2); // Column before the right-side stamp
 
   // Helper styles
   const thinBorder = {
@@ -49,7 +55,6 @@ export async function exportMasterlistToInstitutionalExcel({
     if (file?.dynamic_data?.month) {
       return String(file.dynamic_data.month).toUpperCase();
     }
-    // Check if Date is in rowData
     const dateIdx = headers.findIndex((h) => String(h).toUpperCase().includes("DATE"));
     const rawDate = dateIdx >= 0 ? rowData[dateIdx] : file?.memo_date || file?.created_at;
     if (rawDate) {
@@ -65,8 +70,8 @@ export async function exportMasterlistToInstitutionalExcel({
   sheet.columns = headers.map((header, idx) => {
     let width = 22;
     const hUpper = String(header).toUpperCase();
-    if (hUpper.includes("LOCATION")) width = 42;
-    else if (hUpper.includes("SUBJECT") || hUpper.includes("DESCRIPTION") || hUpper.includes("TITLE")) width = 60;
+    if (hUpper.includes("LOCATION")) width = 45;
+    else if (hUpper.includes("SUBJECT") || hUpper.includes("DESCRIPTION") || hUpper.includes("TITLE")) width = 65;
     else if (hUpper.includes("DATE")) width = 18;
     else if (hUpper.includes("ACCESS")) width = 24;
     else if (hUpper.includes("STATUS") || hUpper.includes("ACTION")) width = 20;
@@ -86,87 +91,128 @@ export async function exportMasterlistToInstitutionalExcel({
     return { width };
   });
 
-  // --- 1. STATE UNIVERSITY INSTITUTIONAL LETTERHEAD ---
+  // --- 1. EMBED OFFICIAL ZPPSU SEAL (LEFT: COLUMN A) ---
   sheet.addRow([]); // Row 1: Top spacing
 
+  try {
+    const logoBuffer = await getInstitutionalLogoBuffer();
+    if (logoBuffer) {
+      const imageId = workbook.addImage({
+        buffer: logoBuffer,
+        extension: "jpeg",
+      });
+      sheet.addImage(imageId, {
+        tl: { col: 0.15, row: 1.15 },
+        ext: { width: 72, height: 72 },
+      });
+    }
+  } catch (imgErr) {
+    console.warn("Could not embed institutional logo into masterlist Excel:", imgErr);
+  }
+
+  // --- 2. CENTER UNIVERSITY HEADINGS (COLS B TO LASTCOL - 1) ---
   // Row 2: Republic of the Philippines
-  sheet.mergeCells(`A2:${lastColLetter}2`);
-  const r2 = sheet.getCell("A2");
+  sheet.mergeCells(`B2:${midColEndLetter}2`);
+  const r2 = sheet.getCell("B2");
   r2.value = "REPUBLIC OF THE PHILIPPINES";
   r2.font = { bold: true, size: 10, color: { argb: "FF333333" } };
   r2.alignment = { horizontal: "center", vertical: "middle" };
   sheet.getRow(2).height = 18;
 
   // Row 3: University Name
-  sheet.mergeCells(`A3:${lastColLetter}3`);
-  const r3 = sheet.getCell("A3");
+  sheet.mergeCells(`B3:${midColEndLetter}3`);
+  const r3 = sheet.getCell("B3");
   r3.value = "ZAMBOANGA PENINSULA POLYTECHNIC STATE UNIVERSITY";
   r3.font = { bold: true, size: 13, color: { argb: "FF1D1A1B" } };
   r3.alignment = { horizontal: "center", vertical: "middle" };
-  sheet.getRow(3).height = 24;
+  sheet.getRow(3).height = 22;
 
   // Row 4: Regional Address
-  sheet.mergeCells(`A4:${lastColLetter}4`);
-  const r4 = sheet.getCell("A4");
+  sheet.mergeCells(`B4:${midColEndLetter}4`);
+  const r4 = sheet.getCell("B4");
   r4.value = "Region IX - Zamboanga Del Sur, Zamboanga City, Philippines";
   r4.font = { italic: true, size: 9.5, color: { argb: "FF555555" } };
   r4.alignment = { horizontal: "center", vertical: "middle" };
-  sheet.getRow(4).height = 18;
+  sheet.getRow(4).height = 17;
 
   // Row 5: Office Name
-  sheet.mergeCells(`A5:${lastColLetter}5`);
-  const r5 = sheet.getCell("A5");
+  sheet.mergeCells(`B5:${midColEndLetter}5`);
+  const r5 = sheet.getCell("B5");
   r5.value = "OFFICE OF GUIDANCE AND COUNSELING SERVICES";
   r5.font = { bold: true, size: 10.5, color: { argb: "FF6B1D2A" } };
   r5.alignment = { horizontal: "center", vertical: "middle" };
   sheet.getRow(5).height = 18;
 
-  // Row 6: Archival Unit
-  sheet.mergeCells(`A6:${lastColLetter}6`);
-  const r6 = sheet.getCell("A6");
+  // Row 6: Archival Unit Name
+  sheet.mergeCells(`B6:${midColEndLetter}6`);
+  const r6 = sheet.getCell("B6");
   r6.value = "ARCHIVAL & RECORDS MANAGEMENT UNIT";
   r6.font = { bold: true, size: 9.5, color: { argb: "FF1D1A1B" } };
   r6.alignment = { horizontal: "center", vertical: "middle" };
-  sheet.getRow(6).height = 17;
+  sheet.getRow(6).height = 16;
 
-  // Row 7: Contact Address
-  sheet.mergeCells(`A7:${lastColLetter}7`);
-  const r7 = sheet.getCell("A7");
+  // Row 7: Physical Address
+  sheet.mergeCells(`B7:${midColEndLetter}7`);
+  const r7 = sheet.getCell("B7");
   r7.value = "R.T. Lim Boulevard, Baliwasan, Zamboanga City 7000 • records@zppsu.edu.ph";
   r7.font = { size: 8.5, color: { argb: "FF666666" } };
   r7.alignment = { horizontal: "center", vertical: "middle" };
   sheet.getRow(7).height = 16;
 
-  // Row 8: Standards & Masterlist Reference Control
-  const splitColIdx = Math.max(1, Math.min(3, numCols - 2));
-  const splitColLetterLeft = String.fromCharCode(65 + splitColIdx - 1);
-  const splitColLetterRight = String.fromCharCode(65 + splitColIdx);
-
-  sheet.mergeCells(`A8:${splitColLetterLeft}8`);
-  const r8Left = sheet.getCell("A8");
-  r8Left.value = "CONTROL STANDARD: ISO 9001:2015 | NAP RA 9470 COMPLIANT";
-  r8Left.font = { bold: true, size: 8.5, color: { argb: "FF6B1D2A" } };
-  r8Left.alignment = { horizontal: "left", vertical: "middle" };
-
-  sheet.mergeCells(`${splitColLetterRight}8:${lastColLetter}8`);
-  const r8Right = sheet.getCell(`${splitColLetterRight}8`);
+  // --- 3. FRAMED CONTROL STANDARD STAMP (RIGHT: LAST COLUMN) ---
   const docTypePrefix = selectedDocType.replace(/[^A-Za-z0-9]/g, "").substring(0, 4).toUpperCase();
-  r8Right.value = `Ref Accession: ML-${new Date().getFullYear()}-${docTypePrefix}`;
-  r8Right.font = { bold: true, size: 8.5, color: { argb: "FF1D1A1B" } };
-  r8Right.alignment = { horizontal: "right", vertical: "middle" };
-  sheet.getRow(8).height = 18;
+  const accessionRef = `ML-${new Date().getFullYear()}-${docTypePrefix}`;
 
-  // Letterhead divider line
+  // Top Stamp Cell
+  const boxTop = sheet.getCell(`${lastColLetter}3`);
+  boxTop.value = "CONTROL STANDARD";
+  boxTop.font = { bold: true, size: 7.5, color: { argb: "FF444444" } };
+  boxTop.alignment = { horizontal: "center", vertical: "middle" };
+  boxTop.border = {
+    top: { style: "thin", color: { argb: "FF000000" } },
+    left: { style: "thin", color: { argb: "FF000000" } },
+    right: { style: "thin", color: { argb: "FF000000" } },
+  };
+
+  // Middle ISO Code Cell
+  const boxMid = sheet.getCell(`${lastColLetter}4`);
+  boxMid.value = "ISO 9001:2015";
+  boxMid.font = { bold: true, size: 10, color: { argb: "FF6B1D2A" } };
+  boxMid.alignment = { horizontal: "center", vertical: "middle" };
+  boxMid.border = {
+    left: { style: "thin", color: { argb: "FF000000" } },
+    right: { style: "thin", color: { argb: "FF000000" } },
+  };
+
+  // Bottom Compliance Cell
+  const boxBot = sheet.getCell(`${lastColLetter}5`);
+  boxBot.value = "NAP RA 9470 COMPLIANT";
+  boxBot.font = { size: 7.5, color: { argb: "FF666666" } };
+  boxBot.alignment = { horizontal: "center", vertical: "middle" };
+  boxBot.border = {
+    bottom: { style: "thin", color: { argb: "FF000000" } },
+    left: { style: "thin", color: { argb: "FF000000" } },
+    right: { style: "thin", color: { argb: "FF000000" } },
+  };
+
+  // Accession Ref under Stamp
+  const refCell = sheet.getCell(`${lastColLetter}6`);
+  refCell.value = `Ref: ${accessionRef}`;
+  refCell.font = { bold: true, size: 8.5, color: { argb: "FF1D1A1B" } };
+  refCell.alignment = { horizontal: "center", vertical: "middle" };
+
+  // --- 4. LETTERHEAD DIVIDER LINE (ROW 8) ---
   for (let c = 0; c < numCols; c++) {
     const colChar = String.fromCharCode(65 + c);
     sheet.getCell(`${colChar}8`).border = {
       bottom: { style: "medium", color: { argb: "FF000000" } },
     };
   }
+  sheet.getRow(8).height = 8;
 
-  sheet.addRow([]); // Row 9: spacing
+  sheet.addRow([]); // Row 9: Spacing
 
-  // --- 2. MASTERLIST TABLE HEADER ---
+  // --- 5. MASTERLIST TABLE HEADER ---
   // Row 10: Masterlist Title
   sheet.mergeCells(`A10:${lastColLetter}10`);
   const r10 = sheet.getCell("A10");
@@ -188,7 +234,18 @@ export async function exportMasterlistToInstitutionalExcel({
     cell.border = thinBorder;
   });
 
-  // --- 3. DATA ROWS WITH MONTH BANNERS ---
+  // --- 6. INTELLIGENT MONTH BANNER LOGIC ---
+  // Check how many unique months are present in this dataset
+  const uniqueMonths = new Set();
+  records.forEach((file) => {
+    const row = getRowData ? getRowData(file, headers) : [];
+    uniqueMonths.add(extractMonth(file, row));
+  });
+
+  // Only render month banners if there are <= 2 unique months (e.g. single month or narrow range).
+  // If > 2 unique months, remove repetitive banners so records flow continuously without clutter!
+  const shouldRenderMonthBanners = uniqueMonths.size <= 2;
+
   let currentMonthGroup = null;
 
   records.forEach((file) => {
@@ -200,8 +257,8 @@ export async function exportMasterlistToInstitutionalExcel({
 
     const fileMonth = extractMonth(file, cleanRowData);
 
-    // Insert Gold Month Banner when month changes
-    if (fileMonth !== currentMonthGroup) {
+    // Insert Gold Month Banner if <= 2 months and month changed
+    if (shouldRenderMonthBanners && fileMonth !== currentMonthGroup) {
       currentMonthGroup = fileMonth;
       const bannerRow = sheet.addRow([]);
       const bannerRowNum = bannerRow.number;

@@ -3,6 +3,7 @@ import { X, FileText, Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import DocumentTemplateRenderer from "../templates/DocumentTemplateRenderer";
 import OfficialDocumentPrintDossier from "../documents/OfficialDocumentPrintDossier";
+import { formatLocationWithColorName } from "../inventory/storageTaxonomy";
 
 /**
  * DocumentViewModal
@@ -109,7 +110,7 @@ export default function DocumentViewModal({
               </span>
               {file.file_box?.cabinet?.name && (
                 <span className="hidden sm:inline">
-                  Storage: <strong className="text-[#1D1A1B]">{file.file_box.cabinet.name} &rarr; {file.file_box.name}</strong>
+                  Storage: <strong className="text-[#1D1A1B]">{file.file_box.cabinet.name} &rarr; {formatLocationWithColorName(file.file_box.name)}</strong>
                 </span>
               )}
             </div>

@@ -2,6 +2,12 @@ import React from "react";
 import InstitutionalPrintHeader from "../common/InstitutionalPrintHeader";
 import InstitutionalSignatoryBlock from "../common/InstitutionalSignatoryBlock";
 import { API_BASE_URL } from "../../services/api";
+import { 
+  formatLocationWithColorName, 
+  getColorNameFromHex, 
+  stripColorTag, 
+  parseBoxHierarchy 
+} from "../inventory/storageTaxonomy";
 
 // Import all specific templates for clean print rendering
 import AccomplishmentReportTemplate from "../templates/AccomplishmentReportTemplate";
@@ -163,17 +169,20 @@ export default function OfficialDocumentPrintDossier({ file }) {
       });
 
   // Physical Location parsing
+  const boxParsed = file.file_box ? parseBoxHierarchy(file.file_box.name) : null;
   const cabinetName = file.file_box?.cabinet?.name || "Unassigned Storage Unit";
   const cabinetType = file.file_box?.cabinet?.type || "Unit";
-  const boxName = file.file_box?.name || "Unassigned Box Container";
-  const archfileName = file.archfile?.name || file.file_box?.archfile?.name || null;
+  const boxName = stripColorTag(boxParsed?.parentBoxName || (!boxParsed?.isArchfile ? file.file_box?.name : "Direct Placement") || "Unassigned Box Container");
+  const archfileName = stripColorTag(file.archfile?.name || file.file_box?.archfile?.name || boxParsed?.archfileName || null);
   const archfileCode = file.archfile?.code || file.file_box?.archfile?.code || null;
-  const archfileColor = file.archfile?.color_tag || file.file_box?.archfile?.color_tag || null;
+  const rawColor = file.archfile?.color_tag || file.file_box?.archfile?.color_tag || boxParsed?.color || null;
+  const archfileColorName = getColorNameFromHex(rawColor);
 
   const rawData = file.dynamic_data || {};
   const computedLocation = file.file_box?.cabinet?.name
     ? `${file.file_box.cabinet.name} - ${file.file_box.name}`
     : (file.file_box?.name || rawData.file_location || "Unassigned");
+  const fileLocation = formatLocationWithColorName(rawData.file_location || computedLocation);
 
   const unifiedData = {
     ...file,
@@ -181,7 +190,7 @@ export default function OfficialDocumentPrintDossier({ file }) {
     subject: rawData.subject || file.subject || file.title || "—",
     access_code: rawData.access_code || file.access_code || "N/A",
     date: rawData.date || formattedDate,
-    file_location: rawData.file_location || computedLocation,
+    file_location: fileLocation,
   };
 
   const fileUrl = file.file_path
@@ -280,7 +289,14 @@ export default function OfficialDocumentPrintDossier({ file }) {
                     <div className="flex items-center gap-2">
                       <span className="font-bold">{archfileName}</span>
                       {archfileCode && <span className="font-mono text-[10px] text-neutral-700">[{archfileCode}]</span>}
-                      {archfileColor && <span className="text-[9.5px] uppercase font-mono px-1 py-0.2 bg-neutral-100 border border-neutral-300">Spine: {archfileColor}</span>}
+                      {archfileColorName && (
+                        <span 
+                          className="text-[9.5px] uppercase font-bold px-1.5 py-0.5 rounded border border-black/20"
+                          style={{ backgroundColor: `${rawColor}15`, color: rawColor || "#6B1D2A" }}
+                        >
+                          Spine: {archfileColorName}
+                        </span>
+                      )}
                     </div>
                   ) : (
                     <span className="text-neutral-600 italic">Direct Unit / Box Placement (Not filed inside a separate Archfile binder)</span>
@@ -322,7 +338,7 @@ export default function OfficialDocumentPrintDossier({ file }) {
                   <td className="border border-black p-2 text-center font-medium">{file.subject || file.title || "—"}</td>
                   <td className="border border-black p-2 text-center">{file.status || "Active"}</td>
                   <td className="border border-black p-2 text-center">
-                    {file.file_box?.cabinet?.name ? `${file.file_box.cabinet.name} - ${file.file_box.name}` : "Unassigned"}
+                    {fileLocation}
                   </td>
                 </tr>
               </tbody>

@@ -77,6 +77,26 @@ function pad(num, size = 2) {
   return String(num).padStart(size, '0');
 }
 
+function formatLocationWithColorName(rawLocation = "") {
+  const COLOR_MAP = {
+    "#6b1d2a": "Maroon",
+    "#c99a2e": "Gold",
+    "#a87818": "Gold",
+    "#1e293b": "Navy",
+    "#2563eb": "Royal Blue",
+    "#b91c1c": "Crimson",
+    "#0f766e": "Teal",
+    "#7e22ce": "Purple",
+    "#475569": "Slate",
+    "#c2410c": "Orange"
+  };
+  return rawLocation.replace(/\[color:([^\]]+)\]/gi, (match, colorVal) => {
+    const clean = colorVal.trim().toLowerCase();
+    const name = COLOR_MAP[clean] || (clean.startsWith("#") ? "" : clean);
+    return name ? `(${name})` : "";
+  }).replace(/\s+/g, " ").trim();
+}
+
 function generateMockRecord(docType, category, index, storageLocation) {
   const dateObj = DATES_POOL[index % DATES_POOL.length];
   const dateStr = `${dateObj.year}-${pad(dateObj.month)}-${pad(dateObj.day)}`;
@@ -86,6 +106,7 @@ function generateMockRecord(docType, category, index, storageLocation) {
   const seq = pad(index + 1, 4);
   const accessCode = `ZPPSU-${prefix}-${dateObj.year}-${seq}`;
   const docId = `DOC-${dateObj.year}-${seq}`;
+  const cleanLocation = formatLocationWithColorName(storageLocation.displayText);
 
   const prog = PROGRAMS[index % PROGRAMS.length];
   const agency = AGENCIES[index % AGENCIES.length];
@@ -99,7 +120,7 @@ function generateMockRecord(docType, category, index, storageLocation) {
   const dynamicData = {
     date: dateStr,
     access_code: accessCode,
-    file_location: storageLocation.displayText,
+    file_location: cleanLocation,
     subject: `Official Filing of ${docType.trim()} - Ref: ${seq}`,
     action_taken: "Processed and officially filed in accordance with RA 9470 Archival Guidelines",
     tracking_details: `Forwarded to Records Unit • Approved by Department Head • Box ID: ${storageLocation.boxName}`,

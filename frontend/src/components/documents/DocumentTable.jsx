@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { formatLocationWithColorName } from "../inventory/storageTaxonomy";
 
 /**
  * DocumentTable
@@ -122,7 +123,7 @@ export default function DocumentTable({
                           <span className="truncate max-w-[150px]">
                             {file.file_box.cabinet.name}
                             <span className="text-[#5F5A5C] mx-1 font-normal">&rarr;</span>
-                            {file.file_box.name}
+                            {formatLocationWithColorName(file.file_box.name)}
                           </span>
                           <Edit className="w-3 h-3 text-[#6B1D2A] opacity-0 group-hover:opacity-100 transition-opacity ml-0.5 shrink-0" />
                         </button>

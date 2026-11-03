@@ -1,4 +1,10 @@
 import ExcelJS from "exceljs";
+import { 
+  formatLocationWithColorName, 
+  getColorNameFromHex, 
+  stripColorTag, 
+  parseBoxHierarchy 
+} from "../components/inventory/storageTaxonomy";
 
 /**
  * Institutional Single Document Excel Exporter
@@ -40,22 +46,24 @@ export async function exportSingleDocumentExcel(document, unifiedData = {}) {
   const statusOrActionValue = document.is_generated && unifiedData.action_taken ? unifiedData.action_taken : (document.status || "Active");
   
   // Storage Location
+  const boxParsed = document.file_box ? parseBoxHierarchy(document.file_box.name) : null;
   const cabinetName = document.file_box?.cabinet?.name 
     ? `${document.file_box.cabinet.name} (${document.file_box.cabinet.type || "Unit"})`
     : "Unassigned Storage Unit";
-  const boxName = document.file_box?.name || "Unassigned Box Container";
-  const archfileName = document.archfile?.name || document.file_box?.archfile?.name || null;
+  const boxName = stripColorTag(boxParsed?.parentBoxName || (!boxParsed?.isArchfile ? document.file_box?.name : "Direct Placement") || "Unassigned Box Container");
+  const archfileName = stripColorTag(document.archfile?.name || document.file_box?.archfile?.name || boxParsed?.archfileName || null);
   const archfileCode = document.archfile?.code || document.file_box?.archfile?.code || null;
-  const archfileColor = document.archfile?.color_tag || document.file_box?.archfile?.color_tag || null;
+  const rawColor = document.archfile?.color_tag || document.file_box?.archfile?.color_tag || boxParsed?.color || null;
+  const archfileColorName = getColorNameFromHex(rawColor);
 
   const archfileInfo = archfileName
-    ? `${archfileName}${archfileCode ? ` [${archfileCode}]` : ""}${archfileColor ? ` (Spine: ${archfileColor})` : ""}`
+    ? `${archfileName}${archfileCode ? ` [${archfileCode}]` : ""}${archfileColorName ? ` (Spine: ${archfileColorName})` : ""}`
     : "Direct Unit / Box Placement (Not filed inside a separate Archfile binder)";
 
   const computedLocation = document.file_box?.cabinet?.name
     ? `${document.file_box.cabinet.name} - ${document.file_box.name}`
     : (document.file_box?.name || unifiedData.file_location || "Unassigned");
-  const fileLocation = unifiedData.file_location || computedLocation;
+  const fileLocation = formatLocationWithColorName(unifiedData.file_location || computedLocation);
 
   // Current logged in user
   const currentUser = (() => {

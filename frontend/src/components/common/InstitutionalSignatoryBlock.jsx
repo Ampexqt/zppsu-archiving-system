@@ -34,7 +34,7 @@ export default function InstitutionalSignatoryBlock({
         {/* COLUMN 1: PREPARED & CATALOGED BY */}
         <div className="flex flex-col items-center">
           <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-800 mb-1">
-            Prepared & Cataloged by:
+            PREPARED &amp; CATALOGED BY:
           </p>
           {/* Dedicated physical pen signature signing clearance */}
           <div className="h-11 w-56 flex items-end justify-center" aria-label="Physical Signature Space" />
@@ -54,7 +54,7 @@ export default function InstitutionalSignatoryBlock({
         {/* COLUMN 2: CERTIFIED OFFICIAL RECORD (BLANK FOR PHYSICAL PEN SIGNATURE & SEAL) */}
         <div className="flex flex-col items-center">
           <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-800 mb-1">
-            Certified Official Record:
+            CERTIFIED OFFICIAL RECORD:
           </p>
           {/* Dedicated physical pen signature & rubber seal clearance */}
           <div className="h-11 w-56 flex items-end justify-center" aria-label="Director Physical Signature Space" />

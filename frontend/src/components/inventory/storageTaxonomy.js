@@ -169,6 +169,7 @@ export function parseBoxHierarchy(rawName = "") {
   const colorMatch = rawName.match(/\[color:([^\]]+)\]/i);
   const color = colorMatch ? colorMatch[1].trim() : "#6B1D2A";
   const cleanName = rawName.replace(/\[color:[^\]]+\]/i, "").trim();
+  const colorName = getColorNameFromHex(color);
 
   if (cleanName.includes(" / ")) {
     const parts = cleanName.split(" / ");
@@ -177,6 +178,7 @@ export function parseBoxHierarchy(rawName = "") {
       parentBoxName: parts[0].trim(),
       archfileName: parts.slice(1).join(" / ").trim(),
       color,
+      colorName,
     };
   }
 
@@ -187,6 +189,7 @@ export function parseBoxHierarchy(rawName = "") {
       parentBoxName: null,
       archfileName: cleanName,
       color,
+      colorName,
     };
   }
 
@@ -194,7 +197,48 @@ export function parseBoxHierarchy(rawName = "") {
     isArchfile: false,
     boxName: cleanName,
     color: null,
+    colorName: null,
   };
+}
+
+/**
+ * Resolves a hex code or color string to an official human-readable label
+ * e.g. "#0F766E" -> "Teal", "#6B1D2A" -> "Maroon"
+ */
+export function getColorNameFromHex(hexOrName = "") {
+  if (!hexOrName) return "";
+  const clean = hexOrName.trim().toLowerCase();
+  const found = ARCHFILE_COLOR_PRESETS.find(
+    (p) => p.hex.toLowerCase() === clean || p.label.toLowerCase() === clean
+  );
+  if (found) return found.label;
+  if (!clean.startsWith("#")) {
+    return clean.charAt(0).toUpperCase() + clean.slice(1);
+  }
+  return "";
+}
+
+/**
+ * Strips [color:...] or transforms [color:#HEX] into clean readable color name:
+ * e.g. "Cabinet 01 - Archfile [color:#0F766E]" -> "Cabinet 01 - Archfile (Teal)"
+ */
+export function formatLocationWithColorName(rawLocation = "") {
+  if (!rawLocation) return "";
+  return rawLocation
+    .replace(/\[color:([^\]]+)\]/gi, (match, colorVal) => {
+      const colorName = getColorNameFromHex(colorVal);
+      return colorName ? `(${colorName})` : "";
+    })
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/**
+ * Strips [color:...] completely from a name:
+ */
+export function stripColorTag(rawString = "") {
+  if (!rawString) return "";
+  return rawString.replace(/\[color:[^\]]+\]/gi, "").replace(/\s+/g, " ").trim();
 }
 
 export function formatArchfileName(parentBoxName, archfileName, color) {

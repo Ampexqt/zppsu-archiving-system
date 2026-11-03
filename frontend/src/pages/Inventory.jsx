@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import axios from "axios";
-import { Plus, Download } from "lucide-react";
+import { Plus, Download, Printer } from "lucide-react";
 import DashboardLayout from "../components/layout/DashboardLayout";
 import DocumentViewModal from "../components/modals/DocumentViewModal";
 import { Button } from "@/components/ui/button";
@@ -246,7 +246,7 @@ function Inventory() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6 font-sans">
+      <div className={`space-y-6 font-sans ${viewingFile ? "print:hidden" : ""}`}>
         {/* HEADER */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
@@ -263,7 +263,18 @@ function Inventory() {
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 no-print">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => window.print()}
+              className="bg-[#FFFCF7] text-[#1D1A1B] border-[#E8E3E1] hover:bg-[#F4E7EA] h-9 px-3.5 rounded-xl font-bold text-xs shadow-2xs flex items-center gap-1.5 cursor-pointer transition-colors"
+              title="Print official physical storage manifest"
+            >
+              <Printer className="w-3.5 h-3.5 text-[#6B1D2A]" />
+              <span>Print Manifest</span>
+            </Button>
+
             <Button
               variant="outline"
               onClick={handleExportManifest}

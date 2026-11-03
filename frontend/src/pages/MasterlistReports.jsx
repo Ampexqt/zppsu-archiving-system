@@ -1,13 +1,15 @@
 import { useEffect, useState, useMemo } from "react";
 import axios from "axios";
 import ExcelJS from "exceljs";
-import { Search, FileSpreadsheet, Calendar, RotateCcw, X, Loader2 } from "lucide-react";
+import { Search, FileSpreadsheet, Calendar, RotateCcw, X, Loader2, Printer } from "lucide-react";
 import DashboardLayout from "../components/layout/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import ShadcnSelect from "@/components/ui/ShadcnSelect";
 import MasterlistSummaryCards from "../components/reports/MasterlistSummaryCards";
+import InstitutionalPrintHeader from "../components/common/InstitutionalPrintHeader";
+import InstitutionalSignatoryBlock from "../components/common/InstitutionalSignatoryBlock";
 import { templateConfig } from "./templateConfig";
 
 function MasterlistReports() {
@@ -259,7 +261,7 @@ function MasterlistReports() {
     <DashboardLayout>
       <div className="space-y-6 font-sans">
         {/* HEADER */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 no-print">
           <div>
             <div className="flex items-center gap-2 mb-1">
               <span className="text-[10px] font-bold text-[#A87818] uppercase tracking-wider bg-[#F2DFB0]/50 px-2 py-0.5 rounded-md border border-[#C99A2E]/30">
@@ -275,6 +277,17 @@ function MasterlistReports() {
           </div>
           
           <div className="flex items-center gap-2.5">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => window.print()}
+              disabled={filteredReports.length === 0}
+              className="h-10 px-3.5 rounded-xl border border-[#E8E3E1] bg-[#FFFCF7] text-[#1D1A1B] hover:bg-[#F4E7EA] font-bold text-xs shadow-xs flex items-center gap-2 cursor-pointer disabled:opacity-50 transition-colors"
+              title="Print official academic masterlist"
+            >
+              <Printer className="w-4 h-4 text-[#6B1D2A]" />
+              <span>Print Masterlist</span>
+            </Button>
             <Button 
               onClick={handleExportExcel}
               disabled={filteredReports.length === 0 || isExporting}
@@ -296,16 +309,18 @@ function MasterlistReports() {
         </div>
 
         {/* SUMMARY CARDS */}
-        <MasterlistSummaryCards 
-          totalEntries={filteredReports.length}
-          assignedCount={assignedCount}
-          unassignedCount={unassignedCount}
-          selectedDocType={selectedDocType}
-          totalDocTypes={documentTypes.length}
-        />
+        <div className="no-print">
+          <MasterlistSummaryCards 
+            totalEntries={filteredReports.length}
+            assignedCount={assignedCount}
+            unassignedCount={unassignedCount}
+            selectedDocType={selectedDocType}
+            totalDocTypes={documentTypes.length}
+          />
+        </div>
 
         {/* FILTERS TOOLBAR */}
-        <Card className="border border-[#E8E3E1] shadow-xs bg-[#FFFCF7] rounded-xl">
+        <Card className="border border-[#E8E3E1] shadow-xs bg-[#FFFCF7] rounded-xl no-print">
           <CardContent className="p-4 space-y-4">
             <div className="flex flex-col md:flex-row gap-3">
               {/* Search Field */}
@@ -403,9 +418,23 @@ function MasterlistReports() {
         </Card>
 
         {/* MASTERLIST TABLE */}
-        <Card className="border border-[#E8E3E1] shadow-xs overflow-hidden bg-[#FFFCF7] rounded-xl">
+        <Card className="border border-[#E8E3E1] shadow-xs overflow-hidden bg-[#FFFCF7] rounded-xl printable-card">
           <CardContent className="p-0 overflow-x-auto">
-            <div className="p-8 min-w-[700px]">
+            <div className="p-8 min-w-[700px] printable-container">
+              {/* PRINT-ONLY INSTITUTIONAL LETTERHEAD */}
+              <div className="hidden print-only-block mb-4">
+                <InstitutionalPrintHeader
+                  title={`MASTERLIST OF RECORDS FOR ${selectedDocType}`}
+                  referenceCode={`ML-${new Date().getFullYear()}-${selectedDocType.substring(0, 4)}`}
+                  documentType={selectedDocType}
+                />
+                <div className="flex items-center justify-between text-xs mb-3 pb-2 border-b border-black font-sans">
+                  <span>Total Cataloged Records: <strong>{filteredReports.length}</strong></span>
+                  <span>Date Filter: <strong>{dateFilter === "all" ? "All Active Records" : dateFilter}</strong></span>
+                  <span>Classification: <strong>{selectedDocType}</strong></span>
+                </div>
+              </div>
+
               <div className="border border-[#1D1A1B] text-center font-extrabold text-base p-3 bg-[#F4E7EA] text-[#1D1A1B] uppercase tracking-wide">
                 MASTERLIST OF RECORDS FOR {selectedDocType}
               </div>
@@ -451,6 +480,13 @@ function MasterlistReports() {
                   )}
                 </tbody>
               </table>
+
+              {/* PRINT-ONLY SIGNATORIES BLOCK */}
+              <div className="hidden print-only-block mt-8">
+                <InstitutionalSignatoryBlock
+                  documentIdentifier={`MASTERLIST-${selectedDocType}`}
+                />
+              </div>
             </div>
           </CardContent>
         </Card>

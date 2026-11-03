@@ -136,3 +136,103 @@
     @apply font-sans;
   }
 }
+
+
+/* ==========================================================================
+   INSTITUTIONAL PRINT STYLESHEET (ZPPSU ARCHIVAL & RECORDS INTEGRITY)
+   Compliant with RA 9470 Archival Formatting and Official State University Records
+   ========================================================================== */
+
+@media print {
+  /* 1. Page Margin & Paper Setup */
+  @page {
+    size: portrait;
+    margin: 12mm 15mm 15mm 15mm;
+  }
+
+  /* 2. Global Resets: High-contrast black on white, remove all shadows & fixed heights */
+  html, body, #root {
+    background: #ffffff !important;
+    color: #000000 !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+    font-size: 10pt !important;
+    line-height: 1.4 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* 3. Hide all non-printable application chrome */
+  aside,
+  nav,
+  header,
+  footer,
+  button,
+  .no-print,
+  .print\:hidden,
+  [role="dialog"] > div > div > button,
+  .screen-only-modal,
+  input,
+  select,
+  textarea,
+  [data-radix-popper-content-wrapper],
+  [role="tooltip"] {
+    display: none !important;
+  }
+
+  /* 4. Display all print-only components */
+  .print-dossier-root,
+  .print-only-block {
+    display: block !important;
+    position: static !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    visibility: visible !important;
+  }
+
+  /* 5. Un-constrain layout containers */
+  main {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .printable-card,
+  .printable-container {
+    border: none !important;
+    box-shadow: none !important;
+    background: #ffffff !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* 6. Avoid breaking inside tables, rows, and signatory blocks */
+  tr, .print-avoid-break {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+  }
+
+  th, td {
+    border-color: #000000 !important;
+  }
+
+  /* Remove all rounded corners, shadows, and outlines in print */
+  * {
+    box-shadow: none !important;
+    text-shadow: none !important;
+    outline: none !important;
+  }
+}

@@ -1,64 +1,80 @@
 import { Link } from "react-scroll";
 import { useNavigate } from "react-router-dom";
 import logo from "../../assets/logo.jpg";
-import { Menu, X, Download, Smartphone, Laptop, Check, LogIn } from "lucide-react";
+import { Menu, X, Download, Smartphone, Laptop, Check, LogIn, ExternalLink } from "lucide-react";
 import { useState, useEffect } from "react";
 
 function Navbar() {
   const navigate = useNavigate();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
-  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [deferredPrompt, setDeferredPrompt] = useState(
+    typeof window !== "undefined" && window.deferredInstallPrompt ? window.deferredInstallPrompt : null
+  );
   const [showPwaModal, setShowPwaModal] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
-  const [downloadSuccess, setDownloadSuccess] = useState(false);
 
   useEffect(() => {
-    // Check if running in standalone mode
-    if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+    // Check if running in standalone mode (already installed & launched as PWA)
+    if (
+      window.matchMedia("(display-mode: standalone)").matches ||
+      window.navigator.standalone === true
+    ) {
       setIsInstalled(true);
     }
 
+    // Sync if global listener captured it early
+    if (window.deferredInstallPrompt) {
+      setDeferredPrompt(window.deferredInstallPrompt);
+    }
+
+    const handlePromptAvailable = () => {
+      if (window.deferredInstallPrompt) {
+        setDeferredPrompt(window.deferredInstallPrompt);
+      }
+    };
+
     const handleBeforeInstall = (e) => {
       e.preventDefault();
+      window.deferredInstallPrompt = e;
       setDeferredPrompt(e);
     };
 
-    window.addEventListener('beforeinstallprompt', handleBeforeInstall);
-    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
+    const handleAppInstalled = () => {
+      setIsInstalled(true);
+      setDeferredPrompt(null);
+      window.deferredInstallPrompt = null;
+      setShowPwaModal(false);
+    };
+
+    window.addEventListener("pwa-prompt-available", handlePromptAvailable);
+    window.addEventListener("beforeinstallprompt", handleBeforeInstall);
+    window.addEventListener("appinstalled", handleAppInstalled);
+
+    return () => {
+      window.removeEventListener("pwa-prompt-available", handlePromptAvailable);
+      window.removeEventListener("beforeinstallprompt", handleBeforeInstall);
+      window.removeEventListener("appinstalled", handleAppInstalled);
+    };
   }, []);
 
-  // Universal Desktop Shortcut Download (.url file that works in ANY browser: Brave, Firefox, Chrome, Edge, Safari)
-  const downloadDesktopShortcut = () => {
-    const currentOrigin = window.location.origin;
-    const shortcutContent = `[InternetShortcut]\r\nURL=${currentOrigin}/\r\nIconIndex=0\r\nIconFile=${currentOrigin}/logo.jpg\r\n`;
-    const blob = new Blob([shortcutContent], { type: 'application/internet-shortcut' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'ZPPSU_Guidance_Archive.url';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    setDownloadSuccess(true);
-    setTimeout(() => setDownloadSuccess(false), 4000);
-  };
-
   const handleInstallClick = async () => {
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
+    const promptToUse = deferredPrompt || window.deferredInstallPrompt;
+    if (promptToUse) {
       try {
-        const choice = await deferredPrompt.userChoice;
-        if (choice.outcome === 'accepted') {
+        promptToUse.prompt();
+        const choice = await promptToUse.userChoice;
+        if (choice.outcome === "accepted") {
           setIsInstalled(true);
           setDeferredPrompt(null);
+          window.deferredInstallPrompt = null;
+          setShowPwaModal(false);
           return;
         }
       } catch (err) {
-        console.warn('Install prompt error:', err);
+        console.warn("Native PWA prompt error:", err);
       }
     }
-    // If not Chrome with native prompt, open universal modal with instant download
+    // If native prompt is not directly available or dismissed, open clear PWA guide modal
     setShowPwaModal(true);
   };
 
@@ -102,7 +118,7 @@ function Navbar() {
           <button
             type="button"
             onClick={handleInstallClick}
-            title="Download or Install ZPPSU Archive PWA"
+            title="Install ZPPSU Archive as a Progressive Web App"
             className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono uppercase tracking-wider text-[#6B1B2E] border border-[#6B1B2E]/30 bg-[#F4E7EA]/40 hover:bg-[#6B1B2E] hover:text-[#FFFCF7] rounded-[4px] transition-colors cursor-pointer"
           >
             {isInstalled ? (
@@ -113,83 +129,94 @@ function Navbar() {
             ) : (
               <>
                 <Download className="w-3.5 h-3.5" />
-                <span>Download PWA</span>
+                <span>Install PWA</span>
               </>
             )}
           </button>
 
-          <button 
+          <button
             type="button"
             onClick={() => navigate("/login")}
-            className="text-xs uppercase tracking-wider font-medium text-[#1D1A1B] hover:text-[#6B1B2E] border border-[#E8E3E1] hover:border-[#6B1B2E] px-3.5 py-1.5 rounded-[4px] transition-colors cursor-pointer"
+            className="px-4 py-2 bg-[#6B1B2E] text-[#FFFCF7] hover:bg-[#521322] rounded-[4px] text-xs uppercase tracking-wider font-medium transition-colors cursor-pointer"
           >
             Staff Sign In
           </button>
         </div>
 
-        {/* MOBILE ONLY TOGGLE (Clean, single button on the right) */}
-        <div className="flex md:hidden items-center gap-2">
+        {/* MOBILE HAMBURGER BUTTON (Clean single icon) */}
+        <div className="md:hidden flex items-center">
           <button
             type="button"
             onClick={() => setMobileNavOpen(!mobileNavOpen)}
+            className="p-2 text-[#1D1A1B] hover:bg-[#F4E7EA]/50 rounded-[4px] transition-colors focus:outline-none"
             aria-label="Toggle navigation menu"
-            className="p-2 text-[#1D1A1B] hover:bg-[#F4E7EA] rounded-[4px] transition-colors"
           >
             {mobileNavOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
 
-        {/* MOBILE SLIDE-DOWN DRAWER (Houses all actions cleanly without horizontal squishing) */}
+        {/* MOBILE SLIDE-DOWN DRAWER */}
         {mobileNavOpen && (
-          <div className="md:hidden absolute top-full left-0 w-full bg-[#FFFCF7] border-b border-[#E8E3E1] p-5 shadow-lg flex flex-col gap-4 text-xs font-mono uppercase tracking-wider text-[#1D1A1B]">
-            <Link
-              to="home"
-              smooth={true}
-              duration={400}
-              onClick={() => setMobileNavOpen(false)}
-              className="py-1.5 hover:text-[#6B1B2E] transition-colors"
-            >
-              Overview
-            </Link>
-            <Link
-              to="features"
-              smooth={true}
-              duration={400}
-              onClick={() => setMobileNavOpen(false)}
-              className="py-1.5 hover:text-[#6B1B2E] transition-colors"
-            >
-              Capabilities
-            </Link>
-            <Link
-              to="about"
-              smooth={true}
-              duration={400}
-              onClick={() => setMobileNavOpen(false)}
-              className="py-1.5 hover:text-[#6B1B2E] transition-colors"
-            >
-              Mandate
-            </Link>
-            <Link
-              to="contact"
-              smooth={true}
-              duration={400}
-              onClick={() => setMobileNavOpen(false)}
-              className="py-1.5 hover:text-[#6B1B2E] transition-colors"
-            >
-              Contact
-            </Link>
+          <div className="absolute top-16 left-0 w-full bg-[#FFFCF7] border-b border-[#E8E3E1] shadow-xl md:hidden px-6 py-6 flex flex-col gap-4 animate-in fade-in slide-in-from-top-2 duration-200">
+            <div className="flex flex-col gap-3 text-xs uppercase tracking-wider font-mono text-[#5F5A5C]">
+              <Link
+                to="home"
+                smooth={true}
+                duration={400}
+                onClick={() => setMobileNavOpen(false)}
+                className="py-2 hover:text-[#1D1A1B] transition-colors"
+              >
+                Overview
+              </Link>
+              <Link
+                to="features"
+                smooth={true}
+                duration={400}
+                onClick={() => setMobileNavOpen(false)}
+                className="py-2 hover:text-[#1D1A1B] transition-colors"
+              >
+                Capabilities
+              </Link>
+              <Link
+                to="about"
+                smooth={true}
+                duration={400}
+                onClick={() => setMobileNavOpen(false)}
+                className="py-2 hover:text-[#1D1A1B] transition-colors"
+              >
+                Mandate
+              </Link>
+              <Link
+                to="contact"
+                smooth={true}
+                duration={400}
+                onClick={() => setMobileNavOpen(false)}
+                className="py-2 hover:text-[#1D1A1B] transition-colors"
+              >
+                Contact
+              </Link>
+            </div>
 
-            <div className="pt-3 border-t border-[#E8E3E1] flex flex-col gap-2.5">
+            <div className="pt-4 border-t border-[#E8E3E1] flex flex-col gap-3">
               <button
                 type="button"
                 onClick={() => {
                   setMobileNavOpen(false);
                   handleInstallClick();
                 }}
-                className="w-full py-2.5 px-3 border border-[#6B1B2E]/30 bg-[#F4E7EA]/40 text-[#6B1B2E] rounded-[4px] flex items-center justify-center gap-2 font-bold cursor-pointer"
+                className="w-full py-2.5 px-3 border border-[#6B1B2E]/30 bg-[#F4E7EA]/30 text-[#6B1B2E] rounded-[4px] flex items-center justify-center gap-2 text-xs font-mono uppercase tracking-wider font-semibold cursor-pointer"
               >
-                <Download className="w-4 h-4" />
-                <span>Download / Install PWA</span>
+                {isInstalled ? (
+                  <>
+                    <Check className="w-4 h-4" />
+                    <span>PWA Installed</span>
+                  </>
+                ) : (
+                  <>
+                    <Download className="w-4 h-4" />
+                    <span>Install PWA App</span>
+                  </>
+                )}
               </button>
 
               <button
@@ -208,21 +235,21 @@ function Navbar() {
         )}
       </nav>
 
-      {/* UNIVERSAL PWA DOWNLOAD & INSTALL MODAL */}
+      {/* PROGRESSIVE WEB APP (PWA) INSTALLATION MODAL */}
       {showPwaModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
-          <div className="relative w-full max-w-md bg-[#FFFCF7] border border-[#E8E3E1] rounded-[4px] p-5 sm:p-6 shadow-2xl space-y-4">
+          <div className="relative w-full max-w-lg bg-[#FFFCF7] border border-[#E8E3E1] rounded-[4px] p-5 sm:p-6 shadow-2xl space-y-4">
             
             {/* Header */}
             <div className="flex items-start justify-between border-b border-[#E8E3E1] pb-3">
               <div className="flex items-center gap-2.5">
-                <div className="w-7 h-7 rounded-full overflow-hidden border border-[#E8E3E1] shrink-0 bg-[#FFFCF7]">
+                <div className="w-8 h-8 rounded-full overflow-hidden border border-[#E8E3E1] shrink-0 bg-[#FFFCF7]">
                   <img src={logo} alt="ZPPSU Logo" className="w-full h-full object-cover" />
                 </div>
                 <div>
                   <h3 className="text-sm font-bold text-[#1D1A1B]">ZPPSU Archiving System</h3>
-                  <span className="text-[10px] font-mono text-[#5F5A5C] uppercase tracking-wider block">
-                    Direct PWA Download &amp; Installation
+                  <span className="text-[10px] font-mono text-[#6B1B2E] uppercase tracking-wider block font-semibold">
+                    Progressive Web Application (PWA)
                   </span>
                 </div>
               </div>
@@ -230,69 +257,90 @@ function Navbar() {
                 type="button"
                 onClick={() => setShowPwaModal(false)}
                 className="text-[#5F5A5C] hover:text-[#1D1A1B] p-1 cursor-pointer"
+                aria-label="Close modal"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            {/* Description */}
+            {/* Explanation */}
             <p className="text-xs text-[#5F5A5C] leading-relaxed">
-              Install the archiving system to your device for instant offline access, standalone desktop windowing, and 0ms latency.
+              This system is built as a Progressive Web App (PWA). It installs directly to your device desktop or home screen with standalone windowing, offline asset caching, and zero background installation files.
             </p>
 
-            {/* DIRECT 1-CLICK DOWNLOAD ACTION (Solves unsupported browser issue) */}
-            <div className="border border-[#E8E3E1] bg-[#FAF7F2] p-3.5 rounded-[4px] space-y-2.5">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Laptop className="w-4 h-4 text-[#6B1B2E]" />
-                  <span className="text-xs font-bold text-[#1D1A1B]">Desktop Launcher (.URL)</span>
+            {/* NATIVE PROMPT BUTTON (If browser event is active) */}
+            {(deferredPrompt || (typeof window !== "undefined" && window.deferredInstallPrompt)) ? (
+              <div className="p-4 border border-[#6B1B2E]/30 bg-[#F4E7EA]/40 rounded-[4px] space-y-2">
+                <div className="flex items-center gap-2 text-xs font-bold text-[#6B1B2E]">
+                  <Download className="w-4 h-4" />
+                  <span>Browser Installation Ready</span>
                 </div>
-                <span className="text-[10px] font-mono text-[#5F5A5C]">Any Browser</span>
-              </div>
-              <p className="text-[11px] text-[#5F5A5C]">
-                Works immediately on Brave, Firefox, Chrome, Edge, and Safari without requiring browser store prompts.
-              </p>
-              <button
-                type="button"
-                onClick={downloadDesktopShortcut}
-                className="w-full py-2 bg-[#6B1B2E] text-[#FFFCF7] hover:bg-[#521322] rounded-[4px] text-xs font-medium flex items-center justify-center gap-2 transition-colors cursor-pointer"
-              >
-                <Download className="w-3.5 h-3.5" />
-                <span>{downloadSuccess ? "Downloaded Successfully!" : "Download Desktop Shortcut"}</span>
-              </button>
-            </div>
-
-            {/* MOBILE INSTRUCTIONS */}
-            <div className="border border-[#E8E3E1] bg-[#FFFCF7] p-3 rounded-[4px] text-[11px] font-mono space-y-1.5 text-[#5F5A5C]">
-              <div className="flex items-center gap-2 text-[#1D1A1B] font-bold">
-                <Smartphone className="w-3.5 h-3.5 text-[#6B1B2E]" />
-                <span>Mobile (Android / iPhone):</span>
-              </div>
-              <p>On Chrome: Tap menu (⋮) → <strong className="text-[#1D1A1B]">&quot;Install App&quot;</strong></p>
-              <p>On Safari: Tap Share (⎋) → <strong className="text-[#1D1A1B]">&quot;Add to Home Screen&quot;</strong></p>
-            </div>
-
-            {/* Modal Actions */}
-            <div className="flex items-center justify-end gap-2.5 pt-2">
-              <button
-                type="button"
-                onClick={() => setShowPwaModal(false)}
-                className="px-4 py-2 border border-[#E8E3E1] text-[#1D1A1B] hover:bg-[#F4E7EA] rounded-[4px] text-xs font-medium transition-colors cursor-pointer"
-              >
-                Close
-              </button>
-              {deferredPrompt && (
+                <p className="text-xs text-[#1D1A1B]/80">
+                  Your browser is ready to install the ZPPSU Archiving System to your operating system now.
+                </p>
                 <button
                   type="button"
                   onClick={() => {
                     handleInstallClick();
-                    setShowPwaModal(false);
                   }}
-                  className="px-4 py-2 bg-[#1D1A1B] text-[#FFFCF7] hover:bg-[#333] rounded-[4px] text-xs font-medium transition-colors cursor-pointer"
+                  className="w-full py-2.5 bg-[#6B1B2E] text-[#FFFCF7] hover:bg-[#521322] rounded-[4px] text-xs font-semibold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors cursor-pointer"
                 >
-                  Native Browser Install
+                  <Download className="w-4 h-4" />
+                  <span>Install Application Now</span>
                 </button>
-              )}
+              </div>
+            ) : null}
+
+            {/* PLATFORM INSTRUCTIONS */}
+            <div className="space-y-2.5 text-xs">
+              {/* Desktop Instructions */}
+              <div className="border border-[#E8E3E1] bg-[#FAF7F2] p-3.5 rounded-[4px] space-y-1.5">
+                <div className="flex items-center gap-2 text-xs font-bold text-[#1D1A1B]">
+                  <Laptop className="w-4 h-4 text-[#6B1B2E]" />
+                  <span>Desktop (Chrome, Edge, Brave)</span>
+                </div>
+                <ul className="list-disc list-inside text-[11px] text-[#5F5A5C] space-y-1 font-mono">
+                  <li>
+                    Look at your browser&apos;s address bar (top-right, near the bookmark star).
+                  </li>
+                  <li>
+                    Click the <strong className="text-[#1D1A1B]">Install App</strong> icon (or menu <span className="text-[#1D1A1B]">⋮</span> &rarr; <span className="text-[#1D1A1B]">&quot;Install ZPPSU Archive...&quot;</span>).
+                  </li>
+                  <li>
+                    Confirm to add the standalone app to your Desktop and Start Menu.
+                  </li>
+                </ul>
+              </div>
+
+              {/* Mobile Instructions */}
+              <div className="border border-[#E8E3E1] bg-[#FAF7F2] p-3.5 rounded-[4px] space-y-1.5">
+                <div className="flex items-center gap-2 text-xs font-bold text-[#1D1A1B]">
+                  <Smartphone className="w-4 h-4 text-[#6B1B2E]" />
+                  <span>Mobile Devices (Android &amp; iOS)</span>
+                </div>
+                <ul className="list-disc list-inside text-[11px] text-[#5F5A5C] space-y-1 font-mono">
+                  <li>
+                    <strong className="text-[#1D1A1B]">Android (Chrome):</strong> Tap menu (⋮) &rarr; tap <strong className="text-[#1D1A1B]">&quot;Install App&quot;</strong> or &quot;Add to Home screen&quot;.
+                  </li>
+                  <li>
+                    <strong className="text-[#1D1A1B]">iPhone / iPad (Safari):</strong> Tap Share (⎋) &rarr; scroll down and tap <strong className="text-[#1D1A1B]">&quot;Add to Home Screen&quot;</strong>.
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="flex items-center justify-between pt-2 border-t border-[#E8E3E1]">
+              <span className="text-[11px] font-mono text-[#5F5A5C]">
+                {isInstalled ? "Status: App Installed" : "Standard PWA Spec"}
+              </span>
+              <button
+                type="button"
+                onClick={() => setShowPwaModal(false)}
+                className="px-4 py-1.5 border border-[#E8E3E1] text-[#1D1A1B] hover:bg-[#F4E7EA] rounded-[4px] text-xs font-medium transition-colors cursor-pointer"
+              >
+                Close
+              </button>
             </div>
 
           </div>

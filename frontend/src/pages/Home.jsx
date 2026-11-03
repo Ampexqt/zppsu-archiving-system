@@ -12,34 +12,34 @@ function Home() {
     <div className="min-h-screen bg-[#FFFCF7] text-[#1D1A1B] font-sans selection:bg-[#6B1B2E] selection:text-[#FFFCF7] scroll-smooth overflow-x-hidden flex flex-col">
       <Navbar />
 
-      {/* HERO SECTION: Swiss / Institutional Minimalist Editorial */}
+      {/* HERO SECTION: Balanced Swiss / Institutional Minimalist Editorial */}
       <section
         id="home"
         className="relative pt-28 pb-16 lg:pt-36 lg:pb-24 px-6 lg:px-12 max-w-7xl mx-auto w-full flex-1 flex flex-col justify-center border-b border-[#E8E3E1]"
       >
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-14 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
           
-          {/* LEFT COLUMN: Headline & Document-Accurate System Narrative (~7 Columns) */}
-          <div className="lg:col-span-7 flex flex-col items-start text-left">
+          {/* LEFT COLUMN: 6 Columns - Balanced Typography & Direct Action */}
+          <div className="lg:col-span-6 flex flex-col items-start text-left">
             
-            {/* Small uppercase mono label (No pill badge) */}
-            <p className="font-mono text-xs uppercase tracking-widest text-[#5F5A5C] mb-6">
+            {/* Small uppercase mono label */}
+            <p className="font-mono text-xs uppercase tracking-widest text-[#5F5A5C] mb-5">
               ZPPSU Guidance &amp; Counseling Office · Archival Repository
             </p>
 
-            {/* Editorial Headline: Based on the system, single color, no gradient, no highlighted accent words */}
-            <h1 className="font-['Newsreader',Georgia,serif] text-4xl sm:text-5xl lg:text-[68px] xl:text-[74px] font-normal tracking-tight text-[#1D1A1B] leading-[1.08] mb-7">
+            {/* Editorial Headline: 2-line harmonious break, single near-black color */}
+            <h1 className="font-['Newsreader',Georgia,serif] text-3xl sm:text-4xl lg:text-[46px] xl:text-[52px] font-normal tracking-tight text-[#1D1A1B] leading-[1.12] mb-5">
               Institutional records and <br />
               physical archives, unified.
             </h1>
 
-            {/* System-accurate, non-misleading subtext directly derived from /docs */}
-            <p className="text-base sm:text-lg text-[#5F5A5C] max-w-xl mb-9 leading-relaxed font-normal">
+            {/* System-accurate narrative directly derived from /docs */}
+            <p className="text-base sm:text-lg text-[#5F5A5C] max-w-lg mb-8 leading-relaxed font-normal">
               A central repository linking physical storage cabinets and file boxes to digital documents. Search, manage, and preserve academic records, accomplishment reports, and guidance files with complete audit accountability.
             </p>
 
-            {/* Action Components: One solid maroon button (4px corners, no arrow icon) + one plain text link */}
-            <div className="flex flex-wrap items-center gap-6 mb-11">
+            {/* Action Components: One solid maroon button (4px corners, no arrow) + one plain text link */}
+            <div className="flex flex-wrap items-center gap-5 mb-8">
               <button
                 type="button"
                 onClick={() => navigate("/login")}
@@ -60,21 +60,25 @@ function Home() {
               </button>
             </div>
 
-            {/* Concrete Facts Line (No 3-stat footer, single understated line) */}
-            <div className="pt-8 border-t border-[#E8E3E1] w-full text-xs font-mono text-[#5F5A5C] tracking-wide">
+            {/* Concrete Facts Line */}
+            <div className="pt-6 border-t border-[#E8E3E1] w-full text-xs font-mono text-[#5F5A5C] tracking-wide">
               Role-based access · Cabinet-to-file indexing · Audit log tracking · Document center
             </div>
 
           </div>
 
-          {/* RIGHT COLUMN: Full, Uncut, Unexaggerated Image (~5 Columns) */}
-          <div className="lg:col-span-5 w-full flex flex-col items-center">
-            <div className="w-full border border-[#E8E3E1] p-1.5 sm:p-2 bg-[#FFFCF7] rounded-[4px]">
+          {/* RIGHT COLUMN: 6 Columns - Optically Balanced Full Photographic Anchor */}
+          <div className="lg:col-span-6 w-full flex flex-col items-center">
+            <div className="w-full border border-[#E8E3E1] p-2 bg-[#FFFCF7] rounded-[4px]">
               <img
                 src={heroImage}
                 alt="ZPPSU Guidance & Counseling Office Building and Records Archive"
                 className="w-full h-auto block rounded-[2px]"
               />
+              <div className="pt-2.5 px-1 flex items-center justify-between text-[11px] font-mono text-[#5F5A5C] border-t border-[#E8E3E1] mt-2">
+                <span>ZPPSU Guidance Office · Main Campus</span>
+                <span>Physical &amp; Digital Vault</span>
+              </div>
             </div>
           </div>
 

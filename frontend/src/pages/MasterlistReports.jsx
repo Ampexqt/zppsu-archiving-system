@@ -392,21 +392,8 @@ function MasterlistReports() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredReports.length > 0 ? (() => {
-                    const uniqueMonths = new Set(
-                      filteredReports.map(file => {
-                        if (file.dynamic_data?.month) return String(file.dynamic_data.month).toUpperCase();
-                        const dateIdx = headers.findIndex(h => String(h).toUpperCase().includes("DATE"));
-                        const rawDate = dateIdx >= 0 ? getRowData(file, headers)[dateIdx] : file.created_at;
-                        if (rawDate && !isNaN(new Date(rawDate).getTime())) {
-                          return new Date(rawDate).toLocaleDateString("en-US", { month: "long" }).toUpperCase();
-                        }
-                        return "ACTIVE RECORDS";
-                      })
-                    );
-                    const shouldRenderMonthBanners = uniqueMonths.size <= 2;
-
-                    return filteredReports.map((file, fileIdx) => {
+                  {filteredReports.length > 0 ? (
+                    filteredReports.map((file, fileIdx) => {
                       const rowData = getRowData(file, headers);
                       
                       // Extract month name
@@ -431,7 +418,7 @@ function MasterlistReports() {
                         return "ACTIVE RECORDS";
                       })() : null;
 
-                      const isNewMonth = shouldRenderMonthBanners && (fileIdx === 0 || currentMonth !== prevMonth);
+                      const isNewMonth = fileIdx === 0 || currentMonth !== prevMonth;
 
                       return (
                         <React.Fragment key={file.id}>
@@ -464,8 +451,8 @@ function MasterlistReports() {
                           </tr>
                         </React.Fragment>
                       );
-                    });
-                  })() : (
+                    })
+                  ) : (
                     <tr>
                       <td colSpan={headers.length} className="border border-[#1D1A1B] p-8 text-center text-[#5F5A5C] italic">
                         {isLoading ? "Loading masterlist records..." : "No records found matching your filters."}

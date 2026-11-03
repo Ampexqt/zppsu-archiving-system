@@ -234,18 +234,7 @@ export async function exportMasterlistToInstitutionalExcel({
     cell.border = thinBorder;
   });
 
-  // --- 6. INTELLIGENT MONTH BANNER LOGIC ---
-  // Check how many unique months are present in this dataset
-  const uniqueMonths = new Set();
-  records.forEach((file) => {
-    const row = getRowData ? getRowData(file, headers) : [];
-    uniqueMonths.add(extractMonth(file, row));
-  });
-
-  // Only render month banners if there are <= 2 unique months (e.g. single month or narrow range).
-  // If > 2 unique months, remove repetitive banners so records flow continuously without clutter!
-  const shouldRenderMonthBanners = uniqueMonths.size <= 2;
-
+  // --- 6. DATA ROWS WITH GOLD MONTH BANNERS ---
   let currentMonthGroup = null;
 
   records.forEach((file) => {
@@ -257,8 +246,8 @@ export async function exportMasterlistToInstitutionalExcel({
 
     const fileMonth = extractMonth(file, cleanRowData);
 
-    // Insert Gold Month Banner if <= 2 months and month changed
-    if (shouldRenderMonthBanners && fileMonth !== currentMonthGroup) {
+    // Insert Gold Month Banner whenever the month changes (#F2DFB0)
+    if (fileMonth !== currentMonthGroup) {
       currentMonthGroup = fileMonth;
       const bannerRow = sheet.addRow([]);
       const bannerRowNum = bannerRow.number;

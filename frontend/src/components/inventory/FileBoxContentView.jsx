@@ -54,7 +54,7 @@ export default function FileBoxContentView({
             className="h-9 px-4 rounded-xl bg-[#6B1D2A] text-[#FFFCF7] hover:bg-[#8B3545] text-xs font-bold shadow-xs flex items-center gap-1.5 cursor-pointer self-start sm:self-auto"
           >
             <Plus className="w-3.5 h-3.5" />
-            <span>+ New Archfile</span>
+            <span>New Archfile</span>
           </Button>
         )}
       </div>

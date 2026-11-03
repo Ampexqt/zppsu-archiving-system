@@ -418,21 +418,25 @@ function DocumentTemplateRenderer({ document: doc }) {
             )}
           </div>
 
-          {/* Electronic Master Repository Filing Card */}
-          <div className="border border-black p-3 bg-neutral-50 text-left space-y-1">
-            <div className="flex items-center gap-1.5 text-[#6B1D2A] font-bold text-xs uppercase tracking-wider">
-              <ShieldCheck className="w-4 h-4" />
-              <span>Certified Electronic Master Record (Central Server)</span>
+          {/* Uploaded Physical Document Attachment (Only rendered when a file was uploaded via Upload Document workflow) */}
+          {!doc.is_generated && doc.file_path && (
+            <div className="border border-black p-3 bg-neutral-50 text-left flex items-center justify-between">
+              <div>
+                <p className="text-xs font-bold text-black uppercase">Original Uploaded File</p>
+                <p className="text-[11px] text-neutral-700 font-mono">{doc.file_name || "Attachment"}</p>
+              </div>
+              <a
+                href={`${API_BASE_URL}/${doc.file_path}`}
+                target="_blank"
+                rel="noreferrer"
+                download
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#6B1D2A] text-white text-xs font-bold rounded hover:bg-[#8B3545]"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Download Attachment</span>
+              </a>
             </div>
-            <p className="text-[11px] text-neutral-700 leading-relaxed">
-              Source Document: <strong className="font-mono text-black">{doc.file_name || `${documentIdentifier}.pdf`}</strong> &bull;
-              Format: <strong className="text-black">{doc.file_type || "OFFICIAL PDF RECORD"}</strong> &bull;
-              Archival Repository Status: <strong className="text-[#6B1D2A]">Verified Electronic Master</strong>.
-            </p>
-            <p className="text-[10px] text-neutral-600 italic">
-              Digital record cataloged in accordance with Republic Act 9470 (National Archives of the Philippines Act). Full text and physical custody metadata are indexed for institutional verification.
-            </p>
-          </div>
+          )}
 
           {/* OCR Extracted Text Transcript if present */}
           {doc.ocr_text && (

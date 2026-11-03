@@ -187,6 +187,8 @@ function generateMockRecord(docType, category, index, storageLocation) {
     category: category,
     document_type: docType,
     access_code: accessCode,
+    file_type: "OFFICIAL_RECORD",
+    is_generated: true,
     document_id: docId,
     subject: dynamicData.subject,
     memo_date: jsDate,
@@ -194,8 +196,8 @@ function generateMockRecord(docType, category, index, storageLocation) {
     created_at: jsDate,
     status: isArchived ? "Archived" : "Active",
     is_deleted: false,
-    file_name: `${docId}_${docType.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`,
-    file_path: `/uploads/${dateObj.year}/${docId}.pdf`,
+    file_name: null,
+    file_path: null,
     dynamic_data: dynamicData,
     file_box_id: storageLocation.fileBoxId
   };

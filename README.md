@@ -12,6 +12,7 @@ This guide is written in **plain, simple language** so that anyone—including n
 | :--- | :--- |
 | **I want to use or download the app on my laptop, tablet, or phone** | 👉 [**Option 1: Download & Install the App (Zero Technical Knowledge Required)**](#-option-1-how-to-download--install-the-app-on-any-device) |
 | **I am setting up the Main Host Laptop or Office Server** | 👉 [**Option 2: Host PC Setup Guide (Step-by-Step Installation)**](#-option-2-host-pc-setup-guide-for-the-main-laptop-or-server) |
+| **I want to inspect the system technologies & architecture** | 👉 [**Technology Stack Used**](#-technology-stack-used) |
 
 ---
 
@@ -222,6 +223,58 @@ Once logged in as Admin, you can easily register accounts for other staff member
 - 📊 **Cabinet Capacity Management:** Live storage gauges show how full each box is (with automatic warnings when boxes approach capacity).
 - 📜 **Audit Trail & Activity Logs:** Automatically tracks and records who logged in, logged out, uploaded, viewed, downloaded, edited, or deleted files with timestamps and IP addresses for full legal accountability.
 - 📑 **Export Masterlist:** Download the complete archive catalog to CSV / Excel spreadsheet anytime.
+
+---
+
+## 🛠️ Technology Stack Used
+
+The **ZPPSU Archiving System** is built on a decoupled, enterprise-grade **Three-Tier Architecture** (Presentation Tier • Application Tier • Data Persistence Tier) designed for high performance, document throughput, data integrity, and local network accessibility.
+
+### 🖥️ 1. Frontend & Client (Presentation Tier)
+- **Framework & Core:** [React 19](https://react.dev/) (`v19.2`) — Modern declarative UI library with React Server Component support and concurrent rendering.
+- **Build Tool & Bundler:** [Vite 8](https://vite.dev/) (`v8.0`) — Ultra-fast frontend development server and production bundler.
+- **Progressive Web App (PWA):** [`vite-plugin-pwa`](https://vite-pwa-org.netlify.app/) (`v1.3`) — Service worker caching and offline-capable PWA manifest, allowing zero-install client usage as a standalone app across Windows, macOS, Android, and iOS.
+- **Styling & Design System:** [Tailwind CSS v4](https://tailwindcss.com/) (`v4.3`) & [`@tailwindcss/vite`](https://tailwindcss.com/) — Next-generation engine with custom CSS design tokens and high-performance utility compilation.
+- **UI Components:** [shadcn/ui](https://ui.shadcn.com/) (`v4.13`) built with [@base-ui/react](https://base-ui.com/) and [cmdk](https://cmdk.paco.me/) for accessible, unstyled component primitives.
+- **Typography & Styling Helpers:** Geist Variable Font (`@fontsource-variable/geist`), `tailwind-merge`, and `class-variance-authority` (CVA).
+- **Icons:** [Lucide React](https://lucide.dev/) (`v1.25`) & [React Icons](https://react-icons.github.io/react-icons/) (`v5.6`).
+- **Routing:** [React Router v7](https://reactrouter.com/) (`v7.15`) — Declarative client-side routing and protected route guards.
+- **HTTP Client:** [Axios](https://axios-http.com/) (`v1.16`) — Promise-based HTTP client for REST API communication.
+- **Date Utilities:** `date-fns` (`v4.4`), `react-day-picker`, and `react-calendar` for administrative date picking and period filtering.
+
+### ⚙️ 2. Backend & Application Logic (Application Tier)
+- **Runtime Environment:** [Node.js](https://nodejs.org/) (v18+ LTS recommended).
+- **Server Framework:** [Express.js 5](https://expressjs.com/) (`v5.2`) — Lightweight, high-throughput REST API routing engine.
+- **Authentication & Security:**
+  - **JWT (JSON Web Tokens):** `jsonwebtoken` (`v9.0`) for stateless token-based authorization and session management.
+  - **Password Hashing:** `bcrypt` (`v6.0`) & `bcryptjs` (`v3.0`) for secure, salted password hashing.
+  - **Network Guards:** `cors` (`v2.8`) middleware for Cross-Origin Resource Sharing control and Role-Based Access Control (RBAC).
+  - **Environment Configuration:** `dotenv` (`v17.4`) for secure credential isolation.
+- **File Upload & Ingestion:** [Multer](https://github.com/expressjs/multer) (`v2.1`) — Multipart form-data parser with automatic disk storage routing into organized upload directories.
+
+### 🗄️ 3. Database & Persistence (Data Tier)
+- **Database Engine:** [PostgreSQL](https://www.postgresql.org/) (v14+) — Industrial-grade relational database for relational schemas, ACID compliance, and relational integrity.
+- **Database Driver:** `pg` (`v8.20`) — Native PostgreSQL client for Node.js.
+- **ORM & Schema Migrations:** [Prisma ORM 6](https://www.prisma.io/) (`v6.6`) — Type-safe database client, declarative schema modeling, and automated database migrations.
+- **File System Storage:** Local disk-based persistent document storage (`uploads/` directory) ensuring institutional records remain safely on-premises.
+
+### 📄 4. Document Ingestion, Text Extraction & OCR Pipeline
+- **Native PDF Parsing:** [`pdf-parse`](https://www.npmjs.com/package/pdf-parse) (`v2.4`) — Fast machine text extraction from digital PDF documents without running heavy OCR unnecessarily.
+- **Office Document Parsing:** [`officeparser`](https://www.npmjs.com/package/officeparser) (`v7.2`) — Automated text extraction for Word documents (`.docx`), PowerPoint decks (`.pptx`), and Excel spreadsheets (`.xlsx`).
+- **OCR Fallback Engine:** [Tesseract.js](https://tesseract.projectnaptha.com/) (`v7.0`) — Pure JavaScript Optical Character Recognition (OCR) fallback that automatically extracts searchable text from scanned physical documents and image-based records.
+
+### 🧠 5. AI & Semantic Search
+- **Local Neural Embeddings:** [@xenova/transformers](https://huggingface.co/docs/transformers.js) (`v2.17`) — Local Hugging Face Transformers running directly in Node.js for semantic vector search and intelligent text indexing without requiring external API keys.
+
+### 📊 6. Analytics, Reporting & Export
+- **Data Visualization:** [Recharts](https://recharts.org/) (`v3.8`) — Declarative charting library for storage capacity gauges, upload trends, category distributions, and accomplishment charts.
+- **Client & Server PDF Generation:** [jsPDF](https://github.com/parallax/jsPDF) (`v4.2`) with `jspdf-autotable` (`v5.0`) on frontend, and [PDFKit](https://pdfkit.org/) (`v0.19`) on backend for formal report generation.
+- **Spreadsheet Compilation:** [ExcelJS](https://github.com/exceljs/exceljs) (`v4.4`) & [XLSX](https://sheetjs.com/) (`v0.18`) for exporting document catalogs and audit masterlists to CSV and Excel `.xlsx` formats.
+
+### 🛠️ 7. Development & Tooling
+- **Process Orchestration:** `concurrently` (`v8.2`) to run both backend and frontend development environments simultaneously.
+- **Hot Reloading:** `nodemon` (`v3.1`) for automatic backend server restarts on file modifications.
+- **Testing & Quality:** [Playwright](https://playwright.dev/) (`v1.64`) for end-to-end workflow verification, and ESLint (`v10.2`) for code quality.
 
 ---
 

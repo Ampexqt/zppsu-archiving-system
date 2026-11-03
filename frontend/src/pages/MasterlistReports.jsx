@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from "react";
 import axios from "axios";
-import { Search, FileSpreadsheet, Calendar, RotateCcw, X, Loader2 } from "lucide-react";
+import { Search, FileSpreadsheet, Calendar, RotateCcw, X, Loader2, Printer } from "lucide-react";
 import DashboardLayout from "../components/layout/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -230,7 +230,16 @@ function MasterlistReports() {
           </div>
           
           <div className="flex items-center gap-2.5">
-            
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => window.print()}
+              className="h-10 px-4 rounded-xl border border-[#E8E3E1] text-[#1D1A1B] hover:bg-[#F4E7EA] font-semibold text-xs shadow-xs flex items-center gap-2 cursor-pointer transition-colors"
+            >
+              <Printer className="w-4 h-4 text-[#6B1D2A]" />
+              <span>Print Masterlist</span>
+            </Button>
+
             <Button 
               onClick={handleExportExcel}
               disabled={filteredReports.length === 0 || isExporting}

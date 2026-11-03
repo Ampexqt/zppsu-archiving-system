@@ -35,8 +35,8 @@ export default function CreateArchfileModal({
     e.preventDefault();
     if (!archfileName.trim() || !docCapacity || !cabinet) return;
 
-    // Encodes color metadata: e.g. "Box 01 / Archfile HR [color:#7E22CE]"
-    const fullName = formatArchfileName(parentBoxName, archfileName.trim(), selectedColor);
+    // Encodes color metadata: e.g. "Box 01 / Archfile HR [color:#7E22CE]" or "Archfile HR [color:#7E22CE]"
+    const fullName = formatArchfileName(parentBoxName || null, archfileName.trim(), selectedColor);
 
     onSubmit({
       name: fullName,
@@ -86,9 +86,17 @@ export default function CreateArchfileModal({
               Placement Target:
             </span>
             <div className="flex items-center gap-1.5 text-xs font-bold text-[#1D1A1B]">
-              <span>{cabinet?.name || "Cabinet"}</span>
-              <span className="text-[#5F5A5C]">&rarr;</span>
-              <span className="text-[#6B1D2A]">{parentBoxName || "File Box"}</span>
+              <span>{cabinet?.name || "Storage Unit"}</span>
+              {parentBoxName ? (
+                <>
+                  <span className="text-[#5F5A5C]">&rarr;</span>
+                  <span className="text-[#6B1D2A]">{parentBoxName}</span>
+                </>
+              ) : (
+                <span className="text-[10px] text-[#A87818] font-bold bg-[#F2DFB0]/60 px-2 py-0.5 rounded border border-[#C99A2E]/30">
+                  Direct in Unit (No Box)
+                </span>
+              )}
             </div>
           </div>
 

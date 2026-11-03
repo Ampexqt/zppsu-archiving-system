@@ -1,14 +1,14 @@
 import React, { useState } from "react";
-import { X, FileBox, FolderArchive, Layers, ArrowRight, Check, Box } from "lucide-react";
+import { X, FileBox, FolderArchive, Layers, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { STORAGE_UNIT_TYPES } from "./storageTaxonomy";
+import { MAIN_STORAGE_CATEGORIES, STORAGE_UNIT_TYPES } from "./storageTaxonomy";
 
 /**
  * CreateCabinetModal
- * Guided creation modal with Stepper / Equipment selection
- * (Cabinet, Steel Cabinet, Shelves).
- * Dynamic box counter: Container capacity is not applicable during creation.
+ * Guided creation modal with Main Category selection:
+ * 1. Cabinet (Main category): Steel Cabinet, Standard Cabinet
+ * 2. Shelves (Separate main category): Open Shelving Rack
  */
 export default function CreateCabinetModal({
   isOpen,
@@ -17,7 +17,7 @@ export default function CreateCabinetModal({
 }) {
   const [selectedType, setSelectedType] = useState("steel_cabinet");
   const [unitName, setUnitName] = useState("");
-  const [step, setStep] = useState(1); // 1 = Select Type, 2 = Configure Unit
+  const [step, setStep] = useState(1);
 
   if (!isOpen) return null;
 
@@ -33,12 +33,10 @@ export default function CreateCabinetModal({
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!unitName.trim()) return;
-    // Capacity is not applicable for physical cabinets; default to 100 for backend compatibility
     onSubmit({
       name: unitName.trim(),
       capacity: 100,
     });
-    // Reset
     setUnitName("");
     setStep(1);
   };
@@ -61,7 +59,7 @@ export default function CreateCabinetModal({
                 Step {step} of 2
               </span>
               <span className="text-xs text-[#5F5A5C]">
-                {step === 1 ? "Select Storage Equipment" : "Configure Unit Details"}
+                {step === 1 ? "Select Category & Equipment" : "Configure Unit Details"}
               </span>
             </div>
             <h2 className="text-base font-bold text-[#1D1A1B] mt-1">
@@ -87,50 +85,101 @@ export default function CreateCabinetModal({
         {/* MODAL BODY */}
         <div className="p-6">
           {step === 1 ? (
-            <div className="space-y-3">
+            <div className="space-y-4">
               <p className="text-xs text-[#5F5A5C]">
-                Choose the physical equipment type to establish in the institutional inventory:
+                Select the physical storage category and equipment type to register:
               </p>
-              <div className="grid grid-cols-1 gap-2.5">
-                {STORAGE_UNIT_TYPES.map((type) => {
-                  const isSelected = selectedType === type.id;
-                  const IconComponent =
-                    type.id === "steel_cabinet"
-                      ? FolderArchive
-                      : type.id === "shelves"
-                      ? Layers
-                      : FileBox;
 
-                  return (
-                    <button
-                      key={type.id}
-                      type="button"
-                      onClick={() => handleTypeSelect(type.id)}
-                      className={`w-full text-left p-3.5 rounded-xl border transition-all flex items-start gap-3.5 cursor-pointer ${
-                        isSelected
-                          ? "border-[#6B1D2A] bg-[#F4E7EA]/40 ring-1 ring-[#6B1D2A]"
-                          : "border-[#E8E3E1] bg-[#FFFCF7] hover:border-[#6B1D2A]/50 hover:bg-[#FCFAF8]"
-                      }`}
-                    >
-                      <div className={`p-2.5 rounded-xl shrink-0 ${type.badgeBg} ${type.badgeText} border border-[#E8E3E1]`}>
-                        <IconComponent className="w-5 h-5 stroke-[2]" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-bold text-[#1D1A1B]">
-                            {type.fullTitle}
-                          </span>
-                          {isSelected && (
-                            <Check className="w-4 h-4 text-[#6B1D2A] shrink-0" />
-                          )}
+              {/* CATEGORY 1: CABINET (MAIN CATEGORY) */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold text-[#6B1D2A] uppercase tracking-wider">
+                    1. Cabinet — Main Category
+                  </span>
+                  <span className="text-[10px] text-[#5F5A5C]">Holds File Boxes & Archfiles</span>
+                </div>
+                <div className="grid grid-cols-1 gap-2">
+                  {STORAGE_UNIT_TYPES.filter((t) => t.categoryId === "cabinet").map((type) => {
+                    const isSelected = selectedType === type.id;
+                    const IconComponent = type.id === "steel_cabinet" ? FolderArchive : FileBox;
+
+                    return (
+                      <button
+                        key={type.id}
+                        type="button"
+                        onClick={() => handleTypeSelect(type.id)}
+                        className={`w-full text-left p-3 rounded-xl border transition-all flex items-start gap-3 cursor-pointer ${
+                          isSelected
+                            ? "border-[#6B1D2A] bg-[#F4E7EA]/40 ring-1 ring-[#6B1D2A]"
+                            : "border-[#E8E3E1] bg-[#FFFCF7] hover:border-[#6B1D2A]/50 hover:bg-[#FCFAF8]"
+                        }`}
+                      >
+                        <div className={`p-2 rounded-xl shrink-0 ${type.badgeBg} ${type.badgeText} border border-[#E8E3E1]`}>
+                          <IconComponent className="w-4 h-4 stroke-[2]" />
                         </div>
-                        <p className="text-[11px] text-[#5F5A5C] mt-0.5 line-clamp-2">
-                          {type.description}
-                        </p>
-                      </div>
-                    </button>
-                  );
-                })}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-bold text-[#1D1A1B]">
+                              {type.fullTitle}
+                            </span>
+                            {isSelected && (
+                              <Check className="w-4 h-4 text-[#6B1D2A] shrink-0" />
+                            )}
+                          </div>
+                          <p className="text-[11px] text-[#5F5A5C] mt-0.5">
+                            {type.description}
+                          </p>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* CATEGORY 2: SHELVES (SEPARATE MAIN CATEGORY) */}
+              <div className="space-y-2 pt-2 border-t border-[#E8E3E1]">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold text-[#5F5A5C] uppercase tracking-wider">
+                    2. Shelves — Separate Main Category
+                  </span>
+                  <span className="text-[10px] text-[#5F5A5C]">Holds File Boxes & Archfiles</span>
+                </div>
+                <div className="grid grid-cols-1 gap-2">
+                  {STORAGE_UNIT_TYPES.filter((t) => t.categoryId === "shelves").map((type) => {
+                    const isSelected = selectedType === type.id;
+                    const IconComponent = Layers;
+
+                    return (
+                      <button
+                        key={type.id}
+                        type="button"
+                        onClick={() => handleTypeSelect(type.id)}
+                        className={`w-full text-left p-3 rounded-xl border transition-all flex items-start gap-3 cursor-pointer ${
+                          isSelected
+                            ? "border-[#6B1D2A] bg-[#F4E7EA]/40 ring-1 ring-[#6B1D2A]"
+                            : "border-[#E8E3E1] bg-[#FFFCF7] hover:border-[#6B1D2A]/50 hover:bg-[#FCFAF8]"
+                        }`}
+                      >
+                        <div className={`p-2 rounded-xl shrink-0 ${type.badgeBg} ${type.badgeText} border border-[#E8E3E1]`}>
+                          <IconComponent className="w-4 h-4 stroke-[2]" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-bold text-[#1D1A1B]">
+                              {type.fullTitle}
+                            </span>
+                            {isSelected && (
+                              <Check className="w-4 h-4 text-[#6B1D2A] shrink-0" />
+                            )}
+                          </div>
+                          <p className="text-[11px] text-[#5F5A5C] mt-0.5">
+                            {type.description}
+                          </p>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
 
               {/* FOOTER ACTIONS FOR STEP 1 */}
@@ -147,19 +196,21 @@ export default function CreateCabinetModal({
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="p-3 rounded-xl border border-[#E8E3E1] bg-[#FCFAF8] flex items-center justify-between">
+              <div className="p-3.5 rounded-xl border border-[#E8E3E1] bg-[#FCFAF8] flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-md ${activeTypeObj.badgeBg} ${activeTypeObj.badgeText}`}>
                     {activeTypeObj.label}
                   </span>
-                  <span className="text-xs text-[#5F5A5C]">Selected Type</span>
+                  <span className="text-xs text-[#5F5A5C]">
+                    {activeTypeObj.categoryId === "shelves" ? "Category: Shelves" : "Category: Cabinet"}
+                  </span>
                 </div>
                 <button
                   type="button"
                   onClick={() => setStep(1)}
                   className="text-xs font-bold text-[#6B1D2A] hover:underline cursor-pointer"
                 >
-                  Change Type
+                  Change Category
                 </button>
               </div>
 
@@ -171,10 +222,10 @@ export default function CreateCabinetModal({
                   type="text"
                   placeholder={
                     selectedType === "steel_cabinet"
-                      ? "e.g. Steel Cabinet 01 (Records Wing)"
+                      ? "e.g. Steel Cabinet 01 or SC-A"
                       : selectedType === "shelves"
-                      ? "e.g. Open Shelves Rack A"
-                      : "e.g. Filing Cabinet Alpha"
+                      ? "e.g. Shelves Bay 01 or Rack 1"
+                      : "e.g. Cabinet 01 or Filing Cabinet A"
                   }
                   value={unitName}
                   onChange={(e) => setUnitName(e.target.value)}
@@ -182,28 +233,8 @@ export default function CreateCabinetModal({
                   autoFocus
                 />
                 <span className="text-[10px] text-[#5F5A5C]">
-                  Official name labeled physically on the equipment.
+                  Official physical label marked on this storage unit in the archive room.
                 </span>
-              </div>
-
-              {/* DYNAMIC CONTAINER COUNTER INFO CARD (CAPACITY NOT APPLICABLE) */}
-              <div className="p-3.5 rounded-xl border border-[#E8E3E1] bg-[#FCFAF8] flex items-start gap-3">
-                <div className="w-8 h-8 rounded-lg bg-[#F4E7EA] text-[#6B1D2A] flex items-center justify-center shrink-0 mt-0.5">
-                  <Box className="w-4 h-4" />
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-[#1D1A1B]">
-                      Container Capacity: Not Applicable
-                    </span>
-                    <span className="text-[10px] font-bold text-[#6B1D2A] bg-[#F4E7EA] px-2 py-0.5 rounded border border-[#E8E3E1]">
-                      Dynamic Counter
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-[#5F5A5C] mt-0.5 leading-relaxed">
-                    Storage units dynamically count and track whichever file boxes and archfiles are housed inside.
-                  </p>
-                </div>
               </div>
 
               {/* FOOTER ACTIONS */}
@@ -212,16 +243,16 @@ export default function CreateCabinetModal({
                   type="button"
                   variant="outline"
                   onClick={() => setStep(1)}
-                  className="h-10 px-4 rounded-xl text-xs font-semibold bg-[#FFFCF7] border-[#E8E3E1] text-[#1D1A1B] hover:bg-[#F4E7EA] cursor-pointer"
+                  className="h-9 px-4 rounded-xl text-xs font-semibold bg-[#FFFCF7] border-[#E8E3E1] text-[#1D1A1B] hover:bg-[#F4E7EA] cursor-pointer"
                 >
                   Back
                 </Button>
                 <Button
                   type="submit"
                   disabled={!unitName.trim()}
-                  className="h-10 px-5 rounded-xl text-xs font-bold bg-[#6B1D2A] text-[#FFFCF7] hover:bg-[#8B3545] cursor-pointer shadow-xs disabled:opacity-50"
+                  className="h-9 px-5 rounded-xl text-xs font-bold bg-[#6B1D2A] text-[#FFFCF7] hover:bg-[#8B3545] cursor-pointer shadow-xs disabled:opacity-50"
                 >
-                  Confirm Unit Creation
+                  Confirm Unit Registration
                 </Button>
               </div>
             </form>

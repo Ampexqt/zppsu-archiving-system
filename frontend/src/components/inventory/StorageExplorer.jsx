@@ -18,6 +18,7 @@ import FileBoxContentView from "./FileBoxContentView";
 import ArchfileRecordsView from "./ArchfileRecordsView";
 import {
   detectUnitType,
+  detectMainCategory,
   parseBoxHierarchy,
   STORAGE_UNIT_TYPES,
 } from "./storageTaxonomy";
@@ -60,28 +61,38 @@ export default function StorageExplorer({
     return fileBoxes.filter((b) => String(b.cabinet_id) === String(currentCabinet.id));
   }, [currentCabinet, fileBoxes]);
 
-  // Distinct Root File Boxes in current cabinet
-  const cabinetBoxes = useMemo(() => {
+  // Distinct Root File Boxes and Direct Archfiles in current cabinet/shelves
+  const cabinetStructure = useMemo(() => {
     const boxMap = new Map();
+    const directArchfiles = [];
 
     cabinetContainers.forEach((container) => {
       const parsed = parseBoxHierarchy(container.name);
       if (parsed.isArchfile) {
-        const parentName = parsed.parentBoxName || "General Box";
-        if (!boxMap.has(parentName)) {
-          boxMap.set(parentName, {
-            id: `virtual-${parentName}`,
-            name: parentName,
-            capacity: 100,
-            archfiles: [],
-            directFiles: [],
+        if (!parsed.parentBoxName) {
+          // Direct Archfile in this cabinet or on shelves!
+          directArchfiles.push({
+            ...container,
+            displayName: parsed.archfileName,
+            color: parsed.color,
+          });
+        } else {
+          const parentName = parsed.parentBoxName;
+          if (!boxMap.has(parentName)) {
+            boxMap.set(parentName, {
+              id: `virtual-${parentName}`,
+              name: parentName,
+              capacity: 100,
+              archfiles: [],
+              directFiles: [],
+            });
+          }
+          boxMap.get(parentName).archfiles.push({
+            ...container,
+            displayName: parsed.archfileName,
+            color: parsed.color,
           });
         }
-        boxMap.get(parentName).archfiles.push({
-          ...container,
-          displayName: parsed.archfileName,
-          color: parsed.color,
-        });
       } else {
         const boxName = parsed.boxName;
         if (!boxMap.has(boxName)) {
@@ -102,14 +113,17 @@ export default function StorageExplorer({
       }
     });
 
-    return Array.from(boxMap.values());
+    return {
+      boxes: Array.from(boxMap.values()),
+      directArchfiles,
+    };
   }, [cabinetContainers]);
 
   // Active Box
   const currentBox = useMemo(() => {
     if (!selectedBoxName) return null;
-    return cabinetBoxes.find((b) => b.name === selectedBoxName) || null;
-  }, [cabinetBoxes, selectedBoxName]);
+    return cabinetStructure.boxes.find((b) => b.name === selectedBoxName) || null;
+  }, [cabinetStructure, selectedBoxName]);
 
   // Breadcrumb navigation helpers
   const handleNavRoot = () => {
@@ -243,14 +257,17 @@ export default function StorageExplorer({
           onViewFile={onViewFile}
         />
       ) : selectedCabinetId ? (
-        /* LEVEL 1: INSIDE A CABINET (FILE BOXES) */
+        /* LEVEL 1: INSIDE A CABINET / SHELVES UNIT */
         <CabinetBoxesView
           cabinet={currentCabinet}
-          boxes={cabinetBoxes}
+          boxes={cabinetStructure.boxes}
+          directArchfiles={cabinetStructure.directArchfiles}
           isAdmin={isAdmin}
           onBack={handleNavRoot}
           onOpenCreateBox={onOpenCreateBox}
+          onOpenCreateArchfile={onOpenCreateArchfile}
           onSelectBox={(boxName) => setSelectedBoxName(boxName)}
+          onSelectArchfile={(arch) => setSelectedArchfile(arch)}
           onEditContainer={onEditContainer}
           onDeleteContainer={onDeleteContainer}
         />
@@ -271,34 +288,38 @@ export default function StorageExplorer({
 
             <div className="flex items-center gap-1.5 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
               <span className="text-[11px] font-bold text-[#5F5A5C] uppercase tracking-wider mr-1">
-                Equipment:
+                Category:
               </span>
               <button
                 onClick={() => setUnitTypeFilter("all")}
-                className={`px-2.5 py-1 text-xs font-semibold rounded-lg transition-colors cursor-pointer ${
+                className={`px-3 py-1 text-xs font-semibold rounded-lg transition-colors cursor-pointer ${
                   unitTypeFilter === "all"
-                    ? "bg-[#6B1D2A] text-[#FFFCF7]"
+                    ? "bg-[#6B1D2A] text-[#FFFCF7] shadow-xs"
                     : "text-[#5F5A5C] hover:bg-[#F4E7EA]"
                 }`}
               >
-                All ({cabinets.length})
+                All Units ({cabinets.length})
               </button>
-              {STORAGE_UNIT_TYPES.map((t) => {
-                const count = cabinets.filter((c) => detectUnitType(c.name).id === t.id).length;
-                return (
-                  <button
-                    key={t.id}
-                    onClick={() => setUnitTypeFilter(t.id)}
-                    className={`px-2.5 py-1 text-xs font-semibold rounded-lg transition-colors cursor-pointer ${
-                      unitTypeFilter === t.id
-                        ? "bg-[#6B1D2A] text-[#FFFCF7]"
-                        : "text-[#5F5A5C] hover:bg-[#F4E7EA]"
-                    }`}
-                  >
-                    {t.label} ({count})
-                  </button>
-                );
-              })}
+              <button
+                onClick={() => setUnitTypeFilter("cabinet")}
+                className={`px-3 py-1 text-xs font-semibold rounded-lg transition-colors cursor-pointer ${
+                  unitTypeFilter === "cabinet"
+                    ? "bg-[#6B1D2A] text-[#FFFCF7] shadow-xs"
+                    : "text-[#5F5A5C] hover:bg-[#F4E7EA]"
+                }`}
+              >
+                1. Cabinets ({cabinets.filter((c) => detectMainCategory(c.name) === "cabinet").length})
+              </button>
+              <button
+                onClick={() => setUnitTypeFilter("shelves")}
+                className={`px-3 py-1 text-xs font-semibold rounded-lg transition-colors cursor-pointer ${
+                  unitTypeFilter === "shelves"
+                    ? "bg-[#6B1D2A] text-[#FFFCF7] shadow-xs"
+                    : "text-[#5F5A5C] hover:bg-[#F4E7EA]"
+                }`}
+              >
+                2. Shelves ({cabinets.filter((c) => detectMainCategory(c.name) === "shelves").length})
+              </button>
             </div>
           </div>
 
@@ -306,7 +327,8 @@ export default function StorageExplorer({
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {cabinets
               .filter((cab) => {
-                if (unitTypeFilter !== "all" && detectUnitType(cab.name).id !== unitTypeFilter) return false;
+                if (unitTypeFilter === "cabinet" && detectMainCategory(cab.name) !== "cabinet") return false;
+                if (unitTypeFilter === "shelves" && detectMainCategory(cab.name) !== "shelves") return false;
                 if (searchQuery.trim() && !cab.name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
                 return true;
               })

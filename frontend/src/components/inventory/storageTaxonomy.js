@@ -1,21 +1,65 @@
 /**
  * storageTaxonomy.js
  * Physical storage classifications for ZPPSU Archiving System.
- * Supports Cabinet, Steel Cabinet, Shelves, File Box, and Customizable Archfiles.
+ * Main Categories:
+ * 1. Cabinet (Main category): Steel Cabinet, File Box, Archfile
+ * 2. Shelves (Separate main category): File Box, Archfile
  */
 
-export const STORAGE_UNIT_TYPES = [
+export const MAIN_STORAGE_CATEGORIES = [
   {
     id: "cabinet",
     label: "Cabinet",
-    fullTitle: "Filing Cabinet",
-    description: "Standard office filing cabinet for categorized records",
+    fullTitle: "Cabinet (Main Category)",
+    description: "Enclosed filing units and heavy-duty steel archive cabinets",
     badgeBg: "bg-[#F4E7EA]",
     badgeText: "text-[#6B1D2A]",
-    iconName: "FileBox",
+    subTypes: [
+      {
+        id: "steel_cabinet",
+        label: "Steel Cabinet",
+        fullTitle: "Steel Archive Cabinet",
+        description: "Heavy-duty fireproof institutional steel storage cabinet",
+        badgeBg: "bg-[#F2DFB0]",
+        badgeText: "text-[#A87818]",
+        iconName: "FolderArchive",
+      },
+      {
+        id: "cabinet",
+        label: "Standard Cabinet",
+        fullTitle: "Standard Filing Cabinet",
+        description: "Standard office drawer filing cabinet for categorized records",
+        badgeBg: "bg-[#F4E7EA]",
+        badgeText: "text-[#6B1D2A]",
+        iconName: "FileBox",
+      },
+    ],
   },
   {
+    id: "shelves",
+    label: "Shelves",
+    fullTitle: "Shelves (Separate Main Category)",
+    description: "Open storage shelving racks and archive bay partitions",
+    badgeBg: "bg-[#FFFCF7]",
+    badgeText: "text-[#5F5A5C]",
+    subTypes: [
+      {
+        id: "shelves",
+        label: "Shelves",
+        fullTitle: "Open Shelving Rack / Bay",
+        description: "Open archive tiers holding file boxes and direct archfile binders",
+        badgeBg: "bg-[#FFFCF7]",
+        badgeText: "text-[#5F5A5C]",
+        iconName: "Layers",
+      },
+    ],
+  },
+];
+
+export const STORAGE_UNIT_TYPES = [
+  {
     id: "steel_cabinet",
+    categoryId: "cabinet",
     label: "Steel Cabinet",
     fullTitle: "Steel Archive Cabinet",
     description: "Heavy-duty fireproof institutional steel storage cabinet",
@@ -24,7 +68,18 @@ export const STORAGE_UNIT_TYPES = [
     iconName: "FolderArchive",
   },
   {
+    id: "cabinet",
+    categoryId: "cabinet",
+    label: "Standard Cabinet",
+    fullTitle: "Standard Filing Cabinet",
+    description: "Standard office filing cabinet for categorized records",
+    badgeBg: "bg-[#F4E7EA]",
+    badgeText: "text-[#6B1D2A]",
+    iconName: "FileBox",
+  },
+  {
     id: "shelves",
+    categoryId: "shelves",
     label: "Shelves",
     fullTitle: "Open Shelving Rack",
     description: "Open storage shelves and archive rack partitions",
@@ -68,15 +123,23 @@ export const ARCHFILE_COLOR_PRESETS = [
   { label: "Orange", hex: "#C2410C" },
 ];
 
+export function detectMainCategory(name = "") {
+  const lower = (name || "").toLowerCase();
+  if (lower.includes("shelve") || lower.includes("shelf") || lower.includes("rack")) {
+    return "shelves";
+  }
+  return "cabinet";
+}
+
 export function detectUnitType(name = "") {
   const lower = (name || "").toLowerCase();
   if (lower.includes("steel cabinet") || lower.includes("steel") || lower.includes("[steel]")) {
-    return STORAGE_UNIT_TYPES[1]; // steel_cabinet
+    return STORAGE_UNIT_TYPES[0]; // steel_cabinet
   }
   if (lower.includes("shelve") || lower.includes("shelf") || lower.includes("rack")) {
     return STORAGE_UNIT_TYPES[2]; // shelves
   }
-  return STORAGE_UNIT_TYPES[0]; // cabinet
+  return STORAGE_UNIT_TYPES[1]; // cabinet
 }
 
 export function detectContainerType(name = "") {
@@ -96,6 +159,7 @@ export function detectContainerType(name = "") {
 /**
  * Parses a container name into hierarchical levels and extracts color metadata:
  * e.g. "Box 01 / HR Records [color:#7E22CE]" -> { isArchfile: true, parentBoxName: "Box 01", archfileName: "HR Records", color: "#7E22CE" }
+ * e.g. "Archfile HR Records [color:#7E22CE]" -> { isArchfile: true, parentBoxName: null, archfileName: "Archfile HR Records", color: "#7E22CE" }
  * e.g. "Box 01" -> { isArchfile: false, boxName: "Box 01", color: null }
  */
 export function parseBoxHierarchy(rawName = "") {

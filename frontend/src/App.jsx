@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import Home from "./pages/Home";
@@ -22,6 +23,28 @@ import { ToastProvider } from "./context/ToastContext";
 import { ModalProvider } from "./context/ModalContext";
 
 function App() {
+  // Institutional Print: Suppress browser default header text during printing
+  useEffect(() => {
+    let savedTitle = "";
+    const handleBeforePrint = () => {
+      savedTitle = document.title;
+      document.title = "";
+    };
+    const handleAfterPrint = () => {
+      if (savedTitle) {
+        document.title = savedTitle;
+      }
+    };
+
+    window.addEventListener("beforeprint", handleBeforePrint);
+    window.addEventListener("afterprint", handleAfterPrint);
+
+    return () => {
+      window.removeEventListener("beforeprint", handleBeforePrint);
+      window.removeEventListener("afterprint", handleAfterPrint);
+    };
+  }, []);
+
   return (
     <ToastProvider>
       <ModalProvider>

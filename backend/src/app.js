@@ -113,4 +113,13 @@ app.use(
   accomplishmentRoutes
 );
 
+// GLOBAL ERROR HANDLER (Catches unhandled errors and Multer / Busboy parsing failures)
+app.use((err, req, res, next) => {
+  console.error("GLOBAL SERVER ERROR:", err);
+  const status = err.status || err.statusCode || 500;
+  res.status(status).json({
+    message: err.message || "An unexpected server error occurred during request processing.",
+  });
+});
+
 module.exports = app;

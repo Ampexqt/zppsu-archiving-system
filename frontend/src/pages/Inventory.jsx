@@ -3,6 +3,7 @@ import axios from "axios";
 import { Plus, Download, Printer } from "lucide-react";
 import DashboardLayout from "../components/layout/DashboardLayout";
 import DocumentViewModal from "../components/modals/DocumentViewModal";
+import DocumentEditModal from "../components/modals/DocumentEditModal";
 import { Button } from "@/components/ui/button";
 import { useToast } from "../context/ToastContext";
 import { useModal } from "../context/ModalContext";
@@ -55,8 +56,10 @@ function Inventory() {
   const [editingFileBox, setEditingFileBox] = useState(null);
   const [isEditFileBoxOpen, setIsEditFileBoxOpen] = useState(false);
 
-  // View File
+  // View & Edit Document
   const [viewingFile, setViewingFile] = useState(null);
+  const [editingFile, setEditingFile] = useState(null);
+  const [isSavingFile, setIsSavingFile] = useState(false);
   const [isExportingManifest, setIsExportingManifest] = useState(false);
 
   const fetchData = async () => {
@@ -104,15 +107,15 @@ function Inventory() {
   }, [fileBoxes]);
 
   // Create Storage Unit Handler
-  const handleCreateCabinet = async ({ name, capacity }) => {
+  const handleCreateCabinet = async ({ name, capacity, max_file_boxes, max_direct_archfiles }) => {
     try {
       const token = localStorage.getItem("token");
       await axios.post(
         "http://localhost:5000/api/inventory/cabinets",
-        { name, capacity },
+        { name, capacity, max_file_boxes, max_direct_archfiles },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      toast.success("Storage cabinet created successfully!", "Cabinet Registered");
+      toast.success("Storage unit created with capacity limits!", "Unit Registered");
       setIsCreateUnitModalOpen(false);
       fetchData();
     } catch (error) {
@@ -146,15 +149,15 @@ function Inventory() {
   };
 
   // Edit Storage Unit Handler
-  const handleEditCabinet = async ({ id, name, capacity }) => {
+  const handleEditCabinet = async ({ id, name, capacity, max_file_boxes, max_direct_archfiles }) => {
     try {
       const token = localStorage.getItem("token");
       await axios.put(
         `http://localhost:5000/api/inventory/cabinets/${id}`,
-        { name, capacity },
+        { name, capacity, max_file_boxes, max_direct_archfiles },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      toast.success("Storage cabinet updated successfully!", "Cabinet Updated");
+      toast.success("Storage unit and capacity limits updated successfully!", "Unit Updated");
       setIsEditCabinetOpen(false);
       setEditingCabinet(null);
       fetchData();
@@ -165,12 +168,12 @@ function Inventory() {
   };
 
   // Create Container (Box or Archfile) Handler
-  const handleCreateContainer = async ({ name, cabinet_id, capacity }) => {
+  const handleCreateContainer = async ({ name, cabinet_id, capacity, max_archfiles }) => {
     try {
       const token = localStorage.getItem("token");
       await axios.post(
         "http://localhost:5000/api/inventory/file-boxes",
-        { name, cabinet_id: Number(cabinet_id), capacity },
+        { name, cabinet_id: Number(cabinet_id), capacity, max_archfiles },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       toast.success("Container registered and mapped to storage unit!", "Container Created");
@@ -208,14 +211,22 @@ function Inventory() {
   };
 
   // Edit Container Handler
-  const handleEditContainer = async ({ id, name, cabinet_id, capacity }) => {
+  const handleEditContainer = async ({ id, name, cabinet_id, capacity, max_archfiles }) => {
     try {
       const token = localStorage.getItem("token");
-      await axios.put(
-        `http://localhost:5000/api/inventory/file-boxes/${id}`,
-        { name, cabinet_id: Number(cabinet_id), capacity },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      if (String(id).startsWith("virtual-")) {
+        await axios.post(
+          "http://localhost:5000/api/inventory/file-boxes",
+          { name, cabinet_id: Number(cabinet_id), capacity, max_archfiles },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+      } else {
+        await axios.put(
+          `http://localhost:5000/api/inventory/file-boxes/${id}`,
+          { name, cabinet_id: Number(cabinet_id), capacity, max_archfiles },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+      }
       toast.success("Container details updated successfully!", "Container Updated");
       setIsEditFileBoxOpen(false);
       setEditingFileBox(null);
@@ -241,6 +252,76 @@ function Inventory() {
       toast.error(error.message || "Failed to generate storage manifest.", "Export Error");
     } finally {
       setIsExportingManifest(false);
+    }
+  };
+
+  // Edit Document Metadata & Storage Handler
+  const handleSaveFileEdit = async ({
+    subject,
+    status,
+    file_box_id,
+    access_code,
+    memo_date,
+    dynamic_data,
+  }) => {
+    if (!editingFile) return;
+    setIsSavingFile(true);
+    try {
+      const token = localStorage.getItem("token");
+
+      await axios.put(
+        `http://localhost:5000/api/files/${editingFile.id}`,
+        {
+          subject,
+          title: subject,
+          status,
+          access_code,
+          memo_date,
+          dynamic_data,
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      if (file_box_id !== undefined && file_box_id !== null) {
+        await axios.put(
+          `http://localhost:5000/api/files/assign/${editingFile.id}`,
+          { file_box_id: file_box_id ? Number(file_box_id) : null },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+      }
+
+      toast.success("Document metadata and physical placement updated!", "Record Saved");
+      setEditingFile(null);
+      fetchData();
+    } catch (error) {
+      console.error(error);
+      toast.error(error.response?.data?.message || "Failed to update document", "Error");
+    } finally {
+      setIsSavingFile(false);
+    }
+  };
+
+  // Delete Document Handler
+  const handleDeleteFile = async (file) => {
+    const confirmed = await modal.confirm({
+      title: "Delete Document Record",
+      message: `Are you sure you want to move "${file.subject || file.title || "this document"}" to the trash?`,
+      confirmText: "Move to Trash",
+      cancelText: "Cancel",
+      variant: "danger",
+    });
+    if (!confirmed) return;
+
+    try {
+      const token = localStorage.getItem("token");
+      await axios.delete(`http://localhost:5000/api/files/${file.id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      toast.success("Document moved to trash successfully.", "Record Trashed");
+      fetchData();
+    } catch (error) {
+      console.error(error);
+      toast.error(error.response?.data?.message || "Failed to delete document", "Error");
     }
   };
 
@@ -332,6 +413,8 @@ function Inventory() {
           }}
           onDeleteContainer={handleDeleteContainer}
           onViewFile={(file) => setViewingFile(file)}
+          onEditFile={(file) => setEditingFile(file)}
+          onDeleteFile={handleDeleteFile}
         />
       </div>
 
@@ -388,6 +471,16 @@ function Inventory() {
         isOpen={Boolean(viewingFile)}
         file={viewingFile}
         onClose={() => setViewingFile(null)}
+      />
+
+      {/* EDIT METADATA & PHYSICAL STORAGE MODAL */}
+      <DocumentEditModal
+        isOpen={Boolean(editingFile)}
+        file={editingFile}
+        cabinets={cabinets}
+        onClose={() => setEditingFile(null)}
+        onSave={handleSaveFileEdit}
+        isSaving={isSavingFile}
       />
     </DashboardLayout>
   );

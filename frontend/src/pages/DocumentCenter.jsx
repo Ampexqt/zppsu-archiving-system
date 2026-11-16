@@ -202,16 +202,30 @@ export default function DocumentCenter() {
     }
   };
 
-  const handleSaveEdit = async ({ subject, status, file_box_id }) => {
+  const handleSaveEdit = async ({
+    subject,
+    status,
+    file_box_id,
+    access_code,
+    memo_date,
+    dynamic_data,
+  }) => {
     if (!editingFile) return;
     setIsSaving(true);
     try {
       const token = localStorage.getItem("token");
-      
-      // Update general metadata
+
+      // Update general and template specification metadata
       await axios.put(
         `http://localhost:5000/api/files/${editingFile.id}`,
-        { subject, status },
+        {
+          subject,
+          title: subject,
+          status,
+          access_code,
+          memo_date,
+          dynamic_data,
+        },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 

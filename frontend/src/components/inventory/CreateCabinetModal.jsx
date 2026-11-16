@@ -9,6 +9,7 @@ import { MAIN_STORAGE_CATEGORIES, STORAGE_UNIT_TYPES } from "./storageTaxonomy";
  * Guided creation modal with Main Category selection:
  * 1. Cabinet (Main category): Steel Cabinet, Standard Cabinet
  * 2. Shelves (Separate main category): Open Shelving Rack
+ * Supports strict physical capacity limits for File Boxes and Direct Archfiles.
  */
 export default function CreateCabinetModal({
   isOpen,
@@ -17,6 +18,8 @@ export default function CreateCabinetModal({
 }) {
   const [selectedType, setSelectedType] = useState("steel_cabinet");
   const [unitName, setUnitName] = useState("");
+  const [maxBoxes, setMaxBoxes] = useState(5);
+  const [maxArchfiles, setMaxArchfiles] = useState(5);
   const [step, setStep] = useState(1);
 
   if (!isOpen) return null;
@@ -33,11 +36,18 @@ export default function CreateCabinetModal({
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!unitName.trim()) return;
+    const parsedBoxes = Math.max(1, parseInt(maxBoxes, 10) || 5);
+    const parsedArchfiles = Math.max(0, parseInt(maxArchfiles, 10) || 5);
+
     onSubmit({
       name: unitName.trim(),
-      capacity: 100,
+      max_file_boxes: parsedBoxes,
+      max_direct_archfiles: parsedArchfiles,
+      capacity: parsedBoxes + parsedArchfiles,
     });
     setUnitName("");
+    setMaxBoxes(5);
+    setMaxArchfiles(5);
     setStep(1);
   };
 
@@ -59,7 +69,7 @@ export default function CreateCabinetModal({
                 Step {step} of 2
               </span>
               <span className="text-xs text-[#5F5A5C]">
-                {step === 1 ? "Select Category & Equipment" : "Configure Unit Details"}
+                {step === 1 ? "Select Category & Equipment" : "Configure Unit Details & Limits"}
               </span>
             </div>
             <h2 className="text-base font-bold text-[#1D1A1B] mt-1">
@@ -139,7 +149,7 @@ export default function CreateCabinetModal({
               {/* CATEGORY 2: SHELVES (SEPARATE MAIN CATEGORY) */}
               <div className="space-y-2 pt-2 border-t border-[#E8E3E1]">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-[#5F5A5C] uppercase tracking-wider">
+                  <span className="text-[11px] font-bold text-[#6B1D2A] uppercase tracking-wider">
                     2. Shelves — Separate Main Category
                   </span>
                   <span className="text-[10px] text-[#5F5A5C]">Holds File Boxes & Archfiles</span>
@@ -147,7 +157,6 @@ export default function CreateCabinetModal({
                 <div className="grid grid-cols-1 gap-2">
                   {STORAGE_UNIT_TYPES.filter((t) => t.categoryId === "shelves").map((type) => {
                     const isSelected = selectedType === type.id;
-                    const IconComponent = Layers;
 
                     return (
                       <button
@@ -161,7 +170,7 @@ export default function CreateCabinetModal({
                         }`}
                       >
                         <div className={`p-2 rounded-xl shrink-0 ${type.badgeBg} ${type.badgeText} border border-[#E8E3E1]`}>
-                          <IconComponent className="w-4 h-4 stroke-[2]" />
+                          <Layers className="w-4 h-4 stroke-[2]" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between">
@@ -182,8 +191,8 @@ export default function CreateCabinetModal({
                 </div>
               </div>
 
-              {/* FOOTER ACTIONS FOR STEP 1 */}
-              <div className="pt-3 border-t border-[#E8E3E1] flex justify-end">
+              {/* FOOTER ACTIONS */}
+              <div className="pt-2 border-t border-[#E8E3E1] flex justify-end">
                 <Button
                   type="button"
                   variant="outline"
@@ -235,6 +244,103 @@ export default function CreateCabinetModal({
                 <span className="text-[10px] text-[#5F5A5C]">
                   Official physical label marked on this storage unit in the archive room.
                 </span>
+              </div>
+
+              {/* CAPACITY LIMITS CONFIGURATION */}
+              <div className="p-4 rounded-xl border border-[#E8E3E1] bg-[#F4E7EA]/20 space-y-3">
+                <div className="flex items-center justify-between border-b border-[#E8E3E1] pb-2">
+                  <div>
+                    <span className="text-[11px] font-bold text-[#6B1D2A] uppercase tracking-wider block">
+                      Physical Storage Capacity Limits
+                    </span>
+                    <span className="text-[10px] text-[#5F5A5C]">
+                      Enforce strict physical limits for containers in this unit
+                    </span>
+                  </div>
+                  <span className="text-[10px] font-bold bg-[#FFFCF7] text-[#6B1D2A] px-2 py-0.5 rounded border border-[#E8E3E1]">
+                    {(parseInt(maxBoxes, 10) || 0) + (parseInt(maxArchfiles, 10) || 0)} Total Containers
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {/* MAX FILE BOXES */}
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] font-bold text-[#1D1A1B] uppercase flex items-center justify-between">
+                      <span>Max File Boxes</span>
+                      <span className="text-[10px] font-normal text-[#5F5A5C]">Limit</span>
+                    </label>
+                    <div className="flex items-center gap-1.5">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setMaxBoxes((prev) => Math.max(1, prev - 1))}
+                        className="h-10 w-10 p-0 rounded-xl bg-[#FFFCF7] border-[#E8E3E1] text-[#1D1A1B] hover:bg-[#F4E7EA] font-bold"
+                      >
+                        -
+                      </Button>
+                      <Input
+                        type="number"
+                        min="1"
+                        max="500"
+                        value={maxBoxes}
+                        onChange={(e) => setMaxBoxes(Math.max(1, parseInt(e.target.value, 10) || 1))}
+                        className="h-10 text-center font-bold text-xs rounded-xl bg-[#FFFCF7] border-[#E8E3E1] text-[#1D1A1B]"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setMaxBoxes((prev) => prev + 1)}
+                        className="h-10 w-10 p-0 rounded-xl bg-[#FFFCF7] border-[#E8E3E1] text-[#1D1A1B] hover:bg-[#F4E7EA] font-bold"
+                      >
+                        +
+                      </Button>
+                    </div>
+                    <span className="text-[10px] text-[#5F5A5C] block">
+                      Max file boxes allowed in this unit (e.g. 2).
+                    </span>
+                  </div>
+
+                  {/* MAX DIRECT ARCHFILES */}
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] font-bold text-[#1D1A1B] uppercase flex items-center justify-between">
+                      <span>Max Direct Archfiles</span>
+                      <span className="text-[10px] font-normal text-[#5F5A5C]">Limit</span>
+                    </label>
+                    <div className="flex items-center gap-1.5">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setMaxArchfiles((prev) => Math.max(0, prev - 1))}
+                        className="h-10 w-10 p-0 rounded-xl bg-[#FFFCF7] border-[#E8E3E1] text-[#1D1A1B] hover:bg-[#F4E7EA] font-bold"
+                      >
+                        -
+                      </Button>
+                      <Input
+                        type="number"
+                        min="0"
+                        max="500"
+                        value={maxArchfiles}
+                        onChange={(e) => setMaxArchfiles(Math.max(0, parseInt(e.target.value, 10) || 0))}
+                        className="h-10 text-center font-bold text-xs rounded-xl bg-[#FFFCF7] border-[#E8E3E1] text-[#1D1A1B]"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setMaxArchfiles((prev) => prev + 1)}
+                        className="h-10 w-10 p-0 rounded-xl bg-[#FFFCF7] border-[#E8E3E1] text-[#1D1A1B] hover:bg-[#F4E7EA] font-bold"
+                      >
+                        +
+                      </Button>
+                    </div>
+                    <span className="text-[10px] text-[#5F5A5C] block">
+                      Max direct binders placed in unit (e.g. 2).
+                    </span>
+                  </div>
+                </div>
               </div>
 
               {/* FOOTER ACTIONS */}

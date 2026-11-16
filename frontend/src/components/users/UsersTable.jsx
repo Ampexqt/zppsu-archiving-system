@@ -112,34 +112,40 @@ export default function UsersTable({
                     {/* ACTIONS */}
                     <td className="px-5 py-3.5 text-right whitespace-nowrap">
                       <div className="inline-flex items-center gap-1 justify-end">
-                        {/* RESET PASSWORD */}
-                        <button
-                          type="button"
-                          onClick={() => onResetPassword(user)}
-                          className="h-8 w-8 rounded-lg flex items-center justify-center text-[#5F5A5C] hover:text-[#A87818] hover:bg-[#F2DFB0]/50 transition-colors cursor-pointer"
-                          title="Reset Password"
-                          aria-label={`Reset password for ${user.name}`}
-                        >
-                          <Key className="w-3.5 h-3.5" />
-                        </button>
-
-                        {/* PROMOTE / DEMOTE */}
-                        {user.role === "Admin" ? (
+                        {/* RESET PASSWORD (STAFF ONLY - PEER ADMINS PROTECTED) */}
+                        {user.role !== "Admin" ? (
                           <button
                             type="button"
-                            onClick={() => onDemote(user)}
-                            className="h-8 w-8 rounded-lg flex items-center justify-center text-[#5F5A5C] hover:text-[#6B1D2A] hover:bg-[#F4E7EA] transition-colors cursor-pointer"
-                            title="Demote to Staff"
-                            aria-label={`Demote ${user.name}`}
+                            onClick={() => onResetPassword(user)}
+                            className="h-8 w-8 rounded-lg flex items-center justify-center text-[#5F5A5C] hover:text-[#A87818] hover:bg-[#F2DFB0]/50 transition-colors cursor-pointer"
+                            title="Reset Staff Password"
+                            aria-label={`Reset password for ${user.name}`}
+                          >
+                            <Key className="w-3.5 h-3.5" />
+                          </button>
+                        ) : (
+                          <span
+                            className="h-8 w-8 rounded-lg flex items-center justify-center text-[#5F5A5C]/30 cursor-not-allowed"
+                            title="Administrator credentials are protected. Peer password reset is restricted."
+                          >
+                            <Key className="w-3.5 h-3.5" />
+                          </span>
+                        )}
+
+                        {/* PROMOTE / DEMOTE (STAFF ONLY - PEER ADMINS PROTECTED) */}
+                        {user.role === "Admin" ? (
+                          <span
+                            className="h-8 w-8 rounded-lg flex items-center justify-center text-[#5F5A5C]/30 cursor-not-allowed"
+                            title="Administrator accounts are protected. Peer demotion is restricted."
                           >
                             <ArrowDownToLine className="w-3.5 h-3.5" />
-                          </button>
+                          </span>
                         ) : (
                           <button
                             type="button"
                             onClick={() => onPromote(user)}
                             className="h-8 w-8 rounded-lg flex items-center justify-center text-[#5F5A5C] hover:text-[#6B1D2A] hover:bg-[#F4E7EA] transition-colors cursor-pointer"
-                            title="Promote to Admin"
+                            title="Promote to Administrator"
                             aria-label={`Promote ${user.name}`}
                           >
                             <ArrowUpToLine className="w-3.5 h-3.5" />
@@ -159,8 +165,8 @@ export default function UsersTable({
                           </button>
                         ) : (
                           <span 
-                            className="h-8 w-8 flex items-center justify-center text-[#5F5A5C]/40 cursor-not-allowed"
-                            title="Admin accounts cannot be deleted"
+                            className="h-8 w-8 rounded-lg flex items-center justify-center text-[#5F5A5C]/30 cursor-not-allowed"
+                            title="Administrator accounts cannot be deleted"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </span>

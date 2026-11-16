@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { X, FolderClosed, Check, Pipette } from "lucide-react";
+import { X, FolderClosed, Check, Pipette, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { formatArchfileName, ARCHFILE_COLOR_PRESETS } from "./storageTaxonomy";
+import { formatArchfileName, ARCHFILE_COLOR_PRESETS, parseBoxHierarchy } from "./storageTaxonomy";
 
 /**
  * CreateArchfileModal
- * Modal for creating an Archfile Binder inside a parent File Box.
- * Supports custom color picking (swatches, HTML5 color wheel, and manual hex/name typing).
+ * Modal for creating an Archfile Binder inside a parent File Box or directly inside a storage unit.
+ * Enforces parent box archfile limits and cabinet direct archfile limits.
  */
 export default function CreateArchfileModal({
   isOpen,
@@ -19,6 +19,7 @@ export default function CreateArchfileModal({
   const [archfileName, setArchfileName] = useState("");
   const [docCapacity, setDocCapacity] = useState("50");
   const [selectedColor, setSelectedColor] = useState("#6B1D2A"); // Default Rich Maroon
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -31,20 +32,58 @@ export default function CreateArchfileModal({
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e) => {
+  // Capacity limit checks
+  let isTargetFull = false;
+  let fullMessage = "";
+  let currentCount = 0;
+  let maxLimit = 5;
+
+  if (parentBoxName) {
+    const parentBox = (cabinet?.file_boxes || []).find(
+      (b) => b.name.trim().toLowerCase() === parentBoxName.toLowerCase()
+    );
+    currentCount = (cabinet?.file_boxes || []).filter((b) => {
+      const p = parseBoxHierarchy(b.name);
+      return p.parentBoxName && p.parentBoxName.toLowerCase() === parentBoxName.toLowerCase();
+    }).length;
+    maxLimit = parentBox?.max_archfiles ?? 5;
+    if (currentCount >= maxLimit) {
+      isTargetFull = true;
+      fullMessage = `File Box '${parentBoxName}' is full (${currentCount}/${maxLimit} archfile binders). Limit reached: cannot create more archfiles inside this box.`;
+    }
+  } else {
+    currentCount = (cabinet?.file_boxes || []).filter((b) => {
+      const p = parseBoxHierarchy(b.name);
+      return p.isArchfile && !p.parentBoxName;
+    }).length;
+    maxLimit = cabinet?.max_direct_archfiles ?? 5;
+    if (currentCount >= maxLimit) {
+      isTargetFull = true;
+      fullMessage = `Storage unit '${cabinet?.name}' has reached its direct Archfile capacity (${currentCount}/${maxLimit} archfiles). Limit reached: cannot add more archfiles directly in this unit.`;
+    }
+  }
+
+  // Encodes color metadata: e.g. "Box 01 / Archfile HR [color:#7E22CE]" or "Archfile HR [color:#7E22CE]"
+  const fullName = formatArchfileName(parentBoxName || null, archfileName.trim(), selectedColor);
+  const isDuplicateArchfile = (cabinet?.file_boxes || []).some(
+    (b) => b.name.trim().toLowerCase() === fullName.toLowerCase()
+  );
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!archfileName.trim() || !docCapacity || !cabinet) return;
+    if (!archfileName.trim() || !docCapacity || !cabinet || isTargetFull || isDuplicateArchfile || isSubmitting) return;
 
-    // Encodes color metadata: e.g. "Box 01 / Archfile HR [color:#7E22CE]" or "Archfile HR [color:#7E22CE]"
-    const fullName = formatArchfileName(parentBoxName || null, archfileName.trim(), selectedColor);
-
-    onSubmit({
-      name: fullName,
-      cabinet_id: cabinet.id,
-      capacity: parseInt(docCapacity, 10),
-    });
-
-    onClose();
+    try {
+      setIsSubmitting(true);
+      await onSubmit({
+        name: fullName,
+        cabinet_id: cabinet.id,
+        capacity: parseInt(docCapacity, 10),
+      });
+      onClose();
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -82,9 +121,14 @@ export default function CreateArchfileModal({
         <form onSubmit={handleSubmit} className="p-6 space-y-4 overflow-y-auto">
           {/* LOCATION TARGET */}
           <div className="p-3 rounded-xl border border-[#E8E3E1] bg-[#FCFAF8] space-y-1">
-            <span className="text-[10px] font-bold uppercase text-[#5F5A5C] block">
-              Placement Target:
-            </span>
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-bold uppercase text-[#5F5A5C]">
+                Placement Target:
+              </span>
+              <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${isTargetFull ? 'bg-red-100 text-red-700' : 'bg-[#F4E7EA] text-[#6B1D2A]'}`}>
+                Capacity: {currentCount} / {maxLimit}
+              </span>
+            </div>
             <div className="flex items-center gap-1.5 text-xs font-bold text-[#1D1A1B]">
               <span>{cabinet?.name || "Storage Unit"}</span>
               {parentBoxName ? (
@@ -100,6 +144,19 @@ export default function CreateArchfileModal({
             </div>
           </div>
 
+          {/* WARNING ALERT IF FULL */}
+          {isTargetFull && (
+            <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-start gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+              <div>
+                <strong className="block">Container Full ({currentCount}/{maxLimit})</strong>
+                <p className="text-[11px] mt-0.5 text-red-600 leading-tight">
+                  {fullMessage}
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* ARCHFILE NAME */}
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-[#1D1A1B] uppercase tracking-wider block">
@@ -111,6 +168,7 @@ export default function CreateArchfileModal({
               value={archfileName}
               onChange={(e) => setArchfileName(e.target.value)}
               className="h-10 text-xs rounded-xl bg-[#FFFCF7] border-[#E8E3E1] text-[#1D1A1B] focus-visible:ring-[#6B1D2A]"
+              disabled={isTargetFull}
               autoFocus
             />
             <span className="text-[10px] text-[#5F5A5C]">
@@ -135,11 +193,12 @@ export default function CreateArchfileModal({
                   <button
                     key={preset.hex}
                     type="button"
+                    disabled={isTargetFull}
                     onClick={() => setSelectedColor(preset.hex)}
                     style={{ backgroundColor: preset.hex }}
                     className={`w-7 h-7 rounded-lg transition-all flex items-center justify-center cursor-pointer shadow-xs ${
                       isSelected ? "ring-2 ring-offset-2 ring-[#1D1A1B] scale-110" : "hover:scale-105 opacity-90 hover:opacity-100"
-                    }`}
+                    } ${isTargetFull ? 'opacity-50 cursor-not-allowed' : ''}`}
                     title={preset.label}
                   >
                     {isSelected && <Check className="w-3.5 h-3.5 text-white stroke-[3]" />}
@@ -153,9 +212,10 @@ export default function CreateArchfileModal({
               <div className="relative flex items-center">
                 <input
                   type="color"
+                  disabled={isTargetFull}
                   value={selectedColor.startsWith("#") && selectedColor.length === 7 ? selectedColor : "#6B1D2A"}
                   onChange={(e) => setSelectedColor(e.target.value)}
-                  className="w-9 h-9 rounded-xl border border-[#E8E3E1] cursor-pointer p-0.5 bg-[#FFFCF7]"
+                  className="w-9 h-9 rounded-xl border border-[#E8E3E1] cursor-pointer p-0.5 bg-[#FFFCF7] disabled:opacity-50"
                   title="Open Color Wheel"
                 />
               </div>
@@ -165,6 +225,7 @@ export default function CreateArchfileModal({
                   placeholder="#6B1D2A or color name"
                   value={selectedColor}
                   onChange={(e) => setSelectedColor(e.target.value)}
+                  disabled={isTargetFull}
                   className="h-9 text-xs rounded-xl bg-[#FFFCF7] border-[#E8E3E1] font-mono text-[#1D1A1B] focus-visible:ring-[#6B1D2A]"
                 />
               </div>
@@ -191,6 +252,7 @@ export default function CreateArchfileModal({
               placeholder="e.g. 50"
               value={docCapacity}
               onChange={(e) => setDocCapacity(e.target.value)}
+              disabled={isTargetFull}
               className="h-10 text-xs rounded-xl bg-[#FFFCF7] border-[#E8E3E1] text-[#1D1A1B] focus-visible:ring-[#6B1D2A]"
             />
             <span className="text-[10px] text-[#5F5A5C]">
@@ -204,16 +266,17 @@ export default function CreateArchfileModal({
               type="button"
               variant="outline"
               onClick={onClose}
+              disabled={isSubmitting}
               className="h-10 px-4 rounded-xl text-xs font-semibold bg-[#FFFCF7] border-[#E8E3E1] text-[#1D1A1B] hover:bg-[#F4E7EA] cursor-pointer"
             >
               Cancel
             </Button>
             <Button
               type="submit"
-              disabled={!archfileName.trim() || !docCapacity}
+              disabled={!archfileName.trim() || !docCapacity || isTargetFull || isDuplicateArchfile || isSubmitting}
               className="h-10 px-5 rounded-xl text-xs font-bold bg-[#6B1D2A] text-[#FFFCF7] hover:bg-[#8B3545] cursor-pointer shadow-xs disabled:opacity-50"
             >
-              Confirm Archfile Creation
+              {isSubmitting ? "Creating..." : "Confirm Archfile Creation"}
             </Button>
           </div>
         </form>

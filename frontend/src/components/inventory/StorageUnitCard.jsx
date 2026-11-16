@@ -1,12 +1,13 @@
 import React from "react";
-import { Archive, Shield, Grid3X3, Edit2, Trash2, ChevronRight } from "lucide-react";
+import { Archive, Shield, Grid3X3, Edit2, Trash2, ChevronRight, Box, FolderClosed } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { detectUnitType } from "./storageTaxonomy";
+import { detectUnitType, parseBoxHierarchy } from "./storageTaxonomy";
 
 /**
  * StorageUnitCard
  * Displays a single Cabinet, Steel Cabinet, or Shelves card in the root explorer grid.
+ * Accurately displays File Box and Archfile capacities and limits.
  */
 export default function StorageUnitCard({
   cab,
@@ -17,9 +18,19 @@ export default function StorageUnitCard({
 }) {
   const typeInfo = detectUnitType(cab.name);
   const boxes = cab.file_boxes || [];
-  const boxCount = boxes.length;
-  const cap = cab.capacity || 20;
-  const pct = Math.round((boxCount / cap) * 100);
+
+  const directBoxes = boxes.filter((b) => !parseBoxHierarchy(b.name).isArchfile);
+  const directArchfiles = boxes.filter((b) => {
+    const p = parseBoxHierarchy(b.name);
+    return p.isArchfile && !p.parentBoxName;
+  });
+
+  const maxBoxes = cab.max_file_boxes ?? 5;
+  const maxArchfiles = cab.max_direct_archfiles ?? 5;
+  const totalLimit = maxBoxes + maxArchfiles;
+  const totalOccupied = directBoxes.length + directArchfiles.length;
+  const pct = totalLimit > 0 ? Math.min(100, Math.round((totalOccupied / totalLimit) * 100)) : 0;
+
   const totalDocsInCab = boxes.reduce(
     (sum, b) => sum + (b.files?.length || 0),
     0
@@ -82,16 +93,28 @@ export default function StorageUnitCard({
         <h3 className="font-bold text-base text-[#1D1A1B] tracking-tight group-hover:text-[#6B1D2A] transition-colors">
           {cab.name}
         </h3>
-        <p className="text-[11px] text-[#5F5A5C] mt-0.5">
-          {boxCount} containers ({totalDocsInCab} filed records)
-        </p>
+
+        {/* CAPACITY BREAKDOWN PILLS */}
+        <div className="flex items-center gap-2 mt-2 flex-wrap">
+          <span className="text-[10px] font-bold text-[#6B1D2A] bg-[#F4E7EA] px-2 py-0.5 rounded border border-[#E8E3E1] inline-flex items-center gap-1">
+            <Box className="w-3 h-3" />
+            <span>{directBoxes.length}/{maxBoxes} Boxes</span>
+          </span>
+          <span className="text-[10px] font-bold text-[#A87818] bg-[#F2DFB0]/50 px-2 py-0.5 rounded border border-[#C99A2E]/30 inline-flex items-center gap-1">
+            <FolderClosed className="w-3 h-3" />
+            <span>{directArchfiles.length}/{maxArchfiles} Archfiles</span>
+          </span>
+          <span className="text-[10px] text-[#5F5A5C]">
+            ({totalDocsInCab} filed docs)
+          </span>
+        </div>
 
         {/* OCCUPANCY BAR */}
         <div className="mt-4 space-y-1">
           <div className="flex justify-between text-[11px] text-[#5F5A5C]">
-            <span>Unit Capacity</span>
+            <span>Unit Physical Occupancy</span>
             <span className="font-bold text-[#1D1A1B]">
-              {boxCount} / {cap} ({pct}%)
+              {totalOccupied} / {totalLimit} containers ({pct}%)
             </span>
           </div>
           <Progress value={pct} className="h-2 bg-[#E8E3E1]" />

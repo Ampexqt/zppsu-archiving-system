@@ -88,8 +88,8 @@ export async function exportStorageManifest(cabinets, fileBoxes) {
       cabBoxes.forEach((b) => {
         const parsed = parseBoxHierarchy(b.name);
         const containerType = parsed.isArchfile ? "Archfile Binder" : "File Box";
-        const displayName = parsed.isArchfile ? `${parsed.parentBox} > ${parsed.archfileName}` : b.name;
-        const colorName = parsed.customColor ? parsed.customColor : "Standard";
+        const displayName = parsed.displayName || b.name;
+        const colorName = parsed.colorName || (parsed.color ? "Custom" : "Standard");
         const docCount = b.files ? b.files.length : 0;
         const docIds = b.files && b.files.length > 0 
           ? b.files.map(f => f.document_id || `DOC-${f.id}`).join(", ") 

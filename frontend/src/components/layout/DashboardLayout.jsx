@@ -224,9 +224,9 @@ function DashboardLayout({ children }) {
                 <div className="w-8 h-8 rounded-lg bg-[#4A0E1C] text-[#F2DFB0] font-mono font-bold text-xs flex items-center justify-center border border-[#6B1D2A]/40 shadow-xs">
                   {userInitials}
                 </div>
-                {/* Active Authorized Session Indicator */}
+                {/* Active Authorized Session Indicator (ZPPSU Gold) */}
                 <span 
-                  className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-[#FFFCF7]" 
+                  className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-[#C99A2E] ring-2 ring-[#FFFCF7]" 
                   title="Active Authorized Session"
                 />
               </div>

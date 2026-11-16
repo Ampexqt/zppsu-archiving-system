@@ -163,39 +163,48 @@ export function detectContainerType(name = "") {
  * e.g. "Box 01" -> { isArchfile: false, boxName: "Box 01", color: null }
  */
 export function parseBoxHierarchy(rawName = "") {
-  if (!rawName) return { isArchfile: false, boxName: "Unnamed", color: "#6B1D2A" };
+  if (!rawName) return { isArchfile: false, boxName: "Unnamed Container", displayName: "Unnamed Container", color: null, colorName: null };
 
   // Check for custom color tag: [color:#HEX] or [color:NAME]
   const colorMatch = rawName.match(/\[color:([^\]]+)\]/i);
-  const color = colorMatch ? colorMatch[1].trim() : "#6B1D2A";
+  const color = colorMatch ? colorMatch[1].trim() : null;
+  const colorName = color ? getColorNameFromHex(color) : null;
   const cleanName = rawName.replace(/\[color:[^\]]+\]/i, "").trim();
-  const colorName = getColorNameFromHex(color);
 
-  if (cleanName.includes(" / ")) {
-    const parts = cleanName.split(" / ");
+  // If there's a slash indicating nesting e.g. "Box 02 / blue gwapo"
+  if (cleanName.includes(" / ") || cleanName.includes("/")) {
+    const parts = cleanName.split(/\s*\/\s*/);
+    const parentBoxName = parts[0]?.trim() || "Box";
+    const archfileName = parts.slice(1).join(" / ").trim() || (colorName ? `${colorName} Archfile` : "Archfile Binder");
     return {
       isArchfile: true,
-      parentBoxName: parts[0].trim(),
-      archfileName: parts.slice(1).join(" / ").trim(),
-      color,
-      colorName,
+      parentBoxName,
+      archfileName,
+      displayName: `${parentBoxName} → ${archfileName}`,
+      color: color || "#6B1D2A",
+      colorName: colorName || "Maroon",
     };
   }
 
   const lower = cleanName.toLowerCase();
-  if (lower.startsWith("archfile") || lower.startsWith("binder")) {
+  // If it explicitly has a color tag OR starts with archfile/binder, it's an Archfile
+  if (color || lower.startsWith("archfile") || lower.startsWith("binder")) {
+    const resolvedArchfileName = cleanName || (colorName ? `${colorName} Archfile` : "Archfile Binder");
     return {
       isArchfile: true,
       parentBoxName: null,
-      archfileName: cleanName,
-      color,
-      colorName,
+      archfileName: resolvedArchfileName,
+      displayName: resolvedArchfileName,
+      color: color || "#6B1D2A",
+      colorName: colorName || "Maroon",
     };
   }
 
+  const resolvedBoxName = cleanName || "File Box";
   return {
     isArchfile: false,
-    boxName: cleanName,
+    boxName: resolvedBoxName,
+    displayName: resolvedBoxName,
     color: null,
     colorName: null,
   };

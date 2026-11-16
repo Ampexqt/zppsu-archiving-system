@@ -13,13 +13,15 @@ export default function BoxFolderCard({
   archfilesCount = 0,
   directDocsCount = 0,
   totalDocs = 0,
+  totalFilesCount,
   isAdmin = false,
   onEnter,
   onEdit,
   onDelete,
 }) {
+  const actualDocs = totalFilesCount !== undefined ? totalFilesCount : totalDocs;
   const cap = box.capacity || 100;
-  const pct = Math.round((totalDocs / cap) * 100);
+  const pct = Math.min(100, Math.round((actualDocs / cap) * 100));
 
   return (
     <div
@@ -76,7 +78,7 @@ export default function BoxFolderCard({
             {archfilesCount} Archfiles
           </span>
           <span>•</span>
-          <span>{totalDocs} Total Records</span>
+          <span className="font-semibold text-[#1D1A1B]">{actualDocs} Total Records</span>
         </div>
 
         {/* OCCUPANCY BAR */}
@@ -84,7 +86,7 @@ export default function BoxFolderCard({
           <div className="flex justify-between text-[11px] text-[#5F5A5C]">
             <span>Document Capacity</span>
             <span className="font-bold text-[#1D1A1B]">
-              {totalDocs} / {cap} ({pct}%)
+              {actualDocs} / {cap} ({pct}%)
             </span>
           </div>
           <Progress value={pct} className="h-2 bg-[#E8E3E1]" />

@@ -73,6 +73,10 @@ export default function Users() {
 
   const handleResetPassword = async (newPassword) => {
     if (!userToReset) return;
+    if (userToReset.role === "Admin") {
+      toast.warning("Administrator credentials are protected against peer reset.", "Action Restricted");
+      return;
+    }
     setIsSaving(true);
     try {
       const token = localStorage.getItem("token");
@@ -118,6 +122,11 @@ export default function Users() {
   };
 
   const handleDemote = async (user) => {
+    if (user.role === "Admin") {
+      toast.warning("Administrator accounts are protected against peer demotion.", "Action Restricted");
+      return;
+    }
+
     const confirmed = await modal.confirm({
       title: "Demote to Staff",
       message: `Are you sure you want to demote "${user.name}" to Staff? They will lose access to system administration and audit logs.`,
@@ -143,6 +152,10 @@ export default function Users() {
   };
 
   const handleDelete = async (user) => {
+    if (user.role === "Admin") {
+      toast.warning("Administrator accounts cannot be deleted.", "Action Restricted");
+      return;
+    }
     const confirmed = await modal.confirm({
       title: "Delete User Account",
       message: `Are you sure you want to permanently delete the account for "${user.name}" (${user.email})? This action cannot be undone.`,

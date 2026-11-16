@@ -16,6 +16,7 @@ export default function ShadcnSelect({
   searchPlaceholder = "Search...",
   allowClear = false,
   clearLabel = "Select (Optional)",
+  modal = false,
 }) {
   const [open, setOpen] = useState(false);
 
@@ -23,7 +24,7 @@ export default function ShadcnSelect({
   const displayText = selectedOption?.label || placeholder;
 
   return (
-    <Popover open={open} onOpenChange={setOpen} modal={true}>
+    <Popover open={open} onOpenChange={setOpen} modal={modal}>
       <PopoverTrigger
         disabled={disabled}
         className={cn(
@@ -31,8 +32,19 @@ export default function ShadcnSelect({
           className
         )}
       >
-        <span className={cn("truncate", !selectedOption && "text-[#5F5A5C]")}>
-          {displayText}
+        <span className={cn("truncate flex items-center min-w-0", !selectedOption && "text-[#5F5A5C]")}>
+          {selectedOption?.color && (
+            <span
+              className="w-2.5 h-2.5 rounded-full mr-2 shrink-0 border border-black/15 shadow-2xs inline-block"
+              style={{ backgroundColor: selectedOption.color }}
+            />
+          )}
+          <span className="truncate">{displayText}</span>
+          {selectedOption?.badge && (
+            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-[#F4E7EA] text-[#6B1D2A] ml-2 shrink-0">
+              {selectedOption.badge}
+            </span>
+          )}
         </span>
         <ChevronsUpDown className="h-3.5 w-3.5 opacity-50 shrink-0 text-[#5F5A5C] ml-1" />
       </PopoverTrigger>
@@ -74,27 +86,46 @@ export default function ShadcnSelect({
                 return (
                   <CommandItem
                     key={opt.value}
-                    value={opt.searchKey || opt.label}
+                    value={opt.searchKey || `${opt.label} ${opt.subtitle || ""}`}
                     onSelect={() => {
                       onChange(String(opt.value));
                       setOpen(false);
                     }}
-                    className="text-xs cursor-pointer text-[#1D1A1B] hover:bg-[#F4E7EA] rounded-lg flex items-center justify-between"
+                    className="text-xs cursor-pointer text-[#1D1A1B] hover:bg-[#F4E7EA] rounded-xl flex items-start gap-2.5 p-2.5 transition-colors"
                   >
-                    <div className="flex items-center min-w-0">
-                      <Check
-                        className={cn(
-                          "mr-2 h-3.5 w-3.5 shrink-0",
-                          isSelected ? "opacity-100 text-[#6B1D2A]" : "opacity-0"
+                    <Check
+                      className={cn(
+                        "h-3.5 w-3.5 shrink-0 mt-0.5",
+                        isSelected ? "opacity-100 text-[#6B1D2A]" : "opacity-0"
+                      )}
+                    />
+
+                    <div className="flex-1 min-w-0 space-y-0.5">
+                      {/* ROW 1: Color Dot + Container Name + Badge */}
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        {opt.color && (
+                          <span
+                            className="w-2.5 h-2.5 rounded-full shrink-0 border border-black/15 shadow-2xs inline-block"
+                            style={{ backgroundColor: opt.color }}
+                          />
                         )}
-                      />
-                      <span className="truncate">{opt.label}</span>
+                        <span className="font-bold text-[#1D1A1B] text-xs">
+                          {opt.label}
+                        </span>
+                        {opt.badge && (
+                          <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-[#F4E7EA] text-[#6B1D2A] border border-[#E8E3E1] shrink-0">
+                            {opt.badge}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* ROW 2: Subtitle Context & Occupancy */}
+                      {opt.subtitle && (
+                        <p className="text-[11px] text-[#5F5A5C] leading-tight">
+                          {opt.subtitle}
+                        </p>
+                      )}
                     </div>
-                    {opt.subtitle && (
-                      <span className="text-[10px] text-[#5F5A5C] ml-2 shrink-0">
-                        {opt.subtitle}
-                      </span>
-                    )}
                   </CommandItem>
                 );
               })}

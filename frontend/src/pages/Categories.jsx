@@ -10,7 +10,9 @@ import {
   Calendar, 
   Layers, 
   Clock, 
-  FilterX 
+  FilterX,
+  ShieldCheck,
+  Lock
 } from "lucide-react";
 import DashboardLayout from "../components/layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -19,6 +21,15 @@ import { Button } from "@/components/ui/button";
 import CategoryModal from "../components/categories/CategoryModal";
 import { useToast } from "../context/ToastContext";
 import { useModal } from "../context/ModalContext";
+
+// Institutional default categories permanently bound to document template formats
+const DEFAULT_SYSTEM_CATEGORIES = ["Administrative", "Academic", "Financial"];
+
+export const isDefaultCategory = (name = "") => {
+  return DEFAULT_SYSTEM_CATEGORIES.some(
+    (d) => d.toLowerCase() === (name || "").trim().toLowerCase()
+  );
+};
 
 export default function Categories() {
   const toast = useToast();
@@ -78,6 +89,15 @@ export default function Categories() {
 
   const handleEditCategory = async (name) => {
     if (!editingCategory) return;
+
+    if (editingCategory.is_default || isDefaultCategory(editingCategory.name)) {
+      toast.warning(
+        `"${editingCategory.name}" is a default institutional category and cannot be renamed.`,
+        "Protected Category"
+      );
+      return;
+    }
+
     setIsSaving(true);
     try {
       const token = localStorage.getItem("token");
@@ -98,6 +118,14 @@ export default function Categories() {
   };
 
   const handleDeleteCategory = async (id, catName) => {
+    if (isDefaultCategory(catName)) {
+      toast.warning(
+        `"${catName}" is a default institutional category and cannot be deleted. All document templates rely on this schema.`,
+        "Protected from Deletion"
+      );
+      return;
+    }
+
     const confirmed = await modal.confirm({
       title: "Delete Classification Category",
       message: `Are you sure you want to delete "${catName}"? Any archived documents classified under this category may require re-tagging.`,
@@ -130,7 +158,8 @@ export default function Categories() {
     );
   });
 
-  const latestCategory = categories.length > 0 ? categories[0] : null;
+  const defaultCount = categories.filter((c) => c.is_default || isDefaultCategory(c.name)).length;
+  const customCount = categories.length - defaultCount;
 
   return (
     <DashboardLayout>
@@ -148,7 +177,7 @@ export default function Categories() {
                   {categories.length}
                 </span>
                 <span className="text-[11px] text-[#5F5A5C] mt-0.5 block">
-                  Active classification categories
+                  {defaultCount} System Defaults • {customCount} Custom
                 </span>
               </div>
               <div className="p-2.5 rounded-xl bg-[#F4E7EA] border border-[#E8E3E1] text-[#6B1D2A]">
@@ -168,7 +197,7 @@ export default function Categories() {
                   Standardized
                 </span>
                 <span className="text-[11px] text-[#5F5A5C] mt-0.5 block">
-                  Guidance & administrative tags
+                  Bound to 60+ template formats
                 </span>
               </div>
               <div className="p-2.5 rounded-xl bg-[#F2DFB0]/50 border border-[#C99A2E]/40 text-[#A87818]">
@@ -177,27 +206,45 @@ export default function Categories() {
             </CardContent>
           </Card>
 
-          {/* LATEST CLASSIFICATION */}
+          {/* CORE SYSTEM PROTECTION */}
           <Card className="bg-[#FFFCF7] border border-[#E8E3E1] shadow-xs rounded-xl">
             <CardContent className="p-4 flex items-center justify-between">
               <div className="min-w-0 pr-2">
                 <span className="text-[11px] font-bold text-[#5F5A5C] uppercase tracking-wider block">
-                  Recent Classification
+                  Core Protection
                 </span>
                 <span className="text-lg font-bold text-[#1D1A1B] mt-1 block truncate">
-                  {latestCategory ? latestCategory.name : "None registered"}
+                  3 Protected Defaults
                 </span>
                 <span className="text-[11px] text-[#5F5A5C] mt-0.5 block">
-                  {latestCategory?.created_at 
-                    ? `Added ${new Date(latestCategory.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}` 
-                    : "No records yet"}
+                  Admin, Academic, Financial
                 </span>
               </div>
-              <div className="p-2.5 rounded-xl bg-[#E8E3E1]/50 border border-[#E8E3E1] text-[#5F5A5C] shrink-0">
-                <Clock className="w-5 h-5 stroke-[2]" />
+              <div className="p-2.5 rounded-xl bg-[#F4E7EA] border border-[#E8E3E1] text-[#6B1D2A] shrink-0">
+                <ShieldCheck className="w-5 h-5 stroke-[2]" />
               </div>
             </CardContent>
           </Card>
+        </div>
+
+        {/* SYSTEM REASSURANCE BANNER */}
+        <div className="p-3.5 rounded-2xl bg-[#FFFCF7] border border-[#E8E3E1] flex items-center justify-between gap-3 shadow-2xs">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-xl bg-[#F2DFB0]/60 border border-[#C99A2E]/40 flex items-center justify-center text-[#A87818] shrink-0">
+              <ShieldCheck className="w-4 h-4" />
+            </div>
+            <div>
+              <h4 className="text-xs font-bold text-[#1D1A1B] flex items-center gap-2">
+                <span>System Core Categories Protected</span>
+                <span className="text-[10px] font-bold text-[#A87818] bg-[#F2DFB0]/50 px-2 py-0.5 rounded border border-[#C99A2E]/30">
+                  Institutional Guarantee
+                </span>
+              </h4>
+              <p className="text-[11px] text-[#5F5A5C] mt-0.5">
+                <strong>Administrative</strong>, <strong>Academic</strong>, and <strong>Financial</strong> categories are permanently locked against accidental deletion or renaming because institutional document templates directly rely on their schema.
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* SEARCH & ACTION TOOLBAR */}
@@ -271,73 +318,102 @@ export default function Categories() {
 
                 <tbody className="divide-y divide-[#E8E3E1]">
                   {filteredCategories.length > 0 ? (
-                    filteredCategories.map((cat) => (
-                      <tr key={cat.id} className="hover:bg-[#F4E7EA]/30 transition-colors">
-                        {/* CATEGORY NAME */}
-                        <td className="px-5 py-3.5 whitespace-nowrap">
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-xl bg-[#F4E7EA] text-[#6B1D2A] border border-[#E8E3E1] flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs">
-                              {cat.name ? cat.name.charAt(0).toUpperCase() : "C"}
-                            </div>
-                            <span className="font-bold text-xs text-[#1D1A1B]">
-                              {cat.name}
-                            </span>
-                          </div>
-                        </td>
+                    filteredCategories.map((cat) => {
+                      const isDefault = cat.is_default || isDefaultCategory(cat.name);
 
-                        {/* IDENTIFIER CHIP */}
-                        <td className="px-5 py-3.5 whitespace-nowrap">
-                          <span className="font-mono text-[11px] font-bold text-[#6B1D2A] bg-[#FFFCF7] border border-[#E8E3E1] px-2 py-0.5 rounded-md shadow-2xs">
-                            CAT-{cat.id}
-                          </span>
-                        </td>
-
-                        {/* CREATED DATE */}
-                        <td className="px-5 py-3.5 whitespace-nowrap text-[#5F5A5C]">
-                          <div className="inline-flex items-center gap-1.5 text-xs">
-                            <Calendar className="w-3.5 h-3.5 text-[#5F5A5C]/70" />
-                            <span>
-                              {cat.created_at 
-                                ? new Date(cat.created_at).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" }) 
-                                : "—"}
-                            </span>
-                          </div>
-                        </td>
-
-                        {/* STATUS */}
-                        <td className="px-5 py-3.5 whitespace-nowrap">
-                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#F4E7EA] text-[#6B1D2A] border border-[#E8E3E1] inline-block">
-                            Active Tag
-                          </span>
-                        </td>
-
-                        {/* ACTIONS */}
-                        {isAdmin && (
-                          <td className="px-5 py-3.5 text-right whitespace-nowrap">
-                            <div className="inline-flex items-center gap-1 justify-end">
-                              <button
-                                type="button"
-                                onClick={() => setEditingCategory(cat)}
-                                className="h-8 w-8 rounded-lg flex items-center justify-center text-[#5F5A5C] hover:text-[#6B1D2A] hover:bg-[#F4E7EA] transition-colors cursor-pointer"
-                                title="Edit Category"
-                                aria-label={`Edit ${cat.name}`}
-                              >
-                                <Edit2 className="w-3.5 h-3.5" />
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => handleDeleteCategory(cat.id, cat.name)}
-                                className="h-8 w-8 rounded-lg flex items-center justify-center text-[#5F5A5C] hover:text-[#4A0E1C] hover:bg-[#F4E7EA] transition-colors cursor-pointer"
-                                title="Delete Category"
-                                aria-label={`Delete ${cat.name}`}
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
+                      return (
+                        <tr key={cat.id} className="hover:bg-[#F4E7EA]/30 transition-colors">
+                          {/* CATEGORY NAME */}
+                          <td className="px-5 py-3.5 whitespace-nowrap">
+                            <div className="flex items-center gap-3">
+                              <div className="w-8 h-8 rounded-xl bg-[#F4E7EA] text-[#6B1D2A] border border-[#E8E3E1] flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs">
+                                {cat.name ? cat.name.charAt(0).toUpperCase() : "C"}
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className="font-bold text-xs text-[#1D1A1B]">
+                                  {cat.name}
+                                </span>
+                                {isDefault && (
+                                  <span className="text-[9px] font-bold text-[#A87818] bg-[#F2DFB0]/60 border border-[#C99A2E]/40 px-1.5 py-0.5 rounded-md inline-flex items-center gap-1 shrink-0">
+                                    <ShieldCheck className="w-2.5 h-2.5" /> System Default
+                                  </span>
+                                )}
+                              </div>
                             </div>
                           </td>
-                        )}
-                      </tr>
-                    ))
+
+                          {/* IDENTIFIER CHIP */}
+                          <td className="px-5 py-3.5 whitespace-nowrap">
+                            <span className="font-mono text-[11px] font-bold text-[#6B1D2A] bg-[#FFFCF7] border border-[#E8E3E1] px-2 py-0.5 rounded-md shadow-2xs">
+                              CAT-{cat.id}
+                            </span>
+                          </td>
+
+                          {/* CREATED DATE */}
+                          <td className="px-5 py-3.5 whitespace-nowrap text-[#5F5A5C]">
+                            <div className="inline-flex items-center gap-1.5 text-xs">
+                              <Calendar className="w-3.5 h-3.5 text-[#5F5A5C]/70" />
+                              <span>
+                                {cat.created_at 
+                                  ? new Date(cat.created_at).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" }) 
+                                  : "—"}
+                              </span>
+                            </div>
+                          </td>
+
+                          {/* STATUS */}
+                          <td className="px-5 py-3.5 whitespace-nowrap">
+                            {isDefault ? (
+                              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#F2DFB0]/50 text-[#A87818] border border-[#C99A2E]/40 inline-flex items-center gap-1">
+                                <Lock className="w-2.5 h-2.5" /> Core Schema
+                              </span>
+                            ) : (
+                              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#F4E7EA] text-[#6B1D2A] border border-[#E8E3E1] inline-block">
+                                Custom Tag
+                              </span>
+                            )}
+                          </td>
+
+                          {/* ACTIONS */}
+                          {isAdmin && (
+                            <td className="px-5 py-3.5 text-right whitespace-nowrap">
+                              <div className="inline-flex items-center gap-1 justify-end">
+                                {isDefault ? (
+                                  <div 
+                                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#FFFCF7] border border-[#E8E3E1] text-[#5F5A5C] text-[10px] font-semibold shadow-2xs cursor-not-allowed"
+                                    title="System default category cannot be modified or deleted (preserves template schemas)"
+                                  >
+                                    <Lock className="w-3 h-3 text-[#A87818]" />
+                                    <span>Locked</span>
+                                  </div>
+                                ) : (
+                                  <>
+                                    <button
+                                      type="button"
+                                      onClick={() => setEditingCategory(cat)}
+                                      className="h-8 w-8 rounded-lg flex items-center justify-center text-[#5F5A5C] hover:text-[#6B1D2A] hover:bg-[#F4E7EA] transition-colors cursor-pointer"
+                                      title="Edit Category"
+                                      aria-label={`Edit ${cat.name}`}
+                                    >
+                                      <Edit2 className="w-3.5 h-3.5" />
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleDeleteCategory(cat.id, cat.name)}
+                                      className="h-8 w-8 rounded-lg flex items-center justify-center text-[#5F5A5C] hover:text-[#4A0E1C] hover:bg-[#F4E7EA] transition-colors cursor-pointer"
+                                      title="Delete Category"
+                                      aria-label={`Delete ${cat.name}`}
+                                    >
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                    </button>
+                                  </>
+                                )}
+                              </div>
+                            </td>
+                          )}
+                        </tr>
+                      );
+                    })
                   ) : (
                     <tr>
                       <td colSpan={isAdmin ? 5 : 4} className="px-5 py-12 text-center text-[#5F5A5C]">
@@ -347,20 +423,8 @@ export default function Categories() {
                           </div>
                           <span className="text-sm font-semibold text-[#1D1A1B]">No categories found</span>
                           <p className="text-xs text-[#5F5A5C] max-w-sm">
-                            {search 
-                              ? `No classification categories match "${search}". Try clearing your search.` 
-                              : "No classification categories have been created yet."}
+                            {search ? `No classification matches query "${search}".` : "No document categories registered."}
                           </p>
-                          {search && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => setSearch("")}
-                              className="mt-2 h-8 px-3 rounded-xl text-xs font-semibold text-[#1D1A1B] bg-[#FFFCF7] border-[#E8E3E1] hover:bg-[#F4E7EA] cursor-pointer"
-                            >
-                              Clear Search
-                            </Button>
-                          )}
                         </div>
                       </td>
                     </tr>
@@ -368,35 +432,25 @@ export default function Categories() {
                 </tbody>
               </table>
             </div>
-
-            {/* TABLE FOOTER */}
-            <div className="p-4 border-t border-[#E8E3E1] flex items-center justify-between bg-[#FFFCF7] text-xs text-[#5F5A5C]">
-              <span>
-                Total records: <strong className="text-[#1D1A1B]">{filteredCategories.length}</strong> categories
-              </span>
-              <span className="text-[11px] text-[#5F5A5C]">
-                ZPPSU Archiving & Classification Registry
-              </span>
-            </div>
           </CardContent>
         </Card>
 
-        {/* CREATE CATEGORY MODAL */}
+        {/* MODAL */}
         <CategoryModal
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          onSave={handleCreateCategory}
-          isEdit={false}
-          isSaving={isSaving}
-        />
-
-        {/* EDIT CATEGORY MODAL */}
-        <CategoryModal
-          isOpen={Boolean(editingCategory)}
+          isOpen={isModalOpen || Boolean(editingCategory)}
+          onClose={() => {
+            setIsModalOpen(false);
+            setEditingCategory(null);
+          }}
+          onSave={(name) => {
+            if (editingCategory) {
+              handleEditCategory(name);
+            } else {
+              handleCreateCategory(name);
+            }
+          }}
           initialName={editingCategory?.name || ""}
-          onClose={() => setEditingCategory(null)}
-          onSave={handleEditCategory}
-          isEdit={true}
+          isEdit={Boolean(editingCategory)}
           isSaving={isSaving}
         />
       </div>

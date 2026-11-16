@@ -41,6 +41,8 @@ export default function StorageExplorer({
   onEditContainer,
   onDeleteContainer,
   onViewFile,
+  onEditFile,
+  onDeleteFile,
 }) {
   // Navigation State
   const [selectedCabinetId, setSelectedCabinetId] = useState(null);
@@ -73,6 +75,7 @@ export default function StorageExplorer({
           // Direct Archfile in this cabinet or on shelves!
           directArchfiles.push({
             ...container,
+            cabinet_id: container.cabinet_id || currentCabinet?.id,
             displayName: parsed.archfileName,
             color: parsed.color,
           });
@@ -81,14 +84,17 @@ export default function StorageExplorer({
           if (!boxMap.has(parentName)) {
             boxMap.set(parentName, {
               id: `virtual-${parentName}`,
+              cabinet_id: container.cabinet_id || currentCabinet?.id,
               name: parentName,
               capacity: 100,
+              max_archfiles: 5,
               archfiles: [],
               directFiles: [],
             });
           }
           boxMap.get(parentName).archfiles.push({
             ...container,
+            cabinet_id: container.cabinet_id || currentCabinet?.id,
             displayName: parsed.archfileName,
             color: parsed.color,
           });
@@ -98,17 +104,38 @@ export default function StorageExplorer({
         if (!boxMap.has(boxName)) {
           boxMap.set(boxName, {
             id: container.id,
+            cabinet_id: container.cabinet_id || currentCabinet?.id,
             name: boxName,
             capacity: container.capacity || 100,
+            max_archfiles: container.max_archfiles ?? 5,
             archfiles: [],
             directFiles: container.files || [],
             rawBox: container,
           });
         } else {
           const existing = boxMap.get(boxName);
-          existing.id = container.id;
-          existing.rawBox = container;
-          existing.directFiles = container.files || [];
+          // If existing entry was a virtual placeholder created by an archfile, merge into real box
+          if (String(existing.id).startsWith("virtual-")) {
+            existing.id = container.id;
+            existing.cabinet_id = container.cabinet_id || currentCabinet?.id;
+            existing.capacity = container.capacity || existing.capacity || 100;
+            existing.max_archfiles = container.max_archfiles ?? existing.max_archfiles ?? 5;
+            existing.rawBox = container;
+            existing.directFiles = container.files || [];
+          } else {
+            // Both are real database containers; keep both visible so no box is mysteriously hidden
+            const uniqueKey = `${boxName}-dup-${container.id}`;
+            boxMap.set(uniqueKey, {
+              id: container.id,
+              cabinet_id: container.cabinet_id || currentCabinet?.id,
+              name: `${boxName} (${container.id})`,
+              capacity: container.capacity || 100,
+              max_archfiles: container.max_archfiles ?? 5,
+              archfiles: [],
+              directFiles: container.files || [],
+              rawBox: container,
+            });
+          }
         }
       }
     });
@@ -117,13 +144,27 @@ export default function StorageExplorer({
       boxes: Array.from(boxMap.values()),
       directArchfiles,
     };
-  }, [cabinetContainers]);
+  }, [cabinetContainers, currentCabinet]);
 
   // Active Box
   const currentBox = useMemo(() => {
     if (!selectedBoxName) return null;
     return cabinetStructure.boxes.find((b) => b.name === selectedBoxName) || null;
   }, [cabinetStructure, selectedBoxName]);
+
+  // Live Active Archfile with fresh files from fileBoxes
+  const activeArchfile = useMemo(() => {
+    if (!selectedArchfile) return null;
+    const fresh = fileBoxes.find((b) => b.id === selectedArchfile.id);
+    if (!fresh) return selectedArchfile;
+    const parsed = parseBoxHierarchy(fresh.name);
+    return {
+      ...fresh,
+      displayName: parsed.archfileName || selectedArchfile.displayName,
+      color: parsed.color || selectedArchfile.color,
+      files: fresh.files || [],
+    };
+  }, [fileBoxes, selectedArchfile]);
 
   // Breadcrumb navigation helpers
   const handleNavRoot = () => {
@@ -232,14 +273,17 @@ export default function StorageExplorer({
       {/* ============================================================== */}
       {/* 2. DYNAMIC VIEW BASED ON DRILL-DOWN DEPTH                     */}
       {/* ============================================================== */}
-      {selectedArchfile ? (
+      {activeArchfile ? (
         /* LEVEL 3: INSIDE AN ARCHFILE (RECORDS LIST) */
         <ArchfileRecordsView
-          archfile={selectedArchfile}
+          archfile={activeArchfile}
           cabinetName={currentCabinet?.name}
           boxName={currentBox?.name}
+          isAdmin={isAdmin}
           onBack={handleNavBox}
           onViewFile={onViewFile}
+          onEditFile={onEditFile}
+          onDeleteFile={onDeleteFile}
         />
       ) : selectedBoxName ? (
         /* LEVEL 2: INSIDE A FILE BOX (ARCHFILES & DIRECT FILES) */
@@ -255,6 +299,8 @@ export default function StorageExplorer({
           onEditContainer={onEditContainer}
           onDeleteContainer={onDeleteContainer}
           onViewFile={onViewFile}
+          onEditFile={onEditFile}
+          onDeleteFile={onDeleteFile}
         />
       ) : selectedCabinetId ? (
         /* LEVEL 1: INSIDE A CABINET / SHELVES UNIT */

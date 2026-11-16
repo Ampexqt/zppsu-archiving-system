@@ -9,19 +9,36 @@ const logsService = require("../logs/logs.service");
 const vectorService = require("./vector.service");
 const extractionService = require("./extraction.service");
 
+// Helper to guarantee scalar string values (prevents Prisma String array mismatch if fields are repeated in multipart forms)
+const toScalarString = (val, fallback = null) => {
+  if (Array.isArray(val)) {
+    const last = val[val.length - 1];
+    return last !== undefined && last !== null ? String(last).trim() : fallback;
+  }
+  if (val !== undefined && val !== null) {
+    return String(val).trim();
+  }
+  return fallback;
+};
+
+const toScalarDate = (val) => {
+  const scalar = toScalarString(val);
+  if (!scalar) return null;
+  const d = new Date(scalar);
+  return isNaN(d.getTime()) ? null : d;
+};
+
 // MODERN DOCUMENT UPLOAD
 exports.uploadFile = async (req, res) => {
   try {
-    const {
-      title,
-      category,
-      access_code,
-      subject,
-      document_type,
-      memo_date,
-      received_date,
-      file_box_id
-    } = req.body;
+    const title = toScalarString(req.body.title);
+    const category = toScalarString(req.body.category, "Uncategorized");
+    const access_code = toScalarString(req.body.access_code, "N/A");
+    const subject = toScalarString(req.body.subject);
+    const document_type = toScalarString(req.body.document_type, "Document");
+    const memo_date = toScalarDate(req.body.memo_date);
+    const received_date = toScalarDate(req.body.received_date) || new Date();
+    const file_box_id = toScalarString(req.body.file_box_id);
 
     if (!req.file) {
       return res.status(400).json({ message: "No file uploaded" });
@@ -84,7 +101,7 @@ exports.uploadFile = async (req, res) => {
     // 🤖 AI LOCAL METADATA EXTRACTION
     let finalSubject = subject;
     let finalDocType = document_type;
-    let finalMemoDate = memo_date ? new Date(memo_date) : null;
+    let finalMemoDate = memo_date;
 
     if (extractedText && extractedText.length > 10) {
       console.log("Running local AI extraction on document...");
@@ -138,28 +155,47 @@ exports.uploadFile = async (req, res) => {
       parsedFileBoxId = box.id;
     }
 
+    // Collect dynamic template fields
+    const dynamicData = { ...req.body };
+    const reservedFields = [
+      "title",
+      "category",
+      "file_box_id",
+      "access_code",
+      "subject",
+      "document_type",
+      "memo_date",
+      "received_date",
+    ];
+    reservedFields.forEach((k) => delete dynamicData[k]);
+    Object.keys(dynamicData).forEach((k) => {
+      if (Array.isArray(dynamicData[k])) {
+        dynamicData[k] = dynamicData[k][dynamicData[k].length - 1];
+      }
+    });
+
     // SAVE DATABASE
     const newFile = await prisma.files.create({
       data: {
         document_id: documentId,
         title: title || req.file.originalname,
-        category,
+        category: category || "Uncategorized",
         file_box_id: parsedFileBoxId,
         access_code: access_code || "N/A",
         subject: finalSubject || "N/A",
         document_type: finalDocType || "Document",
         file_type: fileExtension.replace(".", "").toUpperCase(),
         memo_date: finalMemoDate,
-        received_date: received_date ? new Date(received_date) : null,
+        received_date: received_date,
         file_name: req.file.filename,
         file_path: `uploads/${req.file.filename}`,
-        uploaded_by: req.user.id,
+        uploaded_by: req.user?.id ? Number(req.user.id) : null,
         ocr_text: extractedText,
         embedding: embedding.length > 0 ? embedding : [],
         status: "Active",
         is_deleted: false,
         is_generated: false,
-        category: category || "Uncategorized",
+        dynamic_data: Object.keys(dynamicData).length > 0 ? dynamicData : undefined,
       },
     });
 
@@ -183,25 +219,32 @@ exports.uploadFile = async (req, res) => {
 // GENERATE DOCUMENT (Previously uploadFile Excel generation)
 exports.generateDocument = async (req, res) => {
   try {
-    const {
-      title,
-      category,
-      file_box_id,
-      access_code,
-      subject,
-      document_type,
-      memo_date,
-      received_date,
-    } = req.body;
+    const title = toScalarString(req.body.title);
+    const category = toScalarString(req.body.category, "Uncategorized");
+    const access_code = toScalarString(req.body.access_code, "N/A");
+    const subject = toScalarString(req.body.subject, "N/A");
+    const document_type = toScalarString(req.body.document_type, "Document");
+    const memo_date = toScalarDate(req.body.memo_date);
+    const received_date = toScalarDate(req.body.received_date) || new Date();
+    const file_box_id = toScalarString(req.body.file_box_id);
 
     const dynamicData = { ...req.body };
-    delete dynamicData.title;
-    delete dynamicData.category;
-    delete dynamicData.file_box_id;
-    delete dynamicData.subject;
-    delete dynamicData.document_type;
-    delete dynamicData.memo_date;
-    delete dynamicData.received_date;
+    const reservedFields = [
+      "title",
+      "category",
+      "file_box_id",
+      "access_code",
+      "subject",
+      "document_type",
+      "memo_date",
+      "received_date",
+    ];
+    reservedFields.forEach((k) => delete dynamicData[k]);
+    Object.keys(dynamicData).forEach((k) => {
+      if (Array.isArray(dynamicData[k])) {
+        dynamicData[k] = dynamicData[k][dynamicData[k].length - 1];
+      }
+    });
 
     const currentYear = new Date().getFullYear();
     const latestDocument = await prisma.files.findFirst({ orderBy: { id: "desc" } });
@@ -248,14 +291,14 @@ exports.generateDocument = async (req, res) => {
         file_type: "EXCEL",
         is_generated: true,
         generated_type: document_type,
-        memo_date: memo_date ? new Date(memo_date) : null,
-        received_date: received_date ? new Date(received_date) : null,
+        memo_date,
+        received_date,
         file_name: templateFileName,
         file_path: `uploads/${templateFileName}`,
-        dynamic_data: dynamicData,
+        dynamic_data: Object.keys(dynamicData).length > 0 ? dynamicData : undefined,
         is_deleted: false,
         status: "Active",
-        uploaded_by: req.user.id,
+        uploaded_by: req.user?.id ? Number(req.user.id) : null,
       },
     });
 
@@ -490,5 +533,69 @@ exports.assignFileBox = async (req, res) => {
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Assignment failed" });
+  }
+};
+
+// UPDATE FILE (Admin or Owner) - Updates scalar fields and merges dynamic template specifications
+exports.updateFile = async (req, res) => {
+  try {
+    const fileId = Number(req.params.id);
+    const {
+      title,
+      subject,
+      document_type,
+      status,
+      access_code,
+      memo_date,
+      received_date,
+      dynamic_data,
+      is_deleted,
+    } = req.body;
+
+    const file = await prisma.files.findUnique({ where: { id: fileId } });
+    if (!file) return res.status(404).json({ message: "File not found" });
+
+    // Enforce ownership: Staff can only edit files they uploaded
+    if (req.user.role !== "Admin" && file.uploaded_by !== req.user.id) {
+      return res.status(403).json({ message: "Access denied. You can only edit documents you uploaded." });
+    }
+
+    // Prepare merged dynamic data safely
+    const existingDynamic = typeof file.dynamic_data === "object" && file.dynamic_data !== null
+      ? file.dynamic_data
+      : {};
+    const incomingDynamic = typeof dynamic_data === "object" && dynamic_data !== null
+      ? dynamic_data
+      : {};
+    const mergedDynamicData = {
+      ...existingDynamic,
+      ...incomingDynamic,
+    };
+
+    const updatedFile = await prisma.files.update({
+      where: { id: fileId },
+      data: {
+        ...(title !== undefined && { title: toScalarString(title, file.title) }),
+        ...(subject !== undefined && { subject: toScalarString(subject, file.subject) }),
+        ...(document_type !== undefined && { document_type: toScalarString(document_type, file.document_type) }),
+        ...(status !== undefined && { status: toScalarString(status, file.status) }),
+        ...(access_code !== undefined && { access_code: toScalarString(access_code, file.access_code) }),
+        ...(memo_date !== undefined && { memo_date: toScalarDate(memo_date) }),
+        ...(received_date !== undefined && { received_date: toScalarDate(received_date) }),
+        ...(dynamic_data !== undefined && { dynamic_data: mergedDynamicData }),
+        ...(is_deleted !== undefined && { is_deleted: Boolean(is_deleted) }),
+      },
+    });
+
+    if (status === "Active" && is_deleted === false && file.is_deleted === true) {
+      await logsService.createLog("RESTORE", `Restored ${updatedFile.document_type || 'File'} (${updatedFile.document_id || updatedFile.id})`, req.user.id);
+    } else {
+      await logsService.createLog("EDIT", `Edited ${updatedFile.document_type || 'File'} (${updatedFile.document_id || updatedFile.id})`, req.user.id);
+    }
+
+    return res.json(updatedFile);
+  } catch (error) {
+    console.error("UPDATE FILE ERROR:", error);
+    return res.status(500).json({ message: "Failed to update file" });
   }
 };

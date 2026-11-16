@@ -72,22 +72,25 @@ model logs {
 }
 
 model cabinets {
-  id         Int          @id @default(autoincrement())
-  name       String
-  capacity   Int
-  status     String
-  created_at DateTime     @default(now())
-  file_boxes file_boxes[] @relation("CabinetFileBoxes")
+  id                   Int          @id @default(autoincrement())
+  name                 String
+  capacity             Int          @default(100)
+  max_file_boxes       Int?         @default(10)
+  max_direct_archfiles Int?         @default(10)
+  status               String
+  created_at           DateTime     @default(now())
+  file_boxes           file_boxes[] @relation("CabinetFileBoxes")
 }
 
 model file_boxes {
-  id         Int      @id @default(autoincrement())
-  name       String
-  cabinet_id Int
-  capacity   Int
-  used_space Int      @default(0)
-  status     String
-  created_at DateTime @default(now())
-  cabinet    cabinets @relation("CabinetFileBoxes", fields: [cabinet_id], references: [id])
-  files      files[]  @relation("FileBoxFiles")
+  id            Int      @id @default(autoincrement())
+  name          String
+  cabinet_id    Int
+  capacity      Int      @default(50)
+  max_archfiles Int?     @default(5)
+  used_space    Int      @default(0)
+  status        String
+  created_at    DateTime @default(now())
+  cabinet       cabinets @relation("CabinetFileBoxes", fields: [cabinet_id], references: [id])
+  files         files[]  @relation("FileBoxFiles")
 }

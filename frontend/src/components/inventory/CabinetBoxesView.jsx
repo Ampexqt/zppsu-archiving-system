@@ -126,10 +126,10 @@ export default function CabinetBoxesView({
                   ? "border-[#E8E3E1] text-[#5F5A5C] cursor-not-allowed opacity-80"
                   : "border-[#6B1D2A]/30 text-[#6B1D2A] hover:bg-[#F4E7EA] hover:border-[#6B1D2A] cursor-pointer"
               }`}
-              title={isArchfilesFull ? `Direct archfile limit reached (${directArchfiles.length}/${maxDirectArchfiles})` : "Create new direct Archfile"}
+              title={isArchfilesFull ? `Direct shelf archfile limit reached (${directArchfiles.length}/${maxDirectArchfiles})` : "Create new standalone Archfile directly on cabinet shelf"}
             >
               <Plus className="w-3.5 h-3.5 text-[#6B1D2A]" />
-              <span>{isArchfilesFull ? `Archfiles Full (${directArchfiles.length}/${maxDirectArchfiles})` : "New Archfile"}</span>
+              <span>{isArchfilesFull ? `Shelf Archfiles Full (${directArchfiles.length}/${maxDirectArchfiles})` : "New Shelf Archfile"}</span>
             </Button>
           </div>
         )}

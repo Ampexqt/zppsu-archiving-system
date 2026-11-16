@@ -174,7 +174,7 @@ export default function EditCabinetModal({
               {/* MAX FILE BOXES */}
               <div className="space-y-1">
                 <label className="text-[11px] font-bold text-[#1D1A1B] uppercase flex items-center justify-between">
-                  <span>File Boxes</span>
+                  <span>File Boxes (Shelf)</span>
                   <span className="text-[10px] font-normal text-[#5F5A5C]">Current: {currentBoxesCount}</span>
                 </label>
                 <Input
@@ -186,14 +186,14 @@ export default function EditCabinetModal({
                   required
                 />
                 <span className="text-[9px] text-[#5F5A5C] block">
-                  Min limit: {currentBoxesCount || 1}
+                  Max boxes on shelf (Min: {currentBoxesCount || 1})
                 </span>
               </div>
 
               {/* MAX DIRECT ARCHFILES */}
               <div className="space-y-1">
                 <label className="text-[11px] font-bold text-[#1D1A1B] uppercase flex items-center justify-between">
-                  <span>Archfiles</span>
+                  <span>Direct Archfiles</span>
                   <span className="text-[10px] font-normal text-[#5F5A5C]">Current: {currentArchfilesCount}</span>
                 </label>
                 <Input
@@ -205,14 +205,14 @@ export default function EditCabinetModal({
                   required
                 />
                 <span className="text-[9px] text-[#5F5A5C] block">
-                  Min limit: {currentArchfilesCount || 0}
+                  Loose binders on shelf (Min: {currentArchfilesCount || 0})
                 </span>
               </div>
             </div>
 
-            <div className="p-2 rounded-lg bg-[#FFFCF7] border border-[#E8E3E1] text-[10px] text-[#5F5A5C] leading-relaxed">
-              <span className="font-bold text-[#1D1A1B]">Note: </span>
-              Physical limits govern containers (boxes &amp; binders). Document filing limits are managed individually per container.
+            <div className="p-2.5 rounded-lg bg-[#FFFCF7] border border-[#E8E3E1] text-[10px] text-[#5F5A5C] leading-relaxed">
+              <span className="font-bold text-[#1D1A1B]">Cabinet Rules: </span>
+              <strong>Direct Archfiles</strong> applies exclusively to standalone binders sitting directly on cabinet shelves outside boxes. Binders packed inside individual File Boxes follow each box's own capacity limit.
             </div>
           </div>
 

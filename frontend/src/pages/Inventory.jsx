@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import axios from "axios";
-import { Plus, Download, Printer } from "lucide-react";
+import { Plus } from "lucide-react";
 import DashboardLayout from "../components/layout/DashboardLayout";
 import DocumentViewModal from "../components/modals/DocumentViewModal";
 import DocumentEditModal from "../components/modals/DocumentEditModal";
@@ -17,7 +17,6 @@ import CreateArchfileModal from "../components/inventory/CreateArchfileModal";
 import EditCabinetModal from "../components/inventory/EditCabinetModal";
 import EditFileBoxModal from "../components/inventory/EditFileBoxModal";
 import { parseBoxHierarchy } from "../components/inventory/storageTaxonomy";
-import { exportStorageManifest } from "../utils/storageManifestExporter";
 
 function Inventory() {
   const toast = useToast();
@@ -60,7 +59,6 @@ function Inventory() {
   const [viewingFile, setViewingFile] = useState(null);
   const [editingFile, setEditingFile] = useState(null);
   const [isSavingFile, setIsSavingFile] = useState(false);
-  const [isExportingManifest, setIsExportingManifest] = useState(false);
 
   const fetchData = async () => {
     try {
@@ -237,24 +235,6 @@ function Inventory() {
     }
   };
 
-  // Export Storage Manifest Handler
-  const handleExportManifest = async () => {
-    if (cabinets.length === 0 && fileBoxes.length === 0) {
-      toast.info("No storage units or containers to export.", "Storage Manifest");
-      return;
-    }
-    try {
-      setIsExportingManifest(true);
-      await exportStorageManifest(cabinets, fileBoxes);
-      toast.success("Storage inventory manifest exported to Excel (.xlsx).", "Manifest Exported");
-    } catch (error) {
-      console.error("Storage export failed:", error);
-      toast.error(error.message || "Failed to generate storage manifest.", "Export Error");
-    } finally {
-      setIsExportingManifest(false);
-    }
-  };
-
   // Edit Document Metadata & Storage Handler
   const handleSaveFileEdit = async ({
     subject,
@@ -344,30 +324,8 @@ function Inventory() {
             </p>
           </div>
 
-          <div className="flex items-center gap-2 no-print">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => window.print()}
-              className="bg-[#FFFCF7] text-[#1D1A1B] border-[#E8E3E1] hover:bg-[#F4E7EA] h-9 px-3.5 rounded-xl font-bold text-xs shadow-2xs flex items-center gap-1.5 cursor-pointer transition-colors"
-              title="Print official physical storage manifest"
-            >
-              <Printer className="w-3.5 h-3.5 text-[#6B1D2A]" />
-              <span>Print Manifest</span>
-            </Button>
-
-            <Button
-              variant="outline"
-              onClick={handleExportManifest}
-              disabled={isExportingManifest}
-              className="bg-[#FFFCF7] text-[#6B1D2A] border-[#6B1D2A]/30 hover:bg-[#F4E7EA] hover:border-[#6B1D2A] h-9 px-3.5 rounded-xl font-bold text-xs shadow-2xs flex items-center gap-1.5 cursor-pointer transition-colors"
-              title="Export complete storage hierarchy and containers to Excel (.xlsx)"
-            >
-              <Download className="w-3.5 h-3.5 text-[#6B1D2A]" />
-              <span>{isExportingManifest ? "Exporting..." : "Export Manifest"}</span>
-            </Button>
-
-            {isAdmin && (
+          {isAdmin && (
+            <div className="flex items-center gap-2 no-print">
               <Button
                 onClick={() => setIsCreateUnitModalOpen(true)}
                 className="bg-[#6B1D2A] text-[#FFFCF7] hover:bg-[#8B3545] h-9 px-4 rounded-xl font-bold text-xs shadow-xs flex items-center gap-1.5 cursor-pointer"
@@ -375,8 +333,8 @@ function Inventory() {
                 <Plus className="w-3.5 h-3.5" />
                 <span>New Storage Unit</span>
               </Button>
-            )}
-          </div>
+            </div>
+          )}
         </div>
 
         {/* SUMMARY METRIC CARDS */}

@@ -305,8 +305,8 @@ export default function CreateCabinetModal({
                   {/* MAX DIRECT ARCHFILES */}
                   <div className="space-y-1.5">
                     <label className="text-[11px] font-bold text-[#1D1A1B] uppercase flex items-center justify-between">
-                      <span>Max Direct Archfiles</span>
-                      <span className="text-[10px] font-normal text-[#5F5A5C]">Limit</span>
+                      <span>Direct Shelf Archfiles</span>
+                      <span className="text-[10px] font-normal text-[#5F5A5C]">Shelf Limit</span>
                     </label>
                     <div className="flex items-center gap-1.5">
                       <Button
@@ -337,9 +337,14 @@ export default function CreateCabinetModal({
                       </Button>
                     </div>
                     <span className="text-[10px] text-[#5F5A5C] block">
-                      Max direct binders placed in unit (e.g. 2).
+                      Standalone binders placed directly on shelves (outside boxes).
                     </span>
                   </div>
+                </div>
+
+                <div className="p-2.5 rounded-lg bg-[#FFFCF7] border border-[#E8E3E1] text-[10px] text-[#5F5A5C] leading-relaxed">
+                  <span className="font-bold text-[#1D1A1B]">Cabinet Rules: </span>
+                  <strong>Direct Archfiles</strong> applies only to standalone binders sitting directly on the cabinet shelf. Binders stored inside File Boxes are governed separately by each box container's limit.
                 </div>
               </div>
 

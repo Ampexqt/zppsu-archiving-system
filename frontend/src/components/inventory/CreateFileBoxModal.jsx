@@ -251,7 +251,7 @@ export default function CreateFileBoxModal({
             {/* INNER ARCHFILES CAPACITY */}
             <div className="space-y-1">
               <label className="text-[11px] font-bold text-[#1D1A1B] uppercase block">
-                Max Archfiles Limit
+                Inner Archfiles Limit
               </label>
               <Input
                 type="number"

@@ -351,7 +351,7 @@ export default function EditFileBoxModal({
             {isDirectFileBox ? (
               <div className="space-y-1">
                 <label className="text-[11px] font-bold text-[#1D1A1B] uppercase flex items-center justify-between">
-                  <span>Archfiles</span>
+                  <span>Inner Archfiles Limit</span>
                   <span className="text-[10px] font-normal text-[#5F5A5C]">
                     Current: {currentNestedArchfiles}
                   </span>
@@ -365,7 +365,7 @@ export default function EditFileBoxModal({
                   required
                 />
                 <span className="text-[9px] text-[#5F5A5C] block">
-                  Min limit: {currentNestedArchfiles || 1}
+                  Max binders inside this box (Min: {currentNestedArchfiles || 1})
                 </span>
               </div>
             ) : null}

@@ -12,7 +12,9 @@
     "prisma:generate": "cd backend && npx prisma generate",
     "prisma:seed": "npx prisma db seed",
     "seed": "npx prisma db seed",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "test:playwright": "node tests/e2e_full_conversation_test.js",
+    "test:pwa": "node tests/pwa_compliance_test.js"
   },
   "keywords": [],
   "author": "",

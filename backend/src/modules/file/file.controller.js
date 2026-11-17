@@ -8,6 +8,7 @@ const { appendToExcel, getTemplateFileName } = require("../../utils/excelManager
 const logsService = require("../logs/logs.service");
 const vectorService = require("./vector.service");
 const extractionService = require("./extraction.service");
+const geminiService = require("./gemini.service");
 
 // Helper to guarantee scalar string values (prevents Prisma String array mismatch if fields are repeated in multipart forms)
 const toScalarString = (val, fallback = null) => {
@@ -46,8 +47,9 @@ exports.uploadFile = async (req, res) => {
 
     const fileExtension = path.extname(req.file.originalname).toLowerCase();
     let extractedText = "";
+    let geminiMetadata = null;
 
-    // Text Extraction and Conditional OCR for PDFs and Office Docs
+    // Text Extraction and Conditional OCR for PDFs, Office Docs, and Images
     if (fileExtension === ".pdf") {
       try {
         const dataBuffer = fs.readFileSync(req.file.path);
@@ -57,8 +59,16 @@ exports.uploadFile = async (req, res) => {
         // If no machine-readable text found, assume image-based PDF and run OCR
         if (extractedText.length < 50) {
           console.log("PDF has no readable text. Running OCR...");
-          const result = await Tesseract.recognize(req.file.path, "eng");
-          extractedText = result.data.text;
+          if (geminiService.isConfigured()) {
+            geminiMetadata = await geminiService.analyzeDocumentWithGemini(req.file.path, "application/pdf");
+            if (geminiMetadata?.clean_ocr_text) {
+              extractedText = geminiMetadata.clean_ocr_text;
+            }
+          }
+          if (!extractedText || extractedText.length < 50) {
+            const result = await Tesseract.recognize(req.file.path, "eng");
+            extractedText = result.data.text;
+          }
         }
       } catch (err) {
         console.error("PDF Parsing/OCR Error:", err);
@@ -71,46 +81,75 @@ exports.uploadFile = async (req, res) => {
       } catch (err) {
         console.error("Office Document Parsing Error:", err);
       }
-    } else if ([".jpg", ".jpeg", ".png"].includes(fileExtension)) {
-      try {
-        console.log("Image detected. Running OCR...");
-        const result = await Tesseract.recognize(req.file.path, "eng");
-        extractedText = result.data.text;
-      } catch (err) {
-        console.error("Image OCR Error:", err);
+    } else if ([".jpg", ".jpeg", ".png", ".webp"].includes(fileExtension)) {
+      // 1. Prefer Gemini Vision OCR for images when configured (human-grade accuracy, auto-crops UI ribbons)
+      if (geminiService.isConfigured()) {
+        try {
+          console.log("Image detected. Running Gemini Vision OCR & Metadata extraction...");
+          geminiMetadata = await geminiService.analyzeDocumentWithGemini(req.file.path, req.file.mimetype);
+          if (geminiMetadata?.clean_ocr_text) {
+            extractedText = geminiMetadata.clean_ocr_text;
+          }
+        } catch (err) {
+          console.error("Gemini Vision OCR Error:", err);
+        }
+      }
+
+      // 2. Local Tesseract OCR fallback if Gemini is unconfigured, offline, or timed out
+      if (!extractedText) {
+        try {
+          console.log("Running local Tesseract OCR fallback for image...");
+          const result = await Tesseract.recognize(req.file.path, "eng");
+          extractedText = result.data.text;
+        } catch (err) {
+          console.error("Image OCR Error:", err);
+        }
       }
     }
 
-    // --- OCR TEXT OPTIMIZATION / CLEANUP ---
-    if (extractedText) {
+    // --- OCR TEXT OPTIMIZATION / CLEANUP (For raw Tesseract text) ---
+    if (extractedText && !geminiMetadata) {
       // Split into lines, and remove lines that are mostly garbage/noise from the top
       let lines = extractedText.split('\n');
       while (lines.length > 0) {
         let line = lines[0].trim();
-        // If line is empty, or has less than 5 characters and is mostly symbols, or doesn't have a solid word, drop it
         if (!line || line.length < 4 || (line.replace(/[^a-zA-Z]/g, '').length < 4 && !line.match(/^[A-Z0-9]{3,}$/))) {
           lines.shift();
         } else {
-          break; // Found the first real line (e.g., ZAMBOANGA)
+          break;
         }
       }
       extractedText = lines.join('\n').trim();
     }
 
-
-    // 🤖 AI LOCAL METADATA EXTRACTION
+    // 🤖 AI METADATA EXTRACTION & TAXONOMY CLASSIFICATION
     let finalSubject = subject;
     let finalDocType = document_type;
     let finalMemoDate = memo_date;
 
-    if (extractedText && extractedText.length > 10) {
+    // Apply Gemini high-confidence metadata if generated
+    if (geminiMetadata) {
+      if ((!finalSubject || finalSubject === "N/A" || finalSubject === "null") && geminiMetadata.subject) {
+        finalSubject = geminiMetadata.subject;
+      }
+      if ((!finalDocType || finalDocType === "Document" || finalDocType === "null") && geminiMetadata.document_type && geminiMetadata.document_type !== "Document") {
+        finalDocType = geminiMetadata.document_type;
+      }
+      if (!finalMemoDate && geminiMetadata.memo_date) {
+        finalMemoDate = geminiMetadata.memo_date;
+      }
+      console.log("Gemini Metadata applied:", { finalSubject, finalDocType, finalMemoDate, confidence: geminiMetadata.confidence_score });
+    }
+
+    // Local AI fallback if metadata still unresolved
+    if ((!finalSubject || finalSubject === "N/A" || !finalDocType || finalDocType === "Document") && extractedText && extractedText.length > 10) {
       console.log("Running local AI extraction on document...");
       const aiData = await extractionService.extractMetadata(extractedText);
       if (aiData) {
         if (!finalSubject || finalSubject === "N/A" || finalSubject === "null") finalSubject = aiData.subject || finalSubject;
         if (!finalDocType || finalDocType === "Document" || finalDocType === "null") finalDocType = aiData.document_type || finalDocType;
         if (!finalMemoDate) finalMemoDate = aiData.memo_date || null;
-        console.log("AI Metadata extracted:", { finalSubject, finalDocType, finalMemoDate });
+        console.log("Local AI Metadata extracted:", { finalSubject, finalDocType, finalMemoDate });
       }
     }
 
@@ -173,6 +212,14 @@ exports.uploadFile = async (req, res) => {
         dynamicData[k] = dynamicData[k][dynamicData[k].length - 1];
       }
     });
+
+    // Enforce AI insights in dynamic data if generated
+    if (geminiMetadata?.summary) {
+      dynamicData.ai_summary = geminiMetadata.summary;
+      dynamicData.ai_provider = geminiMetadata.provider;
+      dynamicData.ai_model = geminiMetadata.model;
+      dynamicData.ai_confidence = geminiMetadata.confidence_score;
+    }
 
     // SAVE DATABASE
     const newFile = await prisma.files.create({
@@ -245,6 +292,14 @@ exports.generateDocument = async (req, res) => {
         dynamicData[k] = dynamicData[k][dynamicData[k].length - 1];
       }
     });
+
+    // Enforce AI insights in dynamic data if generated
+    if (geminiMetadata?.summary) {
+      dynamicData.ai_summary = geminiMetadata.summary;
+      dynamicData.ai_provider = geminiMetadata.provider;
+      dynamicData.ai_model = geminiMetadata.model;
+      dynamicData.ai_confidence = geminiMetadata.confidence_score;
+    }
 
     const currentYear = new Date().getFullYear();
     const latestDocument = await prisma.files.findFirst({ orderBy: { id: "desc" } });
@@ -597,5 +652,23 @@ exports.updateFile = async (req, res) => {
   } catch (error) {
     console.error("UPDATE FILE ERROR:", error);
     return res.status(500).json({ message: "Failed to update file" });
+  }
+};
+
+// OCR & AI PIPELINE STATUS
+exports.getOcrStatus = async (req, res) => {
+  try {
+    const isConfigured = geminiService.isConfigured();
+    const model = geminiService.getModel();
+    return res.json({
+      gemini_configured: isConfigured,
+      model: model,
+      active_pipeline: isConfigured
+        ? "Hybrid (Tier-1 Local + Tier-2 Gemini Cloud Fallback)"
+        : "Tier-1 Local Only (Tesseract.js + DistilBERT)",
+    });
+  } catch (error) {
+    console.error("Error retrieving OCR status:", error);
+    return res.status(500).json({ message: "Failed to get OCR status" });
   }
 };

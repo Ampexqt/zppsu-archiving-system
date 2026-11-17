@@ -37,6 +37,13 @@ router.get(
   fileController.getAllFiles
 );
 
+// OCR PIPELINE STATUS
+router.get(
+  "/ocr-status",
+  authMiddleware,
+  fileController.getOcrStatus
+);
+
 // PERMANENT DELETE (Admin Only)
 router.delete(
   "/permanent/:id",

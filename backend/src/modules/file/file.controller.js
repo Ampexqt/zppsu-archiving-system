@@ -183,8 +183,12 @@ exports.uploadFile = async (req, res) => {
     const documentId = `${prefix}-${currentYear}-${sequence}`;
 
     let parsedFileBoxId = null;
+    let box = null;
     if (file_box_id) {
-      const box = await prisma.file_boxes.findUnique({ where: { id: Number(file_box_id) } });
+      box = await prisma.file_boxes.findUnique({
+        where: { id: Number(file_box_id) },
+        include: { cabinet: true },
+      });
       if (!box) {
         return res.status(400).json({ message: "Specified file box does not exist" });
       }
@@ -221,6 +225,10 @@ exports.uploadFile = async (req, res) => {
       dynamicData.ai_confidence = geminiMetadata.confidence_score;
     }
 
+    if (box && !dynamicData.file_location) {
+      dynamicData.file_location = box.cabinet?.name ? `${box.cabinet.name} - ${box.name}` : box.name;
+    }
+
     // SAVE DATABASE
     const newFile = await prisma.files.create({
       data: {
@@ -243,6 +251,9 @@ exports.uploadFile = async (req, res) => {
         is_deleted: false,
         is_generated: false,
         dynamic_data: Object.keys(dynamicData).length > 0 ? dynamicData : undefined,
+      },
+      include: {
+        file_box: { include: { cabinet: true } },
       },
     });
 
@@ -293,13 +304,6 @@ exports.generateDocument = async (req, res) => {
       }
     });
 
-    // Enforce AI insights in dynamic data if generated
-    if (geminiMetadata?.summary) {
-      dynamicData.ai_summary = geminiMetadata.summary;
-      dynamicData.ai_provider = geminiMetadata.provider;
-      dynamicData.ai_model = geminiMetadata.model;
-      dynamicData.ai_confidence = geminiMetadata.confidence_score;
-    }
 
     const currentYear = new Date().getFullYear();
     const latestDocument = await prisma.files.findFirst({ orderBy: { id: "desc" } });
@@ -323,8 +327,12 @@ exports.generateDocument = async (req, res) => {
     const templateFileName = getTemplateFileName(document_type);
 
     let parsedFileBoxId = null;
+    let box = null;
     if (file_box_id) {
-      const box = await prisma.file_boxes.findUnique({ where: { id: Number(file_box_id) } });
+      box = await prisma.file_boxes.findUnique({
+        where: { id: Number(file_box_id) },
+        include: { cabinet: true },
+      });
       if (!box) {
         return res.status(400).json({ message: "Specified file box does not exist" });
       }
@@ -332,6 +340,15 @@ exports.generateDocument = async (req, res) => {
         return res.status(400).json({ message: "Specified file box is already full" });
       }
       parsedFileBoxId = box.id;
+    }
+
+    // Ensure physical location is recorded in dynamic data if assigned
+    const computedLocation = box
+      ? (box.cabinet?.name ? `${box.cabinet.name} - ${box.name}` : box.name)
+      : (req.body.file_location || "Unassigned");
+
+    if (!dynamicData.file_location) {
+      dynamicData.file_location = computedLocation;
     }
 
     const newFile = await prisma.files.create({
@@ -355,9 +372,16 @@ exports.generateDocument = async (req, res) => {
         status: "Active",
         uploaded_by: req.user?.id ? Number(req.user.id) : null,
       },
+      include: {
+        file_box: { include: { cabinet: true } },
+      },
     });
 
-    await appendToExcel(document_type, { ...req.body, document_id: documentId });
+    await appendToExcel(document_type, {
+      ...req.body,
+      file_location: dynamicData.file_location || computedLocation,
+      document_id: documentId,
+    });
 
     if (parsedFileBoxId) {
       await prisma.file_boxes.update({

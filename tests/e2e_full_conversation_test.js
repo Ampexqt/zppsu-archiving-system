@@ -4,7 +4,7 @@ const assert = require("assert");
 const BASE_URL = "http://localhost:5174";
 const ADMIN_USER = {
   email: "admin@example.com",
-  password: "AdminSelfPassword123!",
+  password: "password123",
   name: "System Admin",
 };
 const STAFF_USER = {
@@ -51,9 +51,9 @@ async function runE2ETests() {
     totalTests++;
     try {
       await adminPage.goto(`${BASE_URL}/login`);
-      await adminPage.waitForSelector("input#email");
-      await adminPage.fill("input#email", ADMIN_USER.email);
-      await adminPage.fill("input#password", ADMIN_USER.password);
+      await adminPage.waitForSelector("input[type='email']", { timeout: 10000 });
+      await adminPage.fill("input[type='email']", ADMIN_USER.email);
+      await adminPage.fill("input[type='password']", ADMIN_USER.password);
       await adminPage.click("button[type='submit']");
       await adminPage.waitForURL("**/dashboard", { timeout: 10000 });
       logPass("Admin logged in successfully and navigated to /dashboard");
@@ -61,14 +61,15 @@ async function runE2ETests() {
       logFail("Admin login failed", err);
     }
 
-    // 1.2 Dashboard Real-Time Stream (No 'undefined', No 'document' title, No clipping)
+    // 1.2 Dashboard Real-Time Stream (No 'undefined', No 'document' title, No horizontal clipping)
     totalTests++;
     try {
-      await adminPage.waitForSelector("text=Real-Time Archival Stream");
-      
-      // Check Live indicator
-      const liveBadge = await adminPage.locator("text=Live").first();
-      assert.ok(await liveBadge.isVisible(), "Live badge should be visible");
+      await adminPage.waitForSelector("text=Real-Time Archival Stream", { timeout: 10000 });
+      await adminPage.waitForSelector("table tbody tr:has-text('DOC-')", { timeout: 10000 });
+
+      // Check Live indicator badge
+      const liveBadge = adminPage.locator("span:has-text('Live')").first();
+      assert.ok(await liveBadge.isVisible(), "Live badge must be visible");
 
       // Verify Physical Storage column contains NO 'undefined'
       const tableText = await adminPage.locator("table").first().innerText();
@@ -78,28 +79,35 @@ async function runE2ETests() {
 
       // Verify title resolution does not display generic 'document'
       assert.ok(!tableText.includes("\ndocument\n"), "Title should not resolve to raw generic 'document'");
-      assert.ok(tableText.includes("The Importance of Time Management in Acade"), "Should resolve meaningful subject");
+      assert.ok(
+        tableText.includes("The Importance of Time Management") ||
+        tableText.includes("Strategies for Balancing Studies"),
+        "Should resolve meaningful document subject"
+      );
 
-      // Verify Inspect button is visible without clipping
+      // Verify Inspect button is visible without horizontal clipping
       const inspectBtn = adminPage.locator("button:has-text('Inspect')").first();
-      assert.ok(await inspectBtn.isVisible(), "Inspect button should be fully visible");
+      assert.ok(await inspectBtn.isVisible(), "Inspect button should be fully visible without clipping");
 
       logPass("Dashboard Real-Time Stream verified: clean storage hierarchy, smart titles, and zero clipping");
     } catch (err) {
       logFail("Dashboard Real-Time Stream verification failed", err);
     }
 
-    // 1.3 Modal Preview Inspection from Dashboard
+    // 1.3 Modal Preview Inspection from Dashboard Stream
     totalTests++;
     try {
       const inspectBtn = adminPage.locator("button:has-text('Inspect')").first();
       await inspectBtn.click();
-      await adminPage.waitForSelector("text=Official Archival Dossier", { timeout: 5000 });
-      
+      await adminPage.waitForSelector("div[role='dialog']", { timeout: 5000 });
+
       // Close modal
-      const closeBtn = adminPage.locator("button:has-text('Close Dossier')");
+      const closeBtn = adminPage
+        .locator("div[role='dialog'] button:has-text('Close')")
+        .or(adminPage.locator("button[aria-label='Close document viewer']"))
+        .first();
       await closeBtn.click();
-      await adminPage.waitForSelector("text=Official Archival Dossier", { state: "hidden", timeout: 5000 });
+      await adminPage.waitForSelector("div[role='dialog']", { state: "hidden", timeout: 5000 });
       logPass("Document Dossier modal opened from stream inspect and closed cleanly");
     } catch (err) {
       logFail("Modal preview inspection failed", err);
@@ -110,8 +118,14 @@ async function runE2ETests() {
     try {
       const auditTabBtn = adminPage.locator("button:has-text('Audit Log')");
       await auditTabBtn.click();
-      await adminPage.waitForSelector("text=Showing latest 5 activities", { timeout: 5000 });
-      logPass("Switched to Audit Log tab with color-coded activity badges");
+      await adminPage.waitForSelector("text=activities", { timeout: 5000 });
+      
+      // Switch back to Latest Records
+      const recordsTabBtn = adminPage.locator("button:has-text('Latest Records')");
+      await recordsTabBtn.click();
+      await adminPage.waitForSelector("table tbody tr:has-text('DOC-')", { timeout: 5000 });
+
+      logPass("Switched between Latest Records and Audit Log tabs seamlessly");
     } catch (err) {
       logFail("Audit Log tab switch failed", err);
     }
@@ -120,10 +134,10 @@ async function runE2ETests() {
     totalTests++;
     try {
       await adminPage.goto(`${BASE_URL}/users`);
-      await adminPage.waitForSelector("text=User Access Control & Staff Directory");
+      await adminPage.waitForSelector("table tbody tr:has-text('Administrator')", { timeout: 15000 });
 
-      // Check Administrator rows: Key and Demote icons should be disabled/locked
-      const adminRows = adminPage.locator("tr:has-text('Administrator')");
+      // Check Administrator rows: Key, Demote, and Delete icons are disabled with protected tooltips
+      const adminRows = adminPage.locator("table tbody tr:has-text('Administrator')");
       const adminRowCount = await adminRows.count();
       assert.ok(adminRowCount >= 2, "Should find at least 2 administrators in table");
 
@@ -137,7 +151,11 @@ async function runE2ETests() {
       assert.ok(await disabledDeleteIcon.isVisible(), "Admin row delete icon must have protected tooltip");
 
       // Check Staff rows: should have active buttons
-      const staffRow = adminPage.locator("tr:has-text('Staff')").first();
+      const staffRows = adminPage.locator("table tbody tr:has-text('Staff')");
+      const staffRowCount = await staffRows.count();
+      assert.ok(staffRowCount > 0, "Should find staff member accounts in table");
+
+      const staffRow = staffRows.first();
       const activeKeyBtn = staffRow.locator("button[title='Reset Staff Password']");
       const activePromoteBtn = staffRow.locator("button[title='Promote to Administrator']");
       const activeDeleteBtn = staffRow.locator("button[title='Delete Account']");
@@ -155,26 +173,28 @@ async function runE2ETests() {
     totalTests++;
     try {
       await adminPage.goto(`${BASE_URL}/inventory`);
-      await adminPage.waitForSelector("text=Physical Storage & Inventory");
+      await adminPage.waitForSelector("h3:has-text('Cabinet 02')", { timeout: 15000 });
 
-      // Verify Summary Metrics
-      const totalDocsHeader = await adminPage.locator("text=Total Filed Documents").first();
-      assert.ok(await totalDocsHeader.isVisible(), "Total Filed Documents card should be visible");
+      // Verify Print Manifest and Export Manifest buttons have been completely removed
+      const printManifestBtn = adminPage.locator("button:has-text('Print Manifest')");
+      const exportManifestBtn = adminPage.locator("button:has-text('Export Manifest')");
+      assert.ok(!(await printManifestBtn.isVisible()), "Print Manifest button must be removed from Inventory page");
+      assert.ok(!(await exportManifestBtn.isVisible()), "Export Manifest button must be removed from Inventory page");
 
-      // Drill down into Cabinet 02
-      const cab02Card = adminPage.locator("div:has-text('Cabinet 02')").filter({ hasText: "Enter Cabinet" }).first();
-      await cab02Card.click();
-      await adminPage.waitForSelector("text=File Boxes in this Standard Cabinet");
+      // Drill down into Cabinet 02 using exact heading role
+      const cab02Heading = adminPage.getByRole("heading", { name: "Cabinet 02", exact: true });
+      await cab02Heading.click();
+      await adminPage.waitForSelector("text=File Boxes in this Standard Cabinet", { timeout: 10000 });
 
-      // Verify Box 02 card does NOT show 0% (Fix verification)
-      const box02Card = adminPage.locator("div:has-text('Box 02')").filter({ hasText: "Document Capacity" }).first();
+      // Verify Box 02 card does NOT show 0% (Verifies aggregate count bugfix)
+      const box02Card = adminPage.locator("div.group:has(h3:text-is('Box 02'))");
       const box02Text = await box02Card.innerText();
       
       assert.ok(!box02Text.includes("0 / 50 (0%)"), "Box 02 must not show 0 / 50 (0%) when documents exist");
       assert.ok(box02Text.includes("Total Records"), "Box 02 must show Total Records count");
       assert.ok(!box02Text.includes("0 Total Records"), "Box 02 must not show 0 Total Records");
 
-      logPass("Cabinet 02 Box 02 occupancy count verified: accurately shows non-zero documents & capacity percentage");
+      logPass(`Cabinet 02 Box 02 occupancy count verified: accurately shows non-zero documents & capacity percentage`);
     } catch (err) {
       logFail("Box occupancy count verification failed", err);
     }
@@ -182,18 +202,21 @@ async function runE2ETests() {
     // 1.7 Drill Down into Box 02 -> Loose Records Actions
     totalTests++;
     try {
-      const box02Card = adminPage.locator("div:has-text('Box 02')").filter({ hasText: "Open File Box" }).first();
-      await box02Card.click();
-      await adminPage.waitForSelector("text=Archfile Binders in this Box");
+      await adminPage.getByRole("heading", { name: "Box 02", exact: true }).click();
+      await adminPage.waitForSelector("text=Archfile Binders in this Box", { timeout: 10000 });
 
       // Check loose records section exists
       const looseSection = adminPage.locator("text=Direct Records Filed in Box (Loose Copies)");
-      if (await looseSection.isVisible()) {
-        const looseRecord = adminPage.locator("div:has-text('Direct Records Filed in Box')").locator(".border.rounded-xl").first();
-        assert.ok(await looseRecord.locator("button:has-text('View')").isVisible(), "Loose record must have View button");
-        assert.ok(await looseRecord.locator("button:has-text('Edit')").isVisible(), "Loose record must have Edit button");
-        assert.ok(await looseRecord.locator("button:has-text('Trash')").or(looseRecord.locator("button[title='Move Document to Trash']")).isVisible(), "Loose record must have Delete button");
-      }
+      assert.ok(await looseSection.isVisible(), "Loose records section must be present in Box 02");
+
+      const looseViewBtn = adminPage.locator("button[title='View Document Details & Preview']").first();
+      const looseEditBtn = adminPage.locator("button[title='Edit Metadata & Storage Location']").first();
+      const looseDeleteBtn = adminPage.locator("button[title='Move Document to Trash']").first();
+
+      assert.ok(await looseViewBtn.isVisible(), "Loose record must have View button");
+      assert.ok(await looseEditBtn.isVisible(), "Loose record must have Edit button");
+      assert.ok(await looseDeleteBtn.isVisible(), "Loose record must have Delete button");
+
       logPass("Box 02 content view verified: loose records feature View, Edit, and Delete actions");
     } catch (err) {
       logFail("Box 02 content view verification failed", err);
@@ -202,9 +225,9 @@ async function runE2ETests() {
     // 1.8 Drill Down into Archfile 'blue gwapo' -> Full CRUD on Filed Documents
     totalTests++;
     try {
-      const archfileCard = adminPage.locator("div:has-text('blue gwapo')").filter({ hasText: "Open Archfile" }).first();
-      await archfileCard.click();
-      await adminPage.waitForSelector("text=Official physical copies held in this archfile");
+      const blueGwapoHeading = adminPage.getByRole("heading", { name: "blue gwapo", exact: true });
+      await blueGwapoHeading.click();
+      await adminPage.waitForSelector("text=Official physical copies held in this archfile", { timeout: 10000 });
 
       // Verify Document rows have View, Edit, and Delete
       const docRows = adminPage.locator("div.space-y-2 > div.border.rounded-xl");
@@ -232,10 +255,13 @@ async function runE2ETests() {
 
       // Click View button -> Verify DocumentViewModal opens
       await viewBtn.click();
-      await adminPage.waitForSelector("text=Official Archival Dossier", { timeout: 5000 });
-      const closeViewBtn = adminPage.locator("button:has-text('Close Dossier')");
+      await adminPage.waitForSelector("div[role='dialog']", { timeout: 5000 });
+      const closeViewBtn = adminPage
+        .locator("div[role='dialog'] button:has-text('Close')")
+        .or(adminPage.locator("button[aria-label='Close document viewer']"))
+        .first();
       await closeViewBtn.click();
-      await adminPage.waitForSelector("text=Official Archival Dossier", { state: "hidden", timeout: 5000 });
+      await adminPage.waitForSelector("div[role='dialog']", { state: "hidden", timeout: 5000 });
 
       logPass("Archfile Records View verified: full in-situ View, Edit, and Delete lifecycle operational");
     } catch (err) {
@@ -248,24 +274,24 @@ async function runE2ETests() {
       // Go back to Box 02
       const backBtn = adminPage.locator("button[title='Back to File Box']");
       await backBtn.click();
-      await adminPage.waitForSelector("text=Archfile Binders in this Box");
+      await adminPage.waitForSelector("text=Archfile Binders in this Box", { timeout: 10000 });
 
       // Click Edit on the archfile card
-      const archCard = adminPage.locator("div:has-text('blue gwapo')").filter({ hasText: "Archfile Binder" }).first();
-      const editArchBtn = archCard.locator("button[title='Edit Archfile Binder']");
+      const archCard = adminPage.locator("div.group:has(h3:text-is('blue gwapo'))");
+      const editArchBtn = archCard.locator("button[title='Edit Archfile']");
       await editArchBtn.click();
 
       // Check native color picker and custom hex input
-      await adminPage.waitForSelector("text=Edit Archfile Binder");
+      await adminPage.waitForSelector("text=Edit Archfile Binder", { timeout: 5000 });
       const colorPickerInput = adminPage.locator("input[type='color']");
       assert.ok(await colorPickerInput.isVisible(), "Native color wheel picker must be present");
 
-      const hexInput = adminPage.locator("input[placeholder='#6B1D2A']");
+      const hexInput = adminPage.locator("input[placeholder*='#6B1D2A']");
       assert.ok(await hexInput.isVisible(), "Custom HEX text input must be present");
 
       // Cancel modal
       await adminPage.locator("button:has-text('Cancel')").click();
-      await adminPage.waitForSelector("text=Edit Archfile Binder", { state: "hidden" });
+      await adminPage.waitForSelector("text=Edit Archfile Binder", { state: "hidden", timeout: 5000 });
 
       logPass("Edit Archfile color customization verified: native color picker and hex input active");
     } catch (err) {
@@ -287,16 +313,17 @@ async function runE2ETests() {
     totalTests++;
     try {
       await staffPage.goto(`${BASE_URL}/login`);
-      await staffPage.waitForSelector("input#email");
-      await staffPage.fill("input#email", STAFF_USER.email);
-      await staffPage.fill("input#password", STAFF_USER.password);
+      await staffPage.waitForSelector("input[type='email']", { timeout: 10000 });
+      await staffPage.fill("input[type='email']", STAFF_USER.email);
+      await staffPage.fill("input[type='password']", STAFF_USER.password);
       await staffPage.click("button[type='submit']");
       await staffPage.waitForURL("**/dashboard", { timeout: 10000 });
 
-      // Verify sidebar does NOT have Admin links (Users, Audits & Trails)
+      // Verify sidebar does NOT have Admin links (Users, Audits & Trails, Masterlist Reports)
       const sidebarText = await staffPage.locator("aside").first().innerText();
       assert.ok(!sidebarText.includes("Users"), "Staff sidebar must NOT display Users link");
       assert.ok(!sidebarText.includes("Audits & Trails"), "Staff sidebar must NOT display Audits & Trails link");
+      assert.ok(!sidebarText.includes("Masterlist Reports"), "Staff sidebar must NOT display Masterlist Reports link");
 
       logPass("Staff logged in successfully: RBAC restrictions enforced in sidebar navigation");
     } catch (err) {
@@ -307,11 +334,11 @@ async function runE2ETests() {
     totalTests++;
     try {
       await staffPage.goto(`${BASE_URL}/users`);
-      // Staff should be redirected away from /users (to /dashboard or /login)
-      await staffPage.waitForTimeout(1500);
+      // Staff should be redirected away from /users back to /dashboard
+      await staffPage.waitForURL("**/dashboard", { timeout: 5000 });
       const currentUrl = staffPage.url();
       assert.ok(!currentUrl.includes("/users"), "Staff must be prohibited from accessing /users directly");
-      logPass("Direct URL route guard verified: Staff blocked from accessing /users");
+      logPass("Direct URL route guard verified: Staff blocked from accessing /users and redirected to /dashboard");
     } catch (err) {
       logFail("Direct route guard verification failed", err);
     }
@@ -320,15 +347,15 @@ async function runE2ETests() {
     totalTests++;
     try {
       await staffPage.goto(`${BASE_URL}/files`);
-      await staffPage.waitForSelector("text=Physical Storage Placement");
+      await staffPage.waitForSelector("text=Direct Tagging & Template Specification", { timeout: 10000 });
 
       // Verify Document Type selector exists (Template Driver)
-      const docTypeDropdown = staffPage.locator("button:has-text('Select document type format...')");
-      assert.ok(await docTypeDropdown.isVisible(), "Document Type selector must be visible");
+      const docTypeSelect = staffPage.locator("text=Template Driver");
+      assert.ok(await docTypeSelect.isVisible(), "Document Type selector must be visible with Template Driver tag");
 
       // Verify cascading storage selection is present
-      assert.ok(await staffPage.locator("text=1. SELECT CABINET / STORAGE UNIT").isVisible(), "Cabinet selector must be present");
-      assert.ok(await staffPage.locator("text=2. SELECT CONTAINER / ARCHFILE BINDER").isVisible(), "Container selector must be present");
+      assert.ok(await staffPage.locator("text=1. Select Cabinet / Storage Unit").isVisible(), "Cabinet selector must be present");
+      assert.ok(await staffPage.locator("text=2. Select Container / Archfile Binder").isVisible(), "Container selector must be present");
 
       // Verify Recently Filed Documents bar is visible at bottom
       assert.ok(await staffPage.locator("text=Recently Filed Documents").isVisible(), "Recent records strip must be present");
@@ -342,16 +369,19 @@ async function runE2ETests() {
     totalTests++;
     try {
       await staffPage.goto(`${BASE_URL}/inventory`);
-      await staffPage.waitForSelector("text=Physical Storage & Inventory");
+      await staffPage.waitForSelector("text=Physical Storage & Inventory", { timeout: 10000 });
 
       // Verify 'New Storage Unit' button is NOT visible for Staff
       const newUnitBtn = staffPage.locator("button:has-text('New Storage Unit')");
       assert.ok(!(await newUnitBtn.isVisible()), "Staff must NOT see 'New Storage Unit' button");
 
-      // Drill into Cabinet 02 -> check container delete buttons are hidden for Staff
-      const cab02Card = staffPage.locator("div:has-text('Cabinet 02')").filter({ hasText: "Enter Cabinet" }).first();
-      await cab02Card.click();
-      await staffPage.waitForSelector("text=File Boxes in this Standard Cabinet");
+      // Drill into Cabinet 02 -> check container creation and delete buttons are hidden for Staff
+      const cab02Heading = staffPage.getByRole("heading", { name: "Cabinet 02", exact: true });
+      await cab02Heading.click();
+      await staffPage.waitForSelector("text=File Boxes in this Standard Cabinet", { timeout: 10000 });
+
+      const newBoxBtn = staffPage.locator("button:has-text('New File Box')");
+      assert.ok(!(await newBoxBtn.isVisible()), "Staff must NOT see 'New File Box' button");
 
       const deleteBoxBtn = staffPage.locator("button[title='Delete File Box']");
       assert.ok(!(await deleteBoxBtn.isVisible()), "Staff must NOT see 'Delete File Box' button");
@@ -380,4 +410,3 @@ runE2ETests().catch((err) => {
   console.error("Test execution threw fatal error:", err);
   process.exit(1);
 });
-

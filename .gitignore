@@ -29,6 +29,21 @@ backend/prisma/*.db-journal
 frontend/dist/
 frontend/dist-ssr/
 
+# Tests, Test Reports & Verification Suites
+tests/
+backend/src/tests/
+test-results/
+playwright-report/
+blob-report/
+coverage/
+.nyc_output/
+
+# Temporary Scratch Files & Test Artifacts
+scratch/
+scratch_*
+sample_test_*
+*.tmp
+
 # OS/Editor Files
 .DS_Store
 .vscode/

@@ -48,10 +48,10 @@ const templateConfigs = {
 
   },
 
-  "AACCUP Findings and Recommendations": {
+  "Contract of Service (Visiting Lecturers)": {
 
     fileName:
-      "MASTERLIST FORMAT FOR AACCUP FINDING S AND RECOMMENDATIONS.xlsx",
+      "MASTERLIST FORMAT FOR CONTRACT OF SERVICE (VISITING LECTURERS)x.xlsx",
 
     startRow: 4,
 
@@ -59,14 +59,14 @@ const templateConfigs = {
 
       access_code: "A",
 
-      program: "B",
+      name_of_faculty: "B",
 
-      file_location: "C",
+      semester_year: "C",
+
+      file_location: "D",
 
     },
-
   },
-
 
   "Memorandum": {
 

@@ -1,7 +1,17 @@
+import React from "react";
+import { formatLocationWithColorName } from "../inventory/storageTaxonomy";
+
 export default function StudentAccountTemplate({
   document,
+  data,
 }) {
-  const data = document.dynamic_data || {};
+  const mergedData = data || document?.dynamic_data || document || {};
+  const rawLoc =
+    mergedData.file_location ||
+    (document?.file_box?.cabinet?.name
+      ? `${document.file_box.cabinet.name} - ${document.file_box.name}`
+      : document?.file_box?.name || "Unassigned");
+  const fileLocation = formatLocationWithColorName(rawLoc);
 
   return (
     <div className="w-full">
@@ -63,7 +73,7 @@ export default function StudentAccountTemplate({
                 padding: "10px",
               }}
             >
-              {document.access_code || "N/A"}
+              {document?.access_code || mergedData?.access_code || "N/A"}
             </td>
 
             <td
@@ -72,7 +82,7 @@ export default function StudentAccountTemplate({
                 padding: "10px",
               }}
             >
-              {data.student_name}
+              {mergedData.student_name || document?.student_name || document?.title || "—"}
             </td>
 
             <td
@@ -81,7 +91,7 @@ export default function StudentAccountTemplate({
                 padding: "10px",
               }}
             >
-              {data.file_location}
+              {fileLocation}
             </td>
           </tr>
         </tbody>

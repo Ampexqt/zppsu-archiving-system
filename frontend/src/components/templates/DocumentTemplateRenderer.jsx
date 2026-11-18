@@ -48,6 +48,7 @@ import CscCommunications2024Template from "./CscCommunications2024Template";
 import DataAnalysisTemplate from "./DataAnalysisTemplate";
 import DbmCircularsTemplate from "./DbmCircularsTemplate";
 import DbmCirculars1Template from "./DbmCirculars1Template";
+import DbmCommunications2024Template from "./DbmCommunications2024Template";
 import DisbursementsTemplate from "./DisbursementsTemplate";
 import DostCommunications2024Template from "./DostCommunications2024Template";
 import HemisTemplate from "./HemisTemplate";
@@ -115,6 +116,7 @@ const templateMap = {
   "DATA ANALYSIS": DataAnalysisTemplate,
   "DBM CIRCULARS": DbmCircularsTemplate,
   "DBM CIRCULARS 1": DbmCirculars1Template,
+  "DBM COMMUNICATIONS 2024": DbmCommunications2024Template,
   "DISBURSEMENTS": DisbursementsTemplate,
   "DOST COMMUNICATIONS": DostCommunications2024Template,
   "HEMIS": HemisTemplate,
